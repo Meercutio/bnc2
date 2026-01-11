@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bulls & Cows PvP (MVP)</title>
+    <style>
+        body { font-family: system-ui, -apple-system, Arial, sans-serif; margin: 24px; max-width: 980px; }
+        .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+        .card { border: 1px solid #ddd; border-radius: 12px; padding: 12px; margin: 12px 0; }
+        input { padding: 8px; border-radius: 8px; border: 1px solid #ccc; }
+        button { padding: 8px 12px; border-radius: 10px; border: 1px solid #ccc; background: #f7f7f7; cursor: pointer; }
+        button:disabled { opacity: .5; cursor: not-allowed; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; font-size: 14px; }
+        .muted { color: #666; }
+        .ok { color: #0a7; font-weight: 600; }
+        .warn { color: #b60; font-weight: 600; }
+        .err { color: #c00; font-weight: 600; }
+        code { background: #f4f4f4; padding: 2px 6px; border-radius: 6px; }
+    </style>
+</head>
+<body>
+<h1>Bulls & Cows PvP — MVP</h1>
+<p class="muted">2 игрока. Секрет/попытки: 4 цифры, нули и повторы разрешены. Раунд заканчивается, когда оба ввели (или по таймеру — пропуск).</p>
+
+<div class="card">
+    <div class="row">
+        <div>
+            <div class="muted">Ваш playerId</div>
+            <div><code id="playerId"></code></div>
+        </div>
+
+        <div style="flex:1">
+            <div class="muted">matchId</div>
+            <input id="matchId" placeholder="например: ab12cd34ef" style="width:100%" />
+        </div>
+
+        <button id="createBtn">Create match</button>
+        <button id="connectBtn">Connect</button>
+    </div>
+
+    <div style="margin-top:8px" class="muted">
+        Ссылка другу: <code id="shareLink">—</code>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Игра</h3>
+    <div id="status" class="muted">Не подключен</div>
+    <div id="phase" class="muted"></div>
+    <div id="roundInfo" class="muted"></div>
+
+    <div class="row" style="margin-top:10px">
+        <div>
+            <div class="muted">Secret (4 цифры)</div>
+            <input id="secret" placeholder="например: 0011" maxlength="4" />
+        </div>
+        <button id="setSecretBtn">Set secret</button>
+
+        <div style="flex:1"></div>
+
+        <div>
+            <div class="muted">Guess (4 цифры)</div>
+            <input id="guess" placeholder="например: 0101" maxlength="4" />
+        </div>
+        <button id="guessBtn">Submit guess</button>
+    </div>
+
+    <div style="margin-top:8px" class="muted">
+        Ready: secrets <code id="secretsReady">—</code>, guesses <code id="guessesReady">—</code>
+    </div>
+
+    <div id="winner" style="margin-top:10px;"></div>
+</div>
+
+<div class="card">
+    <h3>История раундов</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Round</th>
+            <th>P1</th>
+            <th>P2</th>
+        </tr>
+        </thead>
+        <tbody id="history"></tbody>
+    </table>
+</div>
+
+<script>
+    // поменяешь на свой домен бэкенда
+    window.BACKEND_HTTP = "https://YOUR_BACKEND_DOMAIN";
+    window.BACKEND_WS = "wss://YOUR_BACKEND_DOMAIN";
+</script>
+
+<script>
+    (() => {
+        const $ = (id) => document.getElementById(id);
+        const BACKEND_HTTP = window.BACKEND_HTTP || "https://YOUR_BACKEND_DOMAIN";
+        const BACKEND_WS   = window.BACKEND_WS   || "wss://YOUR_BACKEND_DOMAIN";
+
+        // playerId
+        let playerId = localStorage.getItem("bc_playerId");
+        if (!playerId) {
+            playerId = "p_" + Math.random().toString(16).slice(2) + Date.now().toString(16);
+            localStorage.setItem("bc_playerId", playerId);
+        }
+        $("playerId").textContent = playerId;
+
+        // if opened with ?matchId=...
+        const url = new URL(window.location.href);
+        const qMatch = url.searchParams.get("matchId");
+        if (qMatch) $("matchId").value = qMatch;
+
+        let ws = null;
+        let lastState = null;
+
+        function setStatus(text, cls="muted") {
+            $("status").className = cls;
+            $("status").textContent = text;
+        }
+
+        function shareLink(matchId) {
+            const u = new URL(window.location.href);
+            u.searchParams.set("matchId", matchId);
+            return u.toString();
+        }
+
+        $("createBtn").onclick = async () => {
+            const res = await fetch(`${BACKEND_HTTP}/api/match`, { method: "POST" });
+            const data = await res.json();
+            $("matchId").value = data.matchId;
+            $("shareLink").textContent = shareLink(data.matchId);
+        };
+
+        $("connectBtn").onclick = () => {
+            const matchId = $("matchId").value.trim();
+            if (!matchId) return;
+
+            $("shareLink").textContent = shareLink(matchId);
+
+            if (ws) ws.close();
+            const proto = location.protocol === "https:" ? "wss" : "ws";
+            ws = new WebSocket(`${BACKEND_WS}/ws?matchId=${encodeURIComponent(matchId)}&playerId=${encodeURIComponent(playerId)}`);
+
+            ws.onopen = () => setStatus("WS connected", "ok");
+            ws.onclose = () => setStatus("WS closed", "warn");
+            ws.onerror = () => setStatus("WS error", "err");
+
+            ws.onmessage = (ev) => {
+                const msg = JSON.parse(ev.data);
+                if (msg.type === "state") {
+                    lastState = msg.payload;
+                    renderState(lastState);
+                } else if (msg.type === "round_started") {
+                    // можно использовать для анимации/сброса формы
+                } else if (msg.type === "round_result") {
+                    // история придёт в state, но можно вывести нотификацию
+                } else if (msg.type === "game_finished") {
+                    // state тоже придёт
+                } else if (msg.type === "error") {
+                    alert(`${msg.payload.code}: ${msg.payload.message}`);
+                }
+            };
+        };
+
+        function send(type, payload) {
+            if (!ws || ws.readyState !== 1) return;
+            ws.send(JSON.stringify({ type, payload }));
+        }
+
+        $("setSecretBtn").onclick = () => {
+            send("set_secret", { secret: $("secret").value.trim() });
+        };
+        $("guessBtn").onclick = () => {
+            send("submit_guess", { guess: $("guess").value.trim() });
+        };
+
+        function renderState(s) {
+            $("phase").textContent = `phase: ${s.phase}, you: ${s.you}, matchId: ${s.matchId}`;
+            $("secretsReady").textContent = `p1=${s.secretsReady.p1}, p2=${s.secretsReady.p2}`;
+            $("guessesReady").textContent = `p1=${s.guessesReady.p1}, p2=${s.guessesReady.p2}`;
+
+            // deadline
+            if (s.deadlineMs && s.phase === "playing") {
+                $("roundInfo").textContent = `round: ${s.round}, deadline: ${new Date(s.deadlineMs).toLocaleTimeString()}`;
+            } else if (s.phase === "playing") {
+                $("roundInfo").textContent = `round: ${s.round}, timer: off`;
+            } else {
+                $("roundInfo").textContent = `round: ${s.round}`;
+            }
+
+            // кнопки
+            $("setSecretBtn").disabled = !(s.phase === "waiting_secrets" || s.phase === "playing");
+            $("guessBtn").disabled = !(s.phase === "playing");
+
+            // winner
+            if (s.phase === "finished" && s.winner) {
+                $("winner").innerHTML = `<div class="ok">GAME FINISHED: winner = <code>${s.winner}</code></div>`;
+            } else {
+                $("winner").innerHTML = "";
+            }
+
+            // history
+            const tbody = $("history");
+            tbody.innerHTML = "";
+            for (const h of s.history) {
+                const p1 = fmtAttempt(h.p1);
+                const p2 = fmtAttempt(h.p2);
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${h.round}</td><td>${p1}</td><td>${p2}</td>`;
+                tbody.appendChild(tr);
+            }
+        }
+
+        function fmtAttempt(a) {
+            if (a.missed || a.guess === null) {
+                return `<span class="muted">missed</span>`;
+            }
+            return `<code>${a.guess}</code> — bulls: <b>${a.bulls}</b>, cows: <b>${a.cows}</b>`;
+        }
+    })();
+</script>
+</body>
+</html>
