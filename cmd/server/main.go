@@ -10,8 +10,9 @@ import (
 )
 
 func main() {
-	addr := env("ADDR", ":8080")
-	roundDur := envDuration("ROUND_DURATION", 30*time.Second) // 0 => таймер выключен
+	port := env("PORT", "8080")                              // Render выставит PORT автоматически
+	addr := ":" + port                                       // слушаем 0.0.0.0:<PORT> по умолчанию
+	roundDur := envDuration("ROUND_DURATION", 0*time.Second) // 0 => таймер выключен
 
 	srv := game.NewServer(game.Config{
 		RoundDuration: roundDur,
