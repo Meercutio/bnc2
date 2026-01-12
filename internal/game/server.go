@@ -24,12 +24,12 @@ func NewServer(cfg Config, matches *MatchService) *Server {
 }
 
 // (опционально) если хочешь подменять storage в тестах/будущем:
-func NewServerWithStore(cfg Config, matches *MatchService) *Server {
-	return &Server{
-		cfg:     cfg,
-		matches: matches,
-	}
-}
+//func NewServerWithStore(cfg Config, matches *MatchService) *Server {
+//	return &Server{
+//		cfg:     cfg,
+//		matches: matches,
+//	}
+//}
 
 func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/match", s.handleCreateMatch)
