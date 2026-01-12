@@ -50,19 +50,19 @@ run:
 # Services
 # -------------------------
 .PHONY: services-up
-services-up:
+up:
 	$(DC) up -d postgres redis
 
 .PHONY: services-down
-services-down:
+down:
 	$(DC) down
 
 .PHONY: services-logs
-services-logs:
+logs:
 	$(DC) logs -f --tail=200
 
 .PHONY: services-reset
-services-reset:
+reset:
 	$(DC) down -v
 
 # -------------------------
