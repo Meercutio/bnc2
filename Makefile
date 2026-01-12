@@ -1,7 +1,7 @@
 APP_NAME := bc-server
 CMD_PATH := ./cmd/server
 PORT ?= 8080
-ROUND_DURATION ?= 20s
+ROUND_DURATION ?= 0s
 
 # Docker compose
 DC := docker compose
