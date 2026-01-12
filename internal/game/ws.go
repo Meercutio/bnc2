@@ -35,9 +35,13 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	m, ok := s.getMatch(matchID)
+	m, ok, err := s.matches.GetOrLoad(r.Context(), matchID)
+	if err != nil {
+		http.Error(w, "storage error", http.StatusInternalServerError)
+		return
+	}
 	if !ok {
-		w.WriteHeader(http.StatusNotFound)
+		http.Error(w, "match not found", http.StatusNotFound)
 		return
 	}
 

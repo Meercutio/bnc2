@@ -12,22 +12,22 @@ type Config struct {
 }
 
 type Server struct {
-	cfg   Config
-	store MatchStore
+	cfg     Config
+	matches *MatchService
 }
 
-func NewServer(cfg Config) *Server {
+func NewServer(cfg Config, matches *MatchService) *Server {
 	return &Server{
-		cfg:   cfg,
-		store: NewInMemoryMatchStore(), // MVP default
+		cfg:     cfg,
+		matches: matches,
 	}
 }
 
 // (опционально) если хочешь подменять storage в тестах/будущем:
-func NewServerWithStore(cfg Config, store MatchStore) *Server {
+func NewServerWithStore(cfg Config, matches *MatchService) *Server {
 	return &Server{
-		cfg:   cfg,
-		store: store,
+		cfg:     cfg,
+		matches: matches,
 	}
 }
 
@@ -43,17 +43,16 @@ func (s *Server) handleCreateMatch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	matchID := randID(10)
-	m := NewMatch(matchID, s.cfg.RoundDuration)
 
-	s.store.Create(matchID, m)
+	_, err := s.matches.Create(r.Context(), matchID)
+	if err != nil {
+		http.Error(w, "failed to create match", http.StatusInternalServerError)
+		return
+	}
 
 	writeJSON(w, http.StatusOK, map[string]string{
 		"matchId": matchID,
 	})
-}
-
-func (s *Server) getMatch(matchID string) (*Match, bool) {
-	return s.store.Get(matchID)
 }
 
 func randID(n int) string {

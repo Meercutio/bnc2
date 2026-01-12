@@ -31,7 +31,8 @@ type Match struct {
 	p1 *Player
 	p2 *Player
 
-	history []RoundHistoryItem
+	history   []RoundHistoryItem
+	onPersist func(MatchSnapshot)
 }
 
 type Player struct {
@@ -129,6 +130,7 @@ func (m *Match) SetSecret(slot Slot, secret string) error {
 	}
 
 	m.broadcastStateLocked()
+	m.persistLocked()
 	return nil
 }
 
@@ -161,6 +163,8 @@ func (m *Match) SubmitGuess(slot Slot, guess string) error {
 	if (m.p1.guessSet || m.p1.missed) && (m.p2.guessSet || m.p2.missed) {
 		m.finalizeRoundLocked()
 	}
+	// если раунд ещё не закрыт — сохраняем частичное состояние (что один игрок уже ввёл)
+	m.persistLocked()
 	return nil
 }
 
@@ -279,6 +283,7 @@ func (m *Match) onRoundTimeout(token int64) {
 	}
 
 	m.broadcastStateLocked()
+	m.persistLocked()
 	m.finalizeRoundLocked()
 }
 
@@ -327,10 +332,12 @@ func (m *Match) finalizeRoundLocked() {
 	if m.phase == "finished" {
 		m.broadcastLocked(Envelope{Type: "game_finished", Payload: mustJSON(map[string]string{"winner": m.winner})})
 		m.broadcastStateLocked()
+		m.persistLocked()
 		return
 	}
 
 	// сразу стартуем следующий раунд (как ты хотел)
+	m.persistLocked()
 	m.startRoundLocked()
 }
 
@@ -441,4 +448,11 @@ func toMs(t time.Time) int64 {
 		return 0
 	}
 	return t.UnixMilli()
+}
+
+func (m *Match) persistLocked() {
+	if m.onPersist == nil {
+		return
+	}
+	m.onPersist(m.snapshotLocked())
 }
