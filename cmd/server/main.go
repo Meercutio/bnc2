@@ -21,6 +21,13 @@ func main() {
 	mux := http.NewServeMux()
 	srv.RegisterRoutes(mux)
 
+	// заменяем статическую раздачу на embedded (перекрываем "/")
+	h, err := webHandler()
+	if err != nil {
+		log.Fatal(err)
+	}
+	mux.Handle("/", h)
+
 	log.Printf("listening on %s (round duration: %s)", addr, roundDur)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)
