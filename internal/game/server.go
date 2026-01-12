@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"net/http"
-	"sync"
 	"time"
 )
 
@@ -13,38 +12,31 @@ type Config struct {
 }
 
 type Server struct {
-	cfg Config
-
-	mu      sync.Mutex
-	matches map[string]*Match
+	cfg     Config
+	matches *MatchService
 }
 
-func NewServer(cfg Config) *Server {
+func NewServer(cfg Config, matches *MatchService) *Server {
 	return &Server{
 		cfg:     cfg,
-		matches: make(map[string]*Match),
+		matches: matches,
 	}
 }
 
+// (опционально) если хочешь подменять storage в тестах/будущем:
+//func NewServerWithStore(cfg Config, matches *MatchService) *Server {
+//	return &Server{
+//		cfg:     cfg,
+//		matches: matches,
+//	}
+//}
+
 func (s *Server) RegisterRoutes(mux *http.ServeMux) {
-	// создать матч
 	mux.HandleFunc("/api/match", s.handleCreateMatch)
-
-	// websocket
 	mux.HandleFunc("/ws", s.handleWS)
-
-	// статика
-	mux.Handle("/", http.FileServer(http.Dir("./web")))
 }
 
 func (s *Server) handleCreateMatch(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -52,22 +44,15 @@ func (s *Server) handleCreateMatch(w http.ResponseWriter, r *http.Request) {
 
 	matchID := randID(10)
 
-	m := NewMatch(matchID, s.cfg.RoundDuration)
-
-	s.mu.Lock()
-	s.matches[matchID] = m
-	s.mu.Unlock()
+	_, err := s.matches.Create(r.Context(), matchID)
+	if err != nil {
+		http.Error(w, "failed to create match", http.StatusInternalServerError)
+		return
+	}
 
 	writeJSON(w, http.StatusOK, map[string]string{
 		"matchId": matchID,
 	})
-}
-
-func (s *Server) getMatch(matchID string) (*Match, bool) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	m, ok := s.matches[matchID]
-	return m, ok
 }
 
 func randID(n int) string {

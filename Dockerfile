@@ -13,13 +13,10 @@ FROM alpine:3.20
 WORKDIR /app
 
 COPY --from=build /out/bc-server /app/bc-server
-COPY web /app/web
 
-# дефолт для локалки; на Render/Fly/и т.п. PORT задаст платформа
 ENV PORT=8080
 EXPOSE 8080
 
-# (опционально) non-root
 RUN adduser -D -H appuser && chown -R appuser:appuser /app
 USER appuser
 
