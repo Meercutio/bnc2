@@ -2,8 +2,13 @@
 FROM golang:1.22-alpine AS build
 WORKDIR /src
 
-# Устанавливаем goose
-RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+# важно для go install в alpine
+RUN apk add --no-cache git ca-certificates
+
+# (по желанию) чтобы всегда работало через модульный прокси
+ENV GOPROXY=https://proxy.golang.org,direct
+
+RUN go env && go install -x github.com/pressly/goose/v3/cmd/goose@v3.21.1
 ENV PATH="/go/bin:${PATH}"
 
 COPY go.mod go.sum ./
