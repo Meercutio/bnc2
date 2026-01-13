@@ -22,6 +22,20 @@ jobs:
           --health-timeout 2s
           --health-retries 20
 
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: bc
+          POSTGRES_USER: bc
+          POSTGRES_PASSWORD: bc
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bc -d bc"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,6 +58,12 @@ jobs:
             exit 1
           fi
 
+      - name: Run migrations
+        env:
+          GOOSE_DRIVER: postgres
+          GOOSE_DBSTRING: "host=localhost user=bc password=bc dbname=bc sslmode=disable"
+        run: goose -dir ./migrations up
+    
       - name: Unit tests
         run: go test ./... -count=1
 
