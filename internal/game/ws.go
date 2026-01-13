@@ -134,6 +134,11 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 				m.SendErrorTo(slot, "bad_input", err.Error())
 			}
 
+		case "rematch_request":
+			if err := m.RequestRematch(slot); err != nil {
+				m.SendErrorTo(slot, "bad_input", err.Error())
+			}
+
 		default:
 			m.SendErrorTo(slot, "unknown_type", "unknown message type")
 		}

@@ -2,12 +2,16 @@ package game
 
 import "time"
 
-// MatchSnapshot — сериализуемое состояние матча, которое можно положить в Redis.
+// MatchSnapshot — сериализуемое состояние матча для Redis.
 type MatchSnapshot struct {
 	MatchID string `json:"matchId"`
 
 	Phase string `json:"phase"`
 	Round int    `json:"round"`
+
+	// важное: сохраняем ID игроков, иначе после рестарта невозможно корректно reconnect
+	P1ID string `json:"p1Id"`
+	P2ID string `json:"p2Id"`
 
 	P1Secret    string `json:"p1Secret"`
 	P1SecretSet bool   `json:"p1SecretSet"`
@@ -18,6 +22,15 @@ type MatchSnapshot struct {
 	P1GuessSet bool   `json:"p1GuessSet"`
 	P2Guess    string `json:"p2Guess"`
 	P2GuessSet bool   `json:"p2GuessSet"`
+
+	// rematch flags
+	P1Rematch bool `json:"p1Rematch"`
+	P2Rematch bool `json:"p2Rematch"`
+
+	// счёт серии в рамках matchId
+	SeriesP1Wins int `json:"seriesP1Wins"`
+	SeriesP2Wins int `json:"seriesP2Wins"`
+	SeriesDraws  int `json:"seriesDraws"`
 
 	DeadlineMs int64 `json:"deadlineMs"` // unix millis, 0 если нет дедлайна
 
@@ -36,6 +49,9 @@ func (m *Match) snapshotLocked() MatchSnapshot {
 		Phase:   m.phase,
 		Round:   m.round,
 
+		P1ID: m.p1.id,
+		P2ID: m.p2.id,
+
 		P1Secret:    m.p1.secret,
 		P1SecretSet: m.p1.secretSet,
 		P2Secret:    m.p2.secret,
@@ -45,6 +61,13 @@ func (m *Match) snapshotLocked() MatchSnapshot {
 		P1GuessSet: m.p1.guessSet,
 		P2Guess:    m.p2.guess,
 		P2GuessSet: m.p2.guessSet,
+
+		P1Rematch: m.p1.rematchRequested,
+		P2Rematch: m.p2.rematchRequested,
+
+		SeriesP1Wins: m.seriesP1Wins,
+		SeriesP2Wins: m.seriesP2Wins,
+		SeriesDraws:  m.seriesDraws,
 
 		DeadlineMs: deadlineMs,
 
@@ -57,6 +80,17 @@ func (m *Match) restoreLocked(s MatchSnapshot) {
 	m.phase = s.Phase
 	m.round = s.Round
 
+	// players
+	m.p1.id = s.P1ID
+	m.p2.id = s.P2ID
+
+	// после рестарта нет соединений
+	m.p1.conn = nil
+	m.p2.conn = nil
+	m.p1.connected = false
+	m.p2.connected = false
+
+	// secrets / guesses
 	m.p1.secret = s.P1Secret
 	m.p1.secretSet = s.P1SecretSet
 	m.p2.secret = s.P2Secret
@@ -67,6 +101,15 @@ func (m *Match) restoreLocked(s MatchSnapshot) {
 	m.p2.guess = s.P2Guess
 	m.p2.guessSet = s.P2GuessSet
 
+	// rematch flags
+	m.p1.rematchRequested = s.P1Rematch
+	m.p2.rematchRequested = s.P2Rematch
+
+	// series score
+	m.seriesP1Wins = s.SeriesP1Wins
+	m.seriesP2Wins = s.SeriesP2Wins
+	m.seriesDraws = s.SeriesDraws
+
 	if s.DeadlineMs > 0 {
 		m.deadline = time.UnixMilli(s.DeadlineMs)
 	} else {
@@ -76,6 +119,6 @@ func (m *Match) restoreLocked(s MatchSnapshot) {
 	m.winner = s.Winner
 	m.history = append([]RoundHistoryItem(nil), s.History...)
 
-	// логически: активен, если матч в playing
+	// активен раунд только если playing
 	m.roundActive = (m.phase == "playing")
 }

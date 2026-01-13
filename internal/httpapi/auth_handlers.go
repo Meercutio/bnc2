@@ -52,8 +52,8 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "bad_request", "email, password and displayName are required")
 		return
 	}
-	if len(req.Password) < 8 {
-		writeError(w, http.StatusBadRequest, "bad_request", "password must be at least 8 chars")
+	if len(req.Password) < 1 {
+		writeError(w, http.StatusBadRequest, "bad_request", "password must be at least 1 chars")
 		return
 	}
 

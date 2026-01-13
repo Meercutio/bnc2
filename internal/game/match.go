@@ -31,15 +31,19 @@ type Match struct {
 	p1 *Player
 	p2 *Player
 
-	history   []RoundHistoryItem
-	onPersist func(MatchSnapshot)
+	history      []RoundHistoryItem
+	seriesP1Wins int
+	seriesP2Wins int
+	seriesDraws  int
+	onPersist    func(MatchSnapshot)
 }
 
 type Player struct {
 	id   string
 	conn *ClientConn
 
-	connected bool
+	connected        bool
+	rematchRequested bool
 
 	secret    string
 	secretSet bool
@@ -166,6 +170,81 @@ func (m *Match) SubmitGuess(slot Slot, guess string) error {
 	// если раунд ещё не закрыт — сохраняем частичное состояние (что один игрок уже ввёл)
 	m.persistLocked()
 	return nil
+}
+
+func (m *Match) RequestRematch(slot Slot) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if m.phase != "finished" {
+		return errors.New("rematch available only after game finished")
+	}
+
+	p := m.playerLocked(slot)
+	p.rematchRequested = true
+
+	// сообщаем состояние рематча
+	m.broadcastLocked(Envelope{
+		Type: "rematch_status",
+		Payload: mustJSON(map[string]any{
+			"p1": m.p1.rematchRequested,
+			"p2": m.p2.rematchRequested,
+		}),
+	})
+
+	// если оба согласились — стартуем новую игру
+	if m.p1.rematchRequested && m.p2.rematchRequested {
+		m.startRematchLocked()
+	}
+
+	m.persistLocked()
+	return nil
+}
+
+func (m *Match) startRematchLocked() {
+	// сбрасываем флаги рематча
+	m.p1.rematchRequested = false
+	m.p2.rematchRequested = false
+
+	// останавливаем таймер на всякий случай
+	if m.roundTimer != nil {
+		m.roundTimer.Stop()
+	}
+
+	// сбрасываем состояние матча, но оставляем игроков и соединения
+	m.phase = "waiting_secrets"
+	m.winner = ""
+	m.round = 0
+	m.roundActive = false
+	m.deadline = time.Time{}
+	m.history = nil
+
+	m.p1.secret = ""
+	m.p2.secret = ""
+	m.p1.secretSet = false
+	m.p2.secretSet = false
+
+	m.p1.guess = ""
+	m.p2.guess = ""
+	m.p1.guessSet = false
+	m.p2.guessSet = false
+	m.p1.missed = false
+	m.p2.missed = false
+
+	// уведомляем фронт
+	m.broadcastLocked(Envelope{
+		Type: "rematch_started",
+		Payload: mustJSON(map[string]any{
+			"series": map[string]int{
+				"p1Wins": m.seriesP1Wins,
+				"p2Wins": m.seriesP2Wins,
+				"draws":  m.seriesDraws,
+			},
+		}),
+	})
+
+	m.broadcastStateLocked()
+	m.persistLocked()
 }
 
 func (m *Match) SendErrorTo(slot Slot, code, message string) {
@@ -325,11 +404,33 @@ func (m *Match) finalizeRoundLocked() {
 		m.phase = "finished"
 	}
 
+	if m.phase == "finished" {
+		switch m.winner {
+		case "p1":
+			m.seriesP1Wins++
+		case "p2":
+			m.seriesP2Wins++
+		case "draw":
+			m.seriesDraws++
+		}
+	}
+
 	// событие round_result
 	m.broadcastLocked(Envelope{Type: "round_result", Payload: mustJSON(item)})
 	m.broadcastStateLocked()
 
 	if m.phase == "finished" {
+		m.broadcastLocked(Envelope{
+			Type: "series_score",
+			Payload: mustJSON(map[string]any{
+				"series": map[string]int{
+					"p1Wins": m.seriesP1Wins,
+					"p2Wins": m.seriesP2Wins,
+					"draws":  m.seriesDraws,
+				},
+			}),
+		})
+
 		m.broadcastLocked(Envelope{Type: "game_finished", Payload: mustJSON(map[string]string{"winner": m.winner})})
 		m.broadcastStateLocked()
 		m.persistLocked()
