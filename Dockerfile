@@ -19,7 +19,7 @@ WORKDIR /app
 COPY --from=build /out/bc-server /app/bc-server
 COPY --from=build /go/bin/goose /usr/local/bin/goose
 
-COPY migrations /app/migrations
+COPY db/migrations/ /app/migrations/
 
 ENV PORT=8080
 EXPOSE 8080
