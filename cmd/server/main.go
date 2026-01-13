@@ -26,6 +26,9 @@ func main() {
 		log.Fatalf("pgxpool: %v", err)
 	}
 	defer dbpool.Close()
+	if env("RUN_MIGRATIONS", "false") == "true" {
+		runMigrations(dbURL)
+	}
 
 	// --- JWT ---
 	jwtSecret := []byte(env("JWT_SECRET", "dev-secret-change-me"))
