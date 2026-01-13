@@ -58,6 +58,11 @@ jobs:
             exit 1
           fi
 
+      - name: Install goose
+        run: |
+          go install github.com/pressly/goose/v3/cmd/goose@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
       - name: Run migrations
         env:
           GOOSE_DRIVER: postgres
@@ -65,13 +70,13 @@ jobs:
         run: goose -dir ./migrations up
     
       - name: Unit tests
-        run: go test ./... -count=1
+        run: go test ./...
 
       - name: Integration tests (Redis)
         env:
           REDIS_ADDR: localhost:6379
           MATCH_TTL: 24h
-        run: go test ./... -count=1 -tags=integration
+        run: go test ./... -tags=integration
 
       - name: Build
         run: go build ./cmd/server
