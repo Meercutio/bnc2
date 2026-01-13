@@ -2,6 +2,10 @@
 FROM golang:1.22-alpine AS build
 WORKDIR /src
 
+# Устанавливаем goose
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+ENV PATH="/go/bin:${PATH}"
+
 COPY go.mod go.sum ./
 RUN go mod download
 
@@ -13,6 +17,9 @@ FROM alpine:3.20
 WORKDIR /app
 
 COPY --from=build /out/bc-server /app/bc-server
+COPY --from=build /go/bin/goose /usr/local/bin/goose
+
+COPY migrations /app/migrations
 
 ENV PORT=8080
 EXPOSE 8080

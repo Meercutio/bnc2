@@ -22,6 +22,20 @@ jobs:
           --health-timeout 2s
           --health-retries 20
 
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: bc
+          POSTGRES_USER: bc
+          POSTGRES_PASSWORD: bc
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bc -d bc"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,14 +58,32 @@ jobs:
             exit 1
           fi
 
+      - name: Install goose
+        run: |
+          go install github.com/pressly/goose/v3/cmd/goose@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Debug workspace
+        run: |
+          pwd
+          ls -la
+          find . -maxdepth 3 -type d -name "migrations" -print
+          git status --porcelain
+
+      - name: Run migrations
+        env:
+          GOOSE_DRIVER: postgres
+          GOOSE_DBSTRING: "host=localhost user=bc password=bc dbname=bc sslmode=disable"
+        run: goose -dir ./db/migrations up
+
       - name: Unit tests
-        run: go test ./... -count=1
+        run: go test ./...
 
       - name: Integration tests (Redis)
         env:
           REDIS_ADDR: localhost:6379
           MATCH_TTL: 24h
-        run: go test ./... -count=1 -tags=integration
+        run: go test ./... -tags=integration
 
       - name: Build
         run: go build ./cmd/server

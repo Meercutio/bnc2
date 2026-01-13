@@ -1,49 +1,79 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"example.com/bc-mvp/internal/game"
+	"example.com/bc-mvp/internal/httpapi"
+	"example.com/bc-mvp/internal/store"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 )
 
 func main() {
-	port := env("PORT", "8080")                              // Render выставит PORT автоматически
-	addr := ":" + port                                       // слушаем 0.0.0.0:<PORT> по умолчанию
-	roundDur := envDuration("ROUND_DURATION", 0*time.Second) // 0 => таймер выключен
+	port := env("PORT", "8080")
+	addr := ":" + port
+	roundDur := envDuration("ROUND_DURATION", 0*time.Second)
 
-	cfg := game.Config{
-		RoundDuration: roundDur,
+	// --- Postgres ---
+	dbURL := env("DATABASE_URL", "postgres://bc:bc@localhost:5432/bc?sslmode=disable")
+	dbpool, err := pgxpool.New(context.Background(), dbURL)
+	if err != nil {
+		log.Fatalf("pgxpool: %v", err)
+	}
+	defer dbpool.Close()
+
+	// --- JWT ---
+	jwtSecret := []byte(env("JWT_SECRET", "dev-secret-change-me"))
+	tokenTTL := envDuration("JWT_TTL", 24*time.Hour)
+	game.SetJWTSecret(jwtSecret)
+
+	users := store.NewUserStore(dbpool)
+	stats := store.NewStatsStore(dbpool)
+
+	authH := &httpapi.AuthHandler{
+		Users:     users,
+		Stats:     stats,
+		JWTSecret: jwtSecret,
+		TokenTTL:  tokenTTL,
 	}
 
-	// --- Redis + Persistent match storage ---
+	// --- Redis (matches persistence) ---
 	redisAddr := env("REDIS_ADDR", "localhost:6379")
 	matchTTL := envDuration("MATCH_TTL", 24*time.Hour)
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr: redisAddr,
-	})
-
+	rdb := redis.NewClient(&redis.Options{Addr: redisAddr})
 	persist := game.NewRedisMatchStore(rdb, matchTTL)
-	matchSvc := game.NewMatchService(cfg, persist)
 
-	// Server теперь создаётся с match service
+	cfg := game.Config{RoundDuration: roundDur}
+	matchSvc := game.NewMatchService(cfg, persist)
 	srv := game.NewServer(cfg, matchSvc)
 
 	mux := http.NewServeMux()
+
+	// --- game routes ---
 	srv.RegisterRoutes(mux)
 
-	// заменяем статическую раздачу на embedded (перекрываем "/")
+	// --- auth routes ---
+	mux.HandleFunc("/api/auth/register", authH.Register)
+	mux.HandleFunc("/api/auth/login", authH.Login)
+
+	// /api/me защищён middleware
+	meHandler := http.HandlerFunc(authH.Me)
+	mux.Handle("/api/me", httpapi.AuthMiddleware(jwtSecret)(meHandler))
+
+	// --- embedded frontend ---
 	h, err := webHandler()
 	if err != nil {
 		log.Fatal(err)
 	}
 	mux.Handle("/", h)
 
-	log.Printf("listening on %s (round duration: %s, redis: %s, match_ttl: %s)", addr, roundDur, redisAddr, matchTTL)
+	log.Printf("listening on %s (round=%s, pg=%s, redis=%s)", addr, roundDur, dbURL, redisAddr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)
 	}
@@ -58,8 +88,7 @@ func env(key, def string) string {
 
 func envDuration(key string, def time.Duration) time.Duration {
 	if v := os.Getenv(key); v != "" {
-		d, err := time.ParseDuration(v)
-		if err == nil {
+		if d, err := time.ParseDuration(v); err == nil {
 			return d
 		}
 	}

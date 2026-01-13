@@ -2,270 +2,377 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Bulls & Cows PvP (MVP)</title>
-
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Bulls & Cows</title>
     <style>
-        body {
-            font-family: system-ui, -apple-system, Arial, sans-serif;
-            margin: 24px;
-            max-width: 960px;
-        }
-        .card {
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 16px;
-        }
-        .row {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: end;
-        }
-        input {
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        button {
-            padding: 8px 12px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-            background: #f7f7f7;
-            cursor: pointer;
-        }
-        button:disabled {
-            opacity: .5;
-            cursor: not-allowed;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border-bottom: 1px solid #eee;
-            padding: 8px;
-            font-size: 14px;
-        }
-        .muted { color: #666; }
-        .ok { color: #0a7; font-weight: 600; }
-        .warn { color: #b60; font-weight: 600; }
-        .err { color: #c00; font-weight: 600; }
-        code {
-            background: #f4f4f4;
-            padding: 2px 6px;
-            border-radius: 6px;
-        }
+        :root { --b:#111; --g:#e7e7e7; --mut:#666; }
+        body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 18px; color: var(--b); }
+        h1 { margin: 0 0 10px; font-size: 22px; }
+        h2 { margin: 0 0 10px; font-size: 16px; }
+        .muted { color: var(--mut); font-size: 12px; }
+        .gridTop { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+        .center { display: grid; justify-items: center; margin-top: 14px; }
+        .card { border: 1px solid #ddd; border-radius: 14px; padding: 14px; background: #fff; }
+        .row { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+        label { display:block; font-size:12px; color: var(--mut); margin-bottom:4px; }
+        input { padding: 10px; border: 1px solid #ccc; border-radius: 10px; min-width: 220px; }
+        button { padding: 10px 14px; border: 1px solid #333; background: #111; color: #fff; border-radius: 10px; cursor: pointer; }
+        button.secondary { background:#fff; color:#111; }
+        button:disabled { opacity: .55; cursor: not-allowed; }
+        .pills { margin-top: 10px; display:flex; gap: 8px; flex-wrap:wrap; }
+        .pill { display:inline-block; padding: 4px 10px; border: 1px solid #ddd; border-radius: 999px; font-size: 12px; }
+        .ok { color: #0a7; }
+        .err { color: #c22; }
+        pre { background:#f7f7f7; border-radius: 10px; padding: 10px; overflow:auto; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #e3e3e3; padding: 8px; font-size: 13px; text-align: center; }
+        th { background: #fafafa; }
+        .gameWrap { width: min(980px, 100%); }
+        .logsWrap { margin-top: 14px; }
+        details { border: 1px solid #ddd; border-radius: 14px; padding: 10px 14px; background:#fff; }
+        summary { cursor: pointer; font-weight: 600; }
+        .kv { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
     </style>
 </head>
 
 <body>
-<h1>Bulls & Cows PvP — MVP</h1>
+<h1>Bulls & Cows</h1>
+<div class="muted">WS + JWT + Rematch (series score). Пароль фронт не валидирует.</div>
 
-<p class="muted">
-    2 игрока, 4 цифры, нули и повторы разрешены.<br>
-    Раунд завершается, когда оба ввели (или по таймеру — пропуск).
-</p>
-
-<div class="card">
-    <div class="row">
-        <div>
-            <div class="muted">playerId</div>
-            <code id="playerId"></code>
+<!-- TOP: left = match controls, right = auth -->
+<div class="gridTop" style="margin-top:12px;">
+    <!-- LEFT TOP: MATCH -->
+    <div class="card">
+        <h2>Match</h2>
+        <div class="row">
+            <button id="btnCreateMatch">Create match</button>
+            <div>
+                <label>Match ID</label>
+                <input id="matchId" placeholder="will appear here" />
+            </div>
         </div>
 
-        <div style="flex:1">
-            <div class="muted">matchId</div>
-            <input id="matchId" placeholder="например: ab12cd34ef" style="width:100%" />
+        <div class="row" style="margin-top:10px;">
+            <button class="secondary" id="btnConnect">Connect WS</button>
+            <button class="secondary" id="btnDisconnect">Disconnect</button>
+            <button class="secondary" id="btnRematch" title="Request rematch (needs both players)">Rematch</button>
         </div>
 
-        <button id="createBtn">Create match</button>
-        <button id="connectBtn">Connect</button>
+        <div class="pills">
+            <div class="pill">You: <span class="kv" id="youSlot">-</span></div>
+            <div class="pill">Phase: <span class="kv" id="phase">-</span></div>
+            <div class="pill">Round: <span class="kv" id="round">-</span></div>
+            <div class="pill">Deadline: <span class="kv" id="deadline">-</span></div>
+            <div class="pill">Series: <span class="kv" id="series">p1 0 : 0 p2 (draw 0)</span></div>
+            <div class="pill">WS: <span class="kv" id="wsStatus">closed</span></div>
+        </div>
     </div>
 
-    <div class="muted" style="margin-top:8px">
-        Ссылка другу:
-        <code id="shareLink">—</code>
+    <!-- RIGHT TOP: AUTH -->
+    <div class="card">
+        <h2>Auth</h2>
+        <div class="row">
+            <div>
+                <label>Email</label>
+                <input id="email" placeholder="you@example.com" />
+            </div>
+            <div>
+                <label>Password</label>
+                <input id="password" type="password" placeholder="any" />
+            </div>
+            <div>
+                <label>Display name (for register)</label>
+                <input id="displayName" placeholder="Player One" />
+            </div>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+            <button id="btnRegister">Register</button>
+            <button class="secondary" id="btnLogin">Login</button>
+            <button class="secondary" id="btnLogout">Logout</button>
+            <button class="secondary" id="btnMe">/api/me</button>
+        </div>
+
+        <div class="pills">
+            <div class="pill">Token: <span class="kv" id="tokenStatus"></span></div>
+            <div class="pill">Auth: <span class="kv" id="authMsg"></span></div>
+        </div>
+
+        <pre id="meOut" style="margin-top:10px; max-height: 140px;"></pre>
     </div>
 </div>
 
-<div class="card">
-    <h3>Игра</h3>
-    <div id="status" class="muted">Не подключен</div>
-    <div id="phase" class="muted"></div>
-    <div id="roundInfo" class="muted"></div>
+<!-- CENTER: GAME -->
+<div class="center">
+    <div class="card gameWrap">
+        <h2>Game</h2>
 
-    <div class="row" style="margin-top:12px">
-        <div>
-            <div class="muted">Secret</div>
-            <input id="secret" maxlength="4" placeholder="0011" />
+        <div class="row">
+            <div>
+                <label>Set secret (4 digits)</label>
+                <input id="secret" placeholder="e.g. 0011" maxlength="4" />
+            </div>
+            <button id="btnSetSecret">Set secret</button>
+
+            <div style="flex:1"></div>
+
+            <div>
+                <label>Submit guess (4 digits)</label>
+                <input id="guess" placeholder="e.g. 0101" maxlength="4" />
+            </div>
+            <button id="btnGuess">Submit guess</button>
         </div>
-        <button id="setSecretBtn">Set secret</button>
 
-        <div style="flex:1"></div>
-
-        <div>
-            <div class="muted">Guess</div>
-            <input id="guess" maxlength="4" placeholder="0101" />
+        <div style="margin-top:12px;">
+            <div class="muted">History (bulls/cows)</div>
+            <div style="margin-top:8px; overflow:auto;">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Round</th>
+                        <th>P1 Guess</th>
+                        <th>P1 Bulls</th>
+                        <th>P1 Cows</th>
+                        <th>P2 Guess</th>
+                        <th>P2 Bulls</th>
+                        <th>P2 Cows</th>
+                        <th>Winner</th>
+                    </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                    <tr><td colspan="8" class="muted">No data yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <button id="guessBtn">Submit guess</button>
     </div>
-
-    <div class="muted" style="margin-top:8px">
-        Secrets ready:
-        <code id="secretsReady">—</code>,
-        Guesses ready:
-        <code id="guessesReady">—</code>
-    </div>
-
-    <div id="winner" style="margin-top:12px"></div>
 </div>
 
-<div class="card">
-    <h3>История раундов</h3>
-    <table>
-        <thead>
-        <tr>
-            <th>Round</th>
-            <th>P1</th>
-            <th>P2</th>
-        </tr>
-        </thead>
-        <tbody id="history"></tbody>
-    </table>
+<!-- BOTTOM: LOGS (collapsible) -->
+<div class="logsWrap">
+    <details>
+        <summary>Logs</summary>
+        <pre id="log" style="height: 260px; margin-top:10px;"></pre>
+    </details>
 </div>
 
 <script>
-    (() => {
-        const $ = (id) => document.getElementById(id);
+    const HTTP_BASE = location.origin;
+    const WS_BASE = (location.protocol === "https:" ? "wss://" : "ws://") + location.host;
 
-        // -------- playerId --------
-        let playerId = localStorage.getItem("bc_playerId");
-        if (!playerId) {
-            playerId = "p_" + Math.random().toString(16).slice(2);
-            localStorage.setItem("bc_playerId", playerId);
+    const $ = (id) => document.getElementById(id);
+
+    function getToken() { return localStorage.getItem("accessToken") || ""; }
+    function setToken(t) {
+        if (!t) localStorage.removeItem("accessToken");
+        else localStorage.setItem("accessToken", t);
+        $("tokenStatus").textContent = t ? "saved" : "empty";
+    }
+    setToken(getToken());
+
+    function setAuthMsg(text, isErr=false) {
+        $("authMsg").textContent = text || "";
+        $("authMsg").className = isErr ? "err" : "ok";
+    }
+
+    function log(line) {
+        const el = $("log");
+        el.textContent += line + "\n";
+        el.scrollTop = el.scrollHeight;
+    }
+
+    async function api(path, opts={}) {
+        const headers = opts.headers || {};
+        headers["Content-Type"] = "application/json";
+        const t = getToken();
+        if (t) headers["Authorization"] = "Bearer " + t;
+        const res = await fetch(HTTP_BASE + path, { ...opts, headers });
+        const text = await res.text();
+        let json = null;
+        try { json = text ? JSON.parse(text) : null; } catch {}
+        if (!res.ok) throw { status: res.status, body: json || text };
+        return json;
+    }
+
+    // -------- Auth
+    $("btnRegister").onclick = async () => {
+        try {
+            await api("/api/auth/register", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: $("email").value,
+                    password: $("password").value,     // фронт НЕ валидирует длину
+                    displayName: $("displayName").value
+                })
+            });
+            setAuthMsg("Registered. Now login.", false);
+        } catch (e) {
+            setAuthMsg("Register error: " + JSON.stringify(e), true);
         }
-        $("playerId").textContent = playerId;
+    };
 
-        // -------- URL param matchId --------
-        const url = new URL(window.location.href);
-        const qMatch = url.searchParams.get("matchId");
-        if (qMatch) $("matchId").value = qMatch;
+    $("btnLogin").onclick = async () => {
+        try {
+            const out = await api("/api/auth/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: $("email").value,
+                    password: $("password").value
+                })
+            });
+            setToken(out?.accessToken || "");
+            setAuthMsg("Logged in.", false);
+        } catch (e) {
+            setAuthMsg("Login error: " + JSON.stringify(e), true);
+        }
+    };
 
-        let ws = null;
+    $("btnLogout").onclick = () => {
+        setToken("");
+        $("meOut").textContent = "";
+        setAuthMsg("Logged out.", false);
+    };
 
-        function setStatus(text, cls="muted") {
-            $("status").className = cls;
-            $("status").textContent = text;
+    $("btnMe").onclick = async () => {
+        try {
+            const me = await api("/api/me", { method: "GET" });
+            $("meOut").textContent = JSON.stringify(me, null, 2);
+            setAuthMsg("Loaded /api/me", false);
+        } catch (e) {
+            setAuthMsg("Me error: " + JSON.stringify(e), true);
+        }
+    };
+
+    // -------- Match + WS
+    let ws = null;
+
+    function setWSStatus(s) { $("wsStatus").textContent = s; }
+
+    function send(type, payload) {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            log("[ws] not connected");
+            return;
+        }
+        ws.send(JSON.stringify({ type, payload }));
+    }
+
+    function renderHistory(state) {
+        const body = $("historyBody");
+        const hist = state?.history || [];
+        const winner = state?.winner || "";
+
+        if (!hist.length) {
+            body.innerHTML = `<tr><td colspan="8" class="muted">No data yet</td></tr>`;
+            return;
         }
 
-        function makeShareLink(matchId) {
-            const u = new URL(window.location.href);
-            u.searchParams.set("matchId", matchId);
-            return u.toString();
-        }
+        const rowHtml = hist.map(item => {
+            const r = item.round ?? "-";
+            const p1 = item.p1 || {};
+            const p2 = item.p2 || {};
 
-        // -------- Create match --------
-        $("createBtn").onclick = async () => {
-            const res = await fetch("/api/match", { method: "POST" });
-            const data = await res.json();
-            $("matchId").value = data.matchId;
-            $("shareLink").textContent = makeShareLink(data.matchId);
-        };
+            const p1Guess = p1.guess ?? (p1.missed ? "(missed)" : "");
+            const p2Guess = p2.guess ?? (p2.missed ? "(missed)" : "");
 
-        // -------- Connect WS --------
-        $("connectBtn").onclick = () => {
-            const matchId = $("matchId").value.trim();
-            if (!matchId) return;
+            const p1B = p1.bulls ?? 0;
+            const p1C = p1.cows ?? 0;
+            const p2B = p2.bulls ?? 0;
+            const p2C = p2.cows ?? 0;
 
-            $("shareLink").textContent = makeShareLink(matchId);
-
-            if (ws) ws.close();
-
-            const proto = location.protocol === "https:" ? "wss" : "ws";
-            const wsUrl =
-                `${proto}://${location.host}/ws` +
-                `?matchId=${encodeURIComponent(matchId)}` +
-                `&playerId=${encodeURIComponent(playerId)}`;
-
-            ws = new WebSocket(wsUrl);
-
-            ws.onopen = () => setStatus("WS connected", "ok");
-            ws.onclose = () => setStatus("WS closed", "warn");
-            ws.onerror = () => setStatus("WS error", "err");
-
-            ws.onmessage = (ev) => {
-                const msg = JSON.parse(ev.data);
-                if (msg.type === "state") {
-                    renderState(msg.payload);
-                } else if (msg.type === "error") {
-                    alert(`${msg.payload.code}: ${msg.payload.message}`);
-                }
-            };
-        };
-
-        function send(type, payload) {
-            if (!ws || ws.readyState !== WebSocket.OPEN) return;
-            ws.send(JSON.stringify({ type, payload }));
-        }
-
-        $("setSecretBtn").onclick = () => {
-            send("set_secret", { secret: $("secret").value.trim() });
-        };
-
-        $("guessBtn").onclick = () => {
-            send("submit_guess", { guess: $("guess").value.trim() });
-        };
-
-        // -------- Render state --------
-        function renderState(s) {
-            $("phase").textContent =
-                `phase: ${s.phase}, you: ${s.you}, matchId: ${s.matchId}`;
-
-            $("secretsReady").textContent =
-                `p1=${s.secretsReady.p1}, p2=${s.secretsReady.p2}`;
-
-            $("guessesReady").textContent =
-                `p1=${s.guessesReady.p1}, p2=${s.guessesReady.p2}`;
-
-            if (s.phase === "playing" && s.deadlineMs) {
-                $("roundInfo").textContent =
-                    `round ${s.round}, deadline ${new Date(s.deadlineMs).toLocaleTimeString()}`;
-            } else {
-                $("roundInfo").textContent = `round ${s.round}`;
-            }
-
-            $("setSecretBtn").disabled = s.phase !== "waiting_secrets";
-            $("guessBtn").disabled = s.phase !== "playing";
-
-            if (s.phase === "finished") {
-                $("winner").innerHTML =
-                    `<div class="ok">GAME FINISHED: winner = <code>${s.winner}</code></div>`;
-            } else {
-                $("winner").innerHTML = "";
-            }
-
-            const tbody = $("history");
-            tbody.innerHTML = "";
-            for (const h of s.history) {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-        <td>${h.round}</td>
-        <td>${fmt(h.p1)}</td>
-        <td>${fmt(h.p2)}</td>
+            return `
+        <tr>
+          <td>${r}</td>
+          <td>${escapeHtml(p1Guess || "")}</td>
+          <td>${p1B}</td>
+          <td>${p1C}</td>
+          <td>${escapeHtml(p2Guess || "")}</td>
+          <td>${p2B}</td>
+          <td>${p2C}</td>
+          <td>${winner ? escapeHtml(winner) : ""}</td>
+        </tr>
       `;
-                tbody.appendChild(tr);
-            }
-        }
+        }).join("");
 
-        function fmt(a) {
-            if (a.missed || a.guess === null) {
-                return `<span class="muted">missed</span>`;
-            }
-            return `<code>${a.guess}</code> — ${a.bulls}B ${a.cows}C`;
+        body.innerHTML = rowHtml;
+    }
+
+    function escapeHtml(s) {
+        return String(s)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    $("btnCreateMatch").onclick = async () => {
+        try {
+            const out = await api("/api/match", { method: "POST" });
+            $("matchId").value = out.matchId || out.matchID || out.match_id || "";
+            log("[http] created match: " + $("matchId").value);
+        } catch (e) {
+            log("[http] create match error: " + JSON.stringify(e));
         }
-    })();
+    };
+
+    $("btnConnect").onclick = () => {
+        const matchId = $("matchId").value.trim();
+        const token = getToken();
+        if (!matchId) return log("missing matchId");
+        if (!token) return log("missing token: login first");
+
+        const url = `${WS_BASE}/ws?matchId=${encodeURIComponent(matchId)}&token=${encodeURIComponent(token)}`;
+        ws = new WebSocket(url);
+
+        ws.onopen = () => { setWSStatus("open"); log("[ws] connected"); };
+        ws.onclose = () => { setWSStatus("closed"); log("[ws] closed"); };
+        ws.onerror = (e) => { setWSStatus("error"); log("[ws] error " + e); };
+
+        ws.onmessage = (ev) => {
+            let msg = null;
+            try { msg = JSON.parse(ev.data); } catch { return; }
+
+            if (msg.type === "state") {
+                const s = msg.payload || {};
+                $("youSlot").textContent = s.you || "-";
+                $("phase").textContent = s.phase || "-";
+                $("round").textContent = (s.round ?? "-");
+                $("deadline").textContent = s.deadlineMs ? new Date(s.deadlineMs).toLocaleTimeString() : "-";
+
+                renderHistory(s);
+
+                // series может прилетать отдельными эвентами, но держим отображение, если есть
+                log("[state] phase=" + (s.phase || "?") + " round=" + (s.round ?? "?"));
+            } else if (msg.type === "series_score") {
+                const ser = msg.payload?.series || {};
+                $("series").textContent = `p1 ${ser.p1Wins||0} : ${ser.p2Wins||0} p2 (draw ${ser.draws||0})`;
+                log("[series_score] " + JSON.stringify(ser));
+            } else if (msg.type === "rematch_status") {
+                log("[rematch_status] " + JSON.stringify(msg.payload));
+            } else if (msg.type === "rematch_started") {
+                const ser = msg.payload?.series || {};
+                $("series").textContent = `p1 ${ser.p1Wins||0} : ${ser.p2Wins||0} p2 (draw ${ser.draws||0})`;
+                log("[rematch_started]");
+            } else if (msg.type === "round_result") {
+                log("[round_result] " + JSON.stringify(msg.payload));
+            } else if (msg.type === "game_finished") {
+                log("[game_finished] winner=" + (msg.payload?.winner || "?"));
+            } else if (msg.type === "error") {
+                log("[error] " + JSON.stringify(msg.payload));
+            } else {
+                log("[msg] " + JSON.stringify(msg));
+            }
+        };
+    };
+
+    $("btnDisconnect").onclick = () => {
+        if (ws) ws.close();
+        ws = null;
+    };
+
+    $("btnSetSecret").onclick = () => send("set_secret", { secret: $("secret").value });
+    $("btnGuess").onclick = () => send("submit_guess", { guess: $("guess").value });
+    $("btnRematch").onclick = () => send("rematch_request", {});
 </script>
 </body>
 </html>

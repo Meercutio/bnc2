@@ -6,11 +6,12 @@ import (
 	"sync"
 	"time"
 
+	"example.com/bc-mvp/internal/auth"
 	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true }, // MVP: потом ужесточим
+	CheckOrigin: func(r *http.Request) bool { return true }, // MVP
 }
 
 type ClientConn struct {
@@ -27,14 +28,26 @@ func (c *ClientConn) Close() {
 	})
 }
 
+// handleWS — WebSocket вход в матч
+// Требует JWT: /ws?matchId=xxx&token=yyy
 func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	matchID := r.URL.Query().Get("matchId")
-	playerID := r.URL.Query().Get("playerId")
-	if matchID == "" || playerID == "" {
-		w.WriteHeader(http.StatusBadRequest)
+	token := r.URL.Query().Get("token")
+
+	if matchID == "" || token == "" {
+		http.Error(w, "missing matchId or token", http.StatusBadRequest)
 		return
 	}
 
+	// 🔐 Проверяем JWT
+	claims, err := auth.Verify(jwtSecret(), token)
+	if err != nil {
+		http.Error(w, "invalid token", http.StatusUnauthorized)
+		return
+	}
+	playerID := claims.UserID
+
+	// получаем матч (in-memory или из Redis)
 	m, ok, err := s.matches.GetOrLoad(r.Context(), matchID)
 	if err != nil {
 		http.Error(w, "storage error", http.StatusInternalServerError)
@@ -65,7 +78,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// writer
+	// writer loop
 	go func() {
 		ticker := time.NewTicker(25 * time.Second)
 		defer ticker.Stop()
@@ -83,7 +96,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	// initial state to this player + broadcast state to all
+	// initial state
 	m.SendStateTo(slot)
 	m.BroadcastState()
 
@@ -109,7 +122,6 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 			}
 			if err := m.SetSecret(slot, p.Secret); err != nil {
 				m.SendErrorTo(slot, "bad_input", err.Error())
-				continue
 			}
 
 		case "submit_guess":
@@ -120,7 +132,11 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 			}
 			if err := m.SubmitGuess(slot, p.Guess); err != nil {
 				m.SendErrorTo(slot, "bad_input", err.Error())
-				continue
+			}
+
+		case "rematch_request":
+			if err := m.RequestRematch(slot); err != nil {
+				m.SendErrorTo(slot, "bad_input", err.Error())
 			}
 
 		default:

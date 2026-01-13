@@ -18,6 +18,16 @@ services:
     container_name: bc_redis
     ports:
       - "6379:6379"
+  
+  migrate:
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: "host=postgres user=bc password=bc dbname=bc sslmode=disable"
+    command: [ "goose", "-dir", "/app/migrations", "up" ]
+    restart: "no"
 
 volumes:
   pgdata:
