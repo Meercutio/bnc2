@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"log"
+	"os"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -21,7 +22,14 @@ func runMigrations(dbURL string) {
 
 	log.Println("running database migrations...")
 
-	if err := goose.Up(db, "app/migrations/"); err != nil {
+	dir := os.Getenv("MIGRATIONS_DIR")
+	if dir == "" {
+		dir = "./migrations"
+	}
+
+	log.Printf("running database migrations from %s ...", dir)
+
+	if err := goose.Up(db, dir); err != nil {
 		log.Fatalf("migrations failed: %v", err)
 	}
 

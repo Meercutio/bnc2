@@ -26,6 +26,8 @@ COPY --from=build /go/bin/goose /usr/local/bin/goose
 
 COPY db/migrations/ /app/migrations/
 
+ENV MIGRATIONS_DIR=/app/migrations
+
 ENV PORT=8080
 EXPOSE 8080
 
