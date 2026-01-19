@@ -56,9 +56,11 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger, opts Options)
 		dbpool.Close()
 		return nil, fmt.Errorf("postgres ping: %w", err)
 	}
-	if err := rdb.Ping(pingCtx).Err(); err != nil {
-		err := rdb.Close()
-		return nil, fmt.Errorf("redis ping: %w", err)
+	pingErr := rdb.Ping(pingCtx).Err()
+	if pingErr != nil {
+		dbpool.Close()
+		_ = rdb.Close()
+		return nil, fmt.Errorf("redis ping (%s db=%d): %w", cfg.Redis.Addr, cfg.Redis.DB, pingErr)
 	}
 
 	// --- Auth service ---
