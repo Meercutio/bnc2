@@ -1,0 +1,92 @@
+# ======================
+# Go binaries & build
+# ======================
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Go build cache
+/bin/
+/obj/
+/pkg/
+/dist/
+/build/
+
+# Go workspace
+/go.work
+/go.work.sum
+
+# ======================
+# Go modules
+# ======================
+# НЕ игнорируем go.mod и go.sum
+# go.mod
+# go.sum
+
+# ======================
+# Coverage & profiling
+# ======================
+*.cover
+*.prof
+*.pprof
+coverage.out
+coverage.txt
+
+# ======================
+# Logs
+# ======================
+*.log
+logs/
+*.tmp
+
+# ======================
+# Environment variables
+# ======================
+.env
+.env.*
+!.env.example
+
+# ======================
+# IDE / Editor
+# ======================
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+
+# GoLand / IntelliJ
+.idea/
+*.iml
+
+# ======================
+# OS files
+# ======================
+.DS_Store
+Thumbs.db
+
+# ======================
+# Docker
+# ======================
+docker-compose.override.yml
+
+# ======================
+# CI artifacts
+# ======================
+test-results/
+.tmp/
+
+# ======================
+# Runtime data (optional)
+# ======================
+data/
+storage/
+
+# ======================
+# Local tools
+# ======================
+tools/bin/
