@@ -50,7 +50,7 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger, opts Options)
 	})
 
 	// Quick connectivity checks (fail fast).
-	pingCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	pingCtx, cancel := context.WithTimeout(ctx, 50*time.Second)
 	defer cancel()
 	if err := dbpool.Ping(pingCtx); err != nil {
 		dbpool.Close()
