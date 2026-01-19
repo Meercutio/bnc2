@@ -321,10 +321,15 @@
         if (!matchId) return log("missing matchId");
         if (!token) return log("missing token: login first");
 
-        const url = `${WS_BASE}/ws?matchId=${encodeURIComponent(matchId)}&token=${encodeURIComponent(token)}`;
+        const url = `${WS_BASE}/ws?matchId=${encodeURIComponent(matchId)}`;
         ws = new WebSocket(url);
 
-        ws.onopen = () => { setWSStatus("open"); log("[ws] connected"); };
+        ws.onopen = () => {
+            setWSStatus("open");
+            log("[ws] connected");
+            // browser WS does not allow custom headers -> send token as first message
+            send("auth", { token });
+        };
         ws.onclose = () => { setWSStatus("closed"); log("[ws] closed"); };
         ws.onerror = (e) => { setWSStatus("error"); log("[ws] error " + e); };
 

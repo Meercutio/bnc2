@@ -2,130 +2,58 @@ package main
 
 import (
 	"context"
-	"log"
-	"net/http"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
-	"example.com/bc-mvp/internal/game"
-	"example.com/bc-mvp/internal/httpapi"
-	"example.com/bc-mvp/internal/store"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/redis/go-redis/v9"
+	"example.com/bc-mvp/internal/app"
+	"example.com/bc-mvp/internal/config"
+	"example.com/bc-mvp/internal/migrate"
 )
 
 func main() {
-	port := env("PORT", "8080")
-	addr := ":" + port
-	roundDur := envDuration("ROUND_DURATION", 0*time.Second)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
-	// --- Postgres ---
-	dbURL := env("DATABASE_URL", "postgres://bc:bc@localhost:5432/bc?sslmode=disable")
-	dbpool, err := pgxpool.New(context.Background(), dbURL)
+	cfg, err := config.LoadFromEnv()
 	if err != nil {
-		log.Fatalf("pgxpool: %v", err)
-	}
-	defer dbpool.Close()
-	if err := dbpool.Ping(context.Background()); err != nil {
-		log.Fatalf("failed to connect to PostgreSQL: %v", err)
-	}
-	if env("RUN_MIGRATIONS", "false") == "true" {
-		runMigrations(dbURL)
+		slog.Error("config error", "err", err)
+		os.Exit(1)
 	}
 
-	// --- JWT ---
-	jwtSecret := []byte(env("JWT_SECRET", "dev-secret-change-me"))
-	tokenTTL := envDuration("JWT_TTL", 24*time.Hour)
-	game.SetJWTSecret(jwtSecret)
+	log := newLogger(cfg)
 
-	users := store.NewUserStore(dbpool)
-	stats := store.NewStatsStore(dbpool)
-
-	authH := &httpapi.AuthHandler{
-		Users:     users,
-		Stats:     stats,
-		JWTSecret: jwtSecret,
-		TokenTTL:  tokenTTL,
-	}
-
-	// --- Redis (matches persistence) ---
-	redisAddr := env("REDIS_ADDR", "localhost:6379")
-	matchTTL := envDuration("MATCH_TTL", 24*time.Hour)
-
-	rdb := redis.NewClient(&redis.Options{Addr: redisAddr})
-	persist := game.NewRedisMatchStore(rdb, matchTTL)
-	defer func(rdb *redis.Client) {
-		err := rdb.Close()
-		if err != nil {
-			log.Fatalf("redis close problem: %v", err)
+	if cfg.Postgres.RunMigrations {
+		if err := migrate.Up(cfg.Postgres.URL, cfg.Postgres.MigrationsDir, log); err != nil {
+			log.Error("migrations failed", "err", err)
+			os.Exit(1)
 		}
-	}(rdb)
-	if _, err := rdb.Ping(context.Background()).Result(); err != nil {
-		log.Fatalf("failed to connect to Redis: %v", err)
 	}
 
-	cfg := game.Config{RoundDuration: roundDur}
-	matchSvc := game.NewMatchService(cfg, persist)
-	srv := game.NewServer(cfg, matchSvc)
-
-	mux := http.NewServeMux()
-	server := &http.Server{
-		Addr:    addr,
-		Handler: mux,
-	}
-
-	// --- game routes ---
-	srv.RegisterRoutes(mux)
-
-	// --- auth routes ---
-	mux.HandleFunc("/api/auth/register", authH.Register)
-	mux.HandleFunc("/api/auth/login", authH.Login)
-
-	// /api/me защищён middleware
-	meHandler := http.HandlerFunc(authH.Me)
-	mux.Handle("/api/me", httpapi.AuthMiddleware(jwtSecret)(meHandler))
-
-	// --- embedded frontend ---
-	h, err := webHandler()
+	static, err := webHandler()
 	if err != nil {
-		log.Fatal(err)
+		log.Error("static handler error", "err", err)
+		os.Exit(1)
 	}
-	mux.Handle("/", h)
 
-	// Запуск сервера в горутине
-	go func() {
-		log.Printf("listening on %s (round=%s, pg=%s, redis=%s)", addr, roundDur, dbURL, redisAddr)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("server failed: %v", err)
-		}
-	}()
-	// Обработка SIGTERM/SIGINT
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	<-c
-	log.Println("shutting down server...")
+	a, err := app.New(ctx, cfg, log, app.Options{Static: static})
+	if err != nil {
+		log.Error("app init error", "err", err)
+		os.Exit(1)
+	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	if err := server.Shutdown(ctx); err != nil {
-		log.Fatalf("server shutdown failed: %v", err)
+	log.Info("starting", "env", cfg.Env, "addr", cfg.HTTP.Addr)
+	if err := a.Run(ctx); err != nil {
+		log.Error("app stopped with error", "err", err)
+		os.Exit(1)
 	}
 }
 
-func env(key, def string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
+func newLogger(cfg config.Config) *slog.Logger {
+	opts := &slog.HandlerOptions{Level: slog.LevelInfo}
+	if cfg.Log.Format == "json" {
+		return slog.New(slog.NewJSONHandler(os.Stdout, opts))
 	}
-	return def
-}
-
-func envDuration(key string, def time.Duration) time.Duration {
-	if v := os.Getenv(key); v != "" {
-		if d, err := time.ParseDuration(v); err == nil {
-			return d
-		}
-	}
-	return def
+	return slog.New(slog.NewTextHandler(os.Stdout, opts))
 }

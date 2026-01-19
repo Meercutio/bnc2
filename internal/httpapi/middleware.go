@@ -12,7 +12,11 @@ type ctxKey string
 
 const userIDKey ctxKey = "userID"
 
-func AuthMiddleware(jwtSecret []byte) func(http.Handler) http.Handler {
+type TokenVerifier interface {
+	Verify(token string) (*auth.Claims, error)
+}
+
+func AuthMiddleware(verifier TokenVerifier) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			h := r.Header.Get("Authorization")
@@ -22,7 +26,7 @@ func AuthMiddleware(jwtSecret []byte) func(http.Handler) http.Handler {
 			}
 			token := strings.TrimPrefix(h, "Bearer ")
 
-			claims, err := auth.Verify(jwtSecret, token)
+			claims, err := verifier.Verify(token)
 			if err != nil {
 				writeError(w, http.StatusUnauthorized, "unauthorized", "invalid token")
 				return

@@ -69,6 +69,7 @@ up: services-up
 down: services-down
 logs: services-logs
 reset: services-reset
+testi: test-integration
 
 # -------------------------
 # Migrations (requires goose installed)
