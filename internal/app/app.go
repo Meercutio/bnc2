@@ -50,15 +50,17 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger, opts Options)
 	})
 
 	// Quick connectivity checks (fail fast).
-	pingCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	pingCtx, cancel := context.WithTimeout(ctx, 50*time.Second)
 	defer cancel()
 	if err := dbpool.Ping(pingCtx); err != nil {
 		dbpool.Close()
 		return nil, fmt.Errorf("postgres ping: %w", err)
 	}
-	if err := rdb.Ping(pingCtx).Err(); err != nil {
-		err := rdb.Close()
-		return nil, fmt.Errorf("redis ping: %w", err)
+	pingErr := rdb.Ping(pingCtx).Err()
+	if pingErr != nil {
+		dbpool.Close()
+		_ = rdb.Close()
+		return nil, fmt.Errorf("redis ping (%s db=%d): %w", cfg.Redis.Addr, cfg.Redis.DB, pingErr)
 	}
 
 	// --- Auth service ---
