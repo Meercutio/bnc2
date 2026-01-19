@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"example.com/bc-mvp/internal/game"
@@ -26,6 +28,9 @@ func main() {
 		log.Fatalf("pgxpool: %v", err)
 	}
 	defer dbpool.Close()
+	if err := dbpool.Ping(context.Background()); err != nil {
+		log.Fatalf("failed to connect to PostgreSQL: %v", err)
+	}
 	if env("RUN_MIGRATIONS", "false") == "true" {
 		runMigrations(dbURL)
 	}
@@ -51,12 +56,25 @@ func main() {
 
 	rdb := redis.NewClient(&redis.Options{Addr: redisAddr})
 	persist := game.NewRedisMatchStore(rdb, matchTTL)
+	defer func(rdb *redis.Client) {
+		err := rdb.Close()
+		if err != nil {
+			log.Fatalf("redis close problem: %v", err)
+		}
+	}(rdb)
+	if _, err := rdb.Ping(context.Background()).Result(); err != nil {
+		log.Fatalf("failed to connect to Redis: %v", err)
+	}
 
 	cfg := game.Config{RoundDuration: roundDur}
 	matchSvc := game.NewMatchService(cfg, persist)
 	srv := game.NewServer(cfg, matchSvc)
 
 	mux := http.NewServeMux()
+	server := &http.Server{
+		Addr:    addr,
+		Handler: mux,
+	}
 
 	// --- game routes ---
 	srv.RegisterRoutes(mux)
@@ -76,9 +94,23 @@ func main() {
 	}
 	mux.Handle("/", h)
 
-	log.Printf("listening on %s (round=%s, pg=%s, redis=%s)", addr, roundDur, dbURL, redisAddr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
-		log.Fatal(err)
+	// Запуск сервера в горутине
+	go func() {
+		log.Printf("listening on %s (round=%s, pg=%s, redis=%s)", addr, roundDur, dbURL, redisAddr)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("server failed: %v", err)
+		}
+	}()
+	// Обработка SIGTERM/SIGINT
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	<-c
+	log.Println("shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("server shutdown failed: %v", err)
 	}
 }
 

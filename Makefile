@@ -49,21 +49,26 @@ run:
 # -------------------------
 # Services
 # -------------------------
-.PHONY: services-up
-up:
+.PHONY: services-up services-down services-logs services-reset
+
+services-up:
 	$(DC) up -d postgres redis
 
-.PHONY: services-down
-down:
+services-down:
 	$(DC) down
 
-.PHONY: services-logs
-logs:
+services-logs:
 	$(DC) logs -f --tail=200
 
-.PHONY: services-reset
-reset:
+services-reset:
 	$(DC) down -v
+
+# Backward-compatible aliases
+.PHONY: up down logs reset
+up: services-up
+down: services-down
+logs: services-logs
+reset: services-reset
 
 # -------------------------
 # Migrations (requires goose installed)
