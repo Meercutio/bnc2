@@ -24,7 +24,7 @@ func runMigrations(dbURL string) {
 
 	dir := os.Getenv("MIGRATIONS_DIR")
 	if dir == "" {
-		dir = "./migrations"
+		dir = "./db/migrations"
 	}
 
 	log.Printf("running database migrations from %s ...", dir)

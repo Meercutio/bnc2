@@ -11,6 +11,27 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
+// Service is a small auth helper that encapsulates a signing secret.
+// It makes it easier to inject auth into handlers without passing raw []byte everywhere.
+type Service struct {
+	secret []byte
+}
+
+func NewService(secret []byte) *Service {
+	// Copy to avoid accidental mutation from outside.
+	s := make([]byte, len(secret))
+	copy(s, secret)
+	return &Service{secret: s}
+}
+
+func (s *Service) Sign(userID string, ttl time.Duration) (string, error) {
+	return Sign(s.secret, userID, ttl)
+}
+
+func (s *Service) Verify(token string) (*Claims, error) {
+	return Verify(s.secret, token)
+}
+
 func Sign(secret []byte, userID string, ttl time.Duration) (string, error) {
 	claims := Claims{
 		UserID: userID,

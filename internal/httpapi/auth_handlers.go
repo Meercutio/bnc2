@@ -13,10 +13,10 @@ import (
 )
 
 type AuthHandler struct {
-	Users     *store.UserStore
-	Stats     *store.StatsStore
-	JWTSecret []byte
-	TokenTTL  time.Duration
+	Users    *store.UserStore
+	Stats    *store.StatsStore
+	Auth     *auth.Service
+	TokenTTL time.Duration
 }
 
 type RegisterRequest struct {
@@ -116,7 +116,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := auth.Sign(h.JWTSecret, u.ID, h.TokenTTL)
+	token, err := h.Auth.Sign(u.ID, h.TokenTTL)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "internal", "failed to sign token")
 		return

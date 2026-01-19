@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+
+	"example.com/bc-mvp/internal/auth"
 )
 
 type Config struct {
@@ -14,12 +16,18 @@ type Config struct {
 type Server struct {
 	cfg     Config
 	matches *MatchService
+	auth    TokenVerifier
 }
 
-func NewServer(cfg Config, matches *MatchService) *Server {
+type TokenVerifier interface {
+	Verify(token string) (*auth.Claims, error)
+}
+
+func NewServer(cfg Config, matches *MatchService, verifier TokenVerifier) *Server {
 	return &Server{
 		cfg:     cfg,
 		matches: matches,
+		auth:    verifier,
 	}
 }
 
