@@ -54,9 +54,9 @@ func TestRedisPersistence_CreateSaveLoad(t *testing.T) {
 	require.True(t, ok)
 
 	// attach игроков
-	_, code, _ := m.Attach("u1", newTestConn())
+	_, code, _ := m.Attach("u1", "Alice", newTestConn())
 	require.Empty(t, code)
-	_, code, _ = m.Attach("u2", newTestConn())
+	_, code, _ = m.Attach("u2", "Bob", newTestConn())
 	require.Empty(t, code)
 
 	require.NoError(t, m.SetSecret(P1, "0011"))
@@ -97,9 +97,9 @@ func TestRedisPersistence_RestoreActiveRound_TimerOff(t *testing.T) {
 	m, err := svc.Create(ctx, matchID)
 	require.NoError(t, err)
 
-	_, code, _ := m.Attach("u1", newTestConn())
+	_, code, _ := m.Attach("u1", "Alice", newTestConn())
 	require.Empty(t, code)
-	_, code, _ = m.Attach("u2", newTestConn())
+	_, code, _ = m.Attach("u2", "Bob", newTestConn())
 	require.Empty(t, code)
 
 	require.NoError(t, m.SetSecret(P1, "1111"))

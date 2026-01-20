@@ -10,8 +10,10 @@ type MatchSnapshot struct {
 	Round int    `json:"round"`
 
 	// важное: сохраняем ID игроков, иначе после рестарта невозможно корректно reconnect
-	P1ID string `json:"p1Id"`
-	P2ID string `json:"p2Id"`
+	P1ID   string `json:"p1Id"`
+	P1Name string `json:"p1Name,omitempty"`
+	P2ID   string `json:"p2Id"`
+	P2Name string `json:"p2Name,omitempty"`
 
 	P1Secret    string `json:"p1Secret"`
 	P1SecretSet bool   `json:"p1SecretSet"`
@@ -49,8 +51,10 @@ func (m *Match) snapshotLocked() MatchSnapshot {
 		Phase:   m.phase,
 		Round:   m.round,
 
-		P1ID: m.p1.id,
-		P2ID: m.p2.id,
+		P1ID:   m.p1.id,
+		P1Name: m.p1.name,
+		P2ID:   m.p2.id,
+		P2Name: m.p2.name,
 
 		P1Secret:    m.p1.secret,
 		P1SecretSet: m.p1.secretSet,
@@ -82,7 +86,9 @@ func (m *Match) restoreLocked(s MatchSnapshot) {
 
 	// players
 	m.p1.id = s.P1ID
+	m.p1.name = s.P1Name
 	m.p2.id = s.P2ID
+	m.p2.name = s.P2Name
 
 	// после рестарта нет соединений
 	m.p1.conn = nil

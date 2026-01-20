@@ -54,7 +54,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Вариант 1: token из headers
-	playerID, err := s.authFromRequest(r)
+	playerID, displayName, err := s.authFromRequest(r)
 	if err != nil {
 		http.Error(w, "invalid token", http.StatusUnauthorized)
 		return
@@ -67,13 +67,14 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 
 	// Если токена не было в headers — ожидаем auth-сообщение как первое.
 	if playerID == "" {
-		pid, aerr := s.authOverWS(ws)
+		pid, name, aerr := s.authOverWS(ws)
 		if aerr != nil {
 			_ = ws.WriteJSON(Envelope{Type: "error", Payload: mustJSON(ErrorPayload{Code: "unauthorized", Message: aerr.Error()})})
 			_ = ws.Close()
 			return
 		}
 		playerID = pid
+		displayName = name
 	}
 
 	cc := &ClientConn{
@@ -81,7 +82,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		send: make(chan []byte, 64),
 	}
 
-	slot, errCode, errMsg := m.Attach(playerID, cc)
+	slot, errCode, errMsg := m.Attach(playerID, displayName, cc)
 	if errCode != "" {
 		_ = ws.WriteJSON(Envelope{
 			Type:    "error",
@@ -164,16 +165,16 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	m.BroadcastState()
 }
 
-func (s *Server) authFromRequest(r *http.Request) (string, error) {
+func (s *Server) authFromRequest(r *http.Request) (userID string, displayName string, err error) {
 	// Authorization: Bearer <token>
 	h := r.Header.Get("Authorization")
 	if strings.HasPrefix(h, "Bearer ") {
 		tok := strings.TrimPrefix(h, "Bearer ")
 		claims, err := s.auth.Verify(tok)
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
-		return claims.UserID, nil
+		return claims.UserID, claims.DisplayName, nil
 	}
 
 	// Sec-WebSocket-Protocol: <token> (используют некоторые клиенты)
@@ -188,46 +189,46 @@ func (s *Server) authFromRequest(r *http.Request) (string, error) {
 			}
 			claims, err := s.auth.Verify(tok)
 			if err == nil {
-				return claims.UserID, nil
+				return claims.UserID, claims.DisplayName, nil
 			}
 		}
 	}
 
 	// Не ошибка: просто придётся авторизоваться через первое WS-сообщение.
-	return "", nil
+	return "", "", nil
 }
 
 type authPayload struct {
 	Token string `json:"token"`
 }
 
-func (s *Server) authOverWS(ws *websocket.Conn) (string, error) {
+func (s *Server) authOverWS(ws *websocket.Conn) (userID string, displayName string, err error) {
 	_ = ws.SetReadDeadline(time.Now().Add(5 * time.Second))
 	defer ws.SetReadDeadline(time.Time{})
 
 	_, data, err := ws.ReadMessage()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	var env Envelope
 	if err := json.Unmarshal(data, &env); err != nil {
-		return "", err
+		return "", "", err
 	}
 	if env.Type != "auth" {
-		return "", errors.New("missing auth message")
+		return "", "", errors.New("missing auth message")
 	}
 	var p authPayload
 	if err := json.Unmarshal(env.Payload, &p); err != nil {
-		return "", err
+		return "", "", err
 	}
 	if strings.TrimSpace(p.Token) == "" {
-		return "", errors.New("missing token")
+		return "", "", errors.New("missing token")
 	}
 	claims, err := s.auth.Verify(strings.TrimSpace(p.Token))
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return claims.UserID, nil
+	return claims.UserID, claims.DisplayName, nil
 }
 
 func mustJSON(v any) json.RawMessage {

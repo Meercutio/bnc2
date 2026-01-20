@@ -54,8 +54,8 @@ func TestMatch_Scenarios(t *testing.T) {
 			name: "start round after both secrets (roundActive=true, round=1, phase=playing)",
 			run: func(t *testing.T) {
 				m := NewMatch("m1", 0)
-				m.Attach("u1", newTestConn())
-				m.Attach("u2", newTestConn())
+				m.Attach("u1", "Alice", newTestConn())
+				m.Attach("u2", "Bob", newTestConn())
 
 				if err := m.SetSecret(P1, "0011"); err != nil {
 					t.Fatalf("SetSecret P1: %v", err)
@@ -82,8 +82,8 @@ func TestMatch_Scenarios(t *testing.T) {
 			name: "both submit -> history appended and draw if both guessed",
 			run: func(t *testing.T) {
 				m := NewMatch("m1", 0)
-				m.Attach("u1", newTestConn())
-				m.Attach("u2", newTestConn())
+				m.Attach("u1", "Alice", newTestConn())
+				m.Attach("u2", "Bob", newTestConn())
 
 				_ = m.SetSecret(P1, "0011")
 				_ = m.SetSecret(P2, "0101")
@@ -121,8 +121,8 @@ func TestMatch_Scenarios(t *testing.T) {
 			name: "winner p1 when p1 guesses opponent secret and p2 doesn't",
 			run: func(t *testing.T) {
 				m := NewMatch("m1", 0)
-				m.Attach("u1", newTestConn())
-				m.Attach("u2", newTestConn())
+				m.Attach("u1", "Alice", newTestConn())
+				m.Attach("u2", "Bob", newTestConn())
 
 				_ = m.SetSecret(P1, "9999")
 				_ = m.SetSecret(P2, "1234")
@@ -145,8 +145,8 @@ func TestMatch_Scenarios(t *testing.T) {
 			name: "timeout marks missed and can still finish game (p1 wins, p2 missed)",
 			run: func(t *testing.T) {
 				m := NewMatch("m1", 50*time.Millisecond)
-				m.Attach("u1", newTestConn())
-				m.Attach("u2", newTestConn())
+				m.Attach("u1", "Alice", newTestConn())
+				m.Attach("u2", "Bob", newTestConn())
 
 				_ = m.SetSecret(P1, "1111")
 				_ = m.SetSecret(P2, "2222")
@@ -174,15 +174,15 @@ func TestMatch_Scenarios(t *testing.T) {
 			name: "cannot attach third player (match_full)",
 			run: func(t *testing.T) {
 				m := NewMatch("m1", 0)
-				_, code, _ := m.Attach("u1", newTestConn())
+				_, code, _ := m.Attach("u1", "Alice", newTestConn())
 				if code != "" {
 					t.Fatalf("unexpected code for u1: %s", code)
 				}
-				_, code, _ = m.Attach("u2", newTestConn())
+				_, code, _ = m.Attach("u2", "Bob", newTestConn())
 				if code != "" {
 					t.Fatalf("unexpected code for u2: %s", code)
 				}
-				_, code, _ = m.Attach("u3", newTestConn())
+				_, code, _ = m.Attach("u3", "Charlie", newTestConn())
 				if code != "match_full" {
 					t.Fatalf("expected match_full, got %q", code)
 				}
@@ -195,11 +195,11 @@ func TestMatch_Scenarios(t *testing.T) {
 				c1 := newTestConn()
 				c2 := newTestConn()
 
-				slot1, code, _ := m.Attach("u1", c1)
+				slot1, code, _ := m.Attach("u1", "Alice", c1)
 				if code != "" || slot1 != P1 {
 					t.Fatalf("attach u1 => slot=%s code=%s", slot1, code)
 				}
-				slot2, code, _ := m.Attach("u2", c2)
+				slot2, code, _ := m.Attach("u2", "Bob", c2)
 				if code != "" || slot2 != P2 {
 					t.Fatalf("attach u2 => slot=%s code=%s", slot2, code)
 				}
@@ -245,10 +245,10 @@ func TestMatch_Scenarios2(t *testing.T) {
 			run: func(t *testing.T) {
 				m := NewMatch("m1", 0)
 
-				_, code, _ := m.Attach("u1", newTestConn())
+				_, code, _ := m.Attach("u1", "Alice", newTestConn())
 				require.Empty(t, code)
 
-				_, code, _ = m.Attach("u2", newTestConn())
+				_, code, _ = m.Attach("u2", "Bob", newTestConn())
 				require.Empty(t, code)
 
 				require.NoError(t, m.SetSecret(P1, "0011"))
@@ -266,8 +266,8 @@ func TestMatch_Scenarios2(t *testing.T) {
 			name: "p1 wins when guessing opponent secret",
 			run: func(t *testing.T) {
 				m := NewMatch("m1", 0)
-				m.Attach("u1", newTestConn())
-				m.Attach("u2", newTestConn())
+				m.Attach("u1", "Alice", newTestConn())
+				m.Attach("u2", "Bob", newTestConn())
 
 				require.NoError(t, m.SetSecret(P1, "9999"))
 				require.NoError(t, m.SetSecret(P2, "1234"))
@@ -286,8 +286,8 @@ func TestMatch_Scenarios2(t *testing.T) {
 			name: "timeout marks missed",
 			run: func(t *testing.T) {
 				m := NewMatch("m1", 40*time.Millisecond)
-				m.Attach("u1", newTestConn())
-				m.Attach("u2", newTestConn())
+				m.Attach("u1", "Alice", newTestConn())
+				m.Attach("u2", "Bob", newTestConn())
 
 				require.NoError(t, m.SetSecret(P1, "1111"))
 				require.NoError(t, m.SetSecret(P2, "2222"))
@@ -304,6 +304,56 @@ func TestMatch_Scenarios2(t *testing.T) {
 				assert.True(t, last.P2.Missed)
 				assert.Equal(t, "finished", m.phase)
 				assert.Equal(t, "p1", m.winner)
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, tc.run)
+	}
+}
+
+func TestMatch_State_PlayerNames_And_RevealedSecrets(t *testing.T) {
+	cases := []struct {
+		name string
+		run  func(t *testing.T)
+	}{
+		{
+			name: "playerNames are included in state after attach",
+			run: func(t *testing.T) {
+				m := NewMatch("m1", 0)
+				c1 := newTestConn()
+				c2 := newTestConn()
+				m.Attach("u1", "Alice", c1)
+				m.Attach("u2", "Bob", c2)
+
+				m.SendStateTo(P1)
+				st, ok := findLastState(readEnvelopesNonBlocking(c1))
+				require.True(t, ok)
+				require.Equal(t, map[string]string{"p1": "Alice", "p2": "Bob"}, st.PlayerNames)
+				require.Nil(t, st.RevealedSecrets)
+			},
+		},
+		{
+			name: "revealedSecrets are present only after finished",
+			run: func(t *testing.T) {
+				m := NewMatch("m1", 0)
+				c1 := newTestConn()
+				c2 := newTestConn()
+				m.Attach("u1", "Alice", c1)
+				m.Attach("u2", "Bob", c2)
+
+				require.NoError(t, m.SetSecret(P1, "1111"))
+				require.NoError(t, m.SetSecret(P2, "2222"))
+				require.NoError(t, m.SubmitGuess(P1, "2222")) // p1 wins
+				require.NoError(t, m.SubmitGuess(P2, "0000"))
+
+				m.SendStateTo(P1)
+				st, ok := findLastState(readEnvelopesNonBlocking(c1))
+				require.True(t, ok)
+				require.Equal(t, "finished", st.Phase)
+				require.Equal(t, map[string]string{"p1": "Alice", "p2": "Bob"}, st.PlayerNames)
+				require.Equal(t, map[string]string{"p1": "1111", "p2": "2222"}, st.RevealedSecrets)
 			},
 		},
 	}

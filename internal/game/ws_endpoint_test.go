@@ -37,7 +37,7 @@ func (v testVerifier) Verify(token string) (*auth.Claims, error) {
 	if token != "good" {
 		return nil, errors.New("bad token")
 	}
-	return &auth.Claims{UserID: "u1"}, nil
+	return &auth.Claims{UserID: "u1", DisplayName: "Alice"}, nil
 }
 
 func TestWS_Endpoint_PathParam(t *testing.T) {
