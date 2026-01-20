@@ -17,12 +17,7 @@ func Up(dbURL, dir string, log *slog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("migrations: open db: %w", err)
 	}
-	defer func(db *sql.DB) {
-		err := db.Close()
-		if err != nil {
-			log.Error("database close error")
-		}
-	}(db)
+	defer db.Close()
 
 	if err := goose.SetDialect("postgres"); err != nil {
 		return fmt.Errorf("migrations: set dialect: %w", err)

@@ -36,9 +36,9 @@ func (c *ClientConn) Close() {
 //  1. Authorization: Bearer <jwt> (для клиентов, которые умеют ставить headers)
 //  2. Первое WS-сообщение: {"type":"auth","payload":{"token":"..."}} (для browser WebSocket)
 func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
-	matchID := r.URL.Query().Get("matchId")
-	if matchID == "" {
-		http.Error(w, "missing matchId", http.StatusBadRequest)
+	matchID, ok := matchIDFromWSPath(r.URL.Path)
+	if !ok {
+		http.Error(w, "missing or invalid matchId: use /ws/{matchId}", http.StatusBadRequest)
 		return
 	}
 
@@ -233,4 +233,33 @@ func (s *Server) authOverWS(ws *websocket.Conn) (string, error) {
 func mustJSON(v any) json.RawMessage {
 	b, _ := json.Marshal(v)
 	return b
+}
+
+// matchIDFromWSPath extracts matchId from /ws/{matchId}.
+//
+// net/http ServeMux matches "/ws/" as a subtree, so we must validate and reject paths like "/ws/abc/def".
+func matchIDFromWSPath(path string) (string, bool) {
+	const prefix = "/ws/"
+	if !strings.HasPrefix(path, prefix) {
+		return "", false
+	}
+	id := strings.TrimPrefix(path, prefix)
+	if id == "" {
+		return "", false
+	}
+	// no extra path segments
+	if strings.Contains(id, "/") {
+		return "", false
+	}
+	// simple validation: match IDs are generated as [a-z0-9]+ by randID
+	if len(id) > 64 {
+		return "", false
+	}
+	for _, ch := range id {
+		if (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') {
+			continue
+		}
+		return "", false
+	}
+	return id, true
 }

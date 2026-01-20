@@ -41,7 +41,12 @@ func NewServer(cfg Config, matches *MatchService, verifier TokenVerifier) *Serve
 
 func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/match", s.handleCreateMatch)
-	mux.HandleFunc("/ws", s.handleWS)
+
+	// WebSocket: /ws/{matchId}
+	mux.HandleFunc("/ws/", s.handleWS)
+	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "missing matchId: use /ws/{matchId}", http.StatusBadRequest)
+	})
 }
 
 func (s *Server) handleCreateMatch(w http.ResponseWriter, r *http.Request) {

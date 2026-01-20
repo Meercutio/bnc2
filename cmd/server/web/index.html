@@ -37,7 +37,7 @@
 
 <body>
 <h1>Bulls & Cows</h1>
-<div class="muted">WS + JWT + Rematch (series score). Пароль фронт не валидирует.</div>
+<!--<div class="muted">WS + JWT + Rematch (series score). Пароль фронт не валидирует.</div>-->
 
 <!-- TOP: left = match controls, right = auth -->
 <div class="gridTop" style="margin-top:12px;">
@@ -321,7 +321,7 @@
         if (!matchId) return log("missing matchId");
         if (!token) return log("missing token: login first");
 
-        const url = `${WS_BASE}/ws?matchId=${encodeURIComponent(matchId)}`;
+        const url = `${WS_BASE}/ws/${encodeURIComponent(matchId)}`;
         ws = new WebSocket(url);
 
         ws.onopen = () => {
