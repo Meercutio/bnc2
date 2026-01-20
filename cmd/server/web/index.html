@@ -37,7 +37,7 @@
 
 <body>
 <h1>Bulls & Cows</h1>
-<div class="muted">WS + JWT + Rematch (series score). Пароль фронт не валидирует.</div>
+<!--<div class="muted">WS + JWT + Rematch (series score). Пароль фронт не валидирует.</div>-->
 
 <!-- TOP: left = match controls, right = auth -->
 <div class="gridTop" style="margin-top:12px;">
@@ -130,12 +130,12 @@
                     <thead>
                     <tr>
                         <th>Round</th>
-                        <th>P1 Guess</th>
-                        <th>P1 Bulls</th>
-                        <th>P1 Cows</th>
-                        <th>P2 Guess</th>
-                        <th>P2 Bulls</th>
-                        <th>P2 Cows</th>
+                        <th id="hP1Guess">P1 Guess</th>
+                        <th id="hP1Bulls">P1 Bulls</th>
+                        <th id="hP1Cows">P1 Cows</th>
+                        <th id="hP2Guess">P2 Guess</th>
+                        <th id="hP2Bulls">P2 Bulls</th>
+                        <th id="hP2Cows">P2 Cows</th>
                         <th>Winner</th>
                     </tr>
                     </thead>
@@ -246,6 +246,32 @@
     // -------- Match + WS
     let ws = null;
 
+    // Keep last known names for nicer UI (fallback to p1/p2).
+    let lastNames = { p1: "p1", p2: "p2" };
+
+    function normalizeNames(names) {
+        const p1 = (names?.p1 || "").trim() || "p1";
+        const p2 = (names?.p2 || "").trim() || "p2";
+        return { p1, p2 };
+    }
+
+    function setTableHeaders(p1, p2) {
+        if ($("hP1Guess")) $("hP1Guess").textContent = `${p1} Guess`;
+        if ($("hP1Bulls")) $("hP1Bulls").textContent = `${p1} Bulls`;
+        if ($("hP1Cows")) $("hP1Cows").textContent = `${p1} Cows`;
+        if ($("hP2Guess")) $("hP2Guess").textContent = `${p2} Guess`;
+        if ($("hP2Bulls")) $("hP2Bulls").textContent = `${p2} Bulls`;
+        if ($("hP2Cows")) $("hP2Cows").textContent = `${p2} Cows`;
+    }
+
+    function winnerLabel(winner, names) {
+        if (!winner) return "";
+        if (winner === "draw") return "draw";
+        if (winner === "p1") return names.p1;
+        if (winner === "p2") return names.p2;
+        return winner;
+    }
+
     function setWSStatus(s) { $("wsStatus").textContent = s; }
 
     function send(type, payload) {
@@ -261,18 +287,32 @@
         const hist = state?.history || [];
         const winner = state?.winner || "";
 
+        const names = normalizeNames(state?.playerNames);
+        lastNames = names;
+
+        // At the end of the game we reveal opponent secrets.
+        // To keep history intact, we show them only in the last row and only in the Guess columns.
+        const isFinished = state?.phase === "finished";
+        const revealed = state?.revealedSecrets || {};
+        const lastIdx = hist.length - 1;
+
         if (!hist.length) {
             body.innerHTML = `<tr><td colspan="8" class="muted">No data yet</td></tr>`;
             return;
         }
 
-        const rowHtml = hist.map(item => {
+        const rowHtml = hist.map((item, idx) => {
             const r = item.round ?? "-";
             const p1 = item.p1 || {};
             const p2 = item.p2 || {};
 
-            const p1Guess = p1.guess ?? (p1.missed ? "(missed)" : "");
-            const p2Guess = p2.guess ?? (p2.missed ? "(missed)" : "");
+            let p1Guess = p1.guess ?? (p1.missed ? "(missed)" : "");
+            let p2Guess = p2.guess ?? (p2.missed ? "(missed)" : "");
+
+            if (isFinished && idx === lastIdx) {
+                if (revealed?.p2) p1Guess = revealed.p2; // show opponent secret for p1 column
+                if (revealed?.p1) p2Guess = revealed.p1; // show opponent secret for p2 column
+            }
 
             const p1B = p1.bulls ?? 0;
             const p1C = p1.cows ?? 0;
@@ -288,7 +328,7 @@
           <td>${escapeHtml(p2Guess || "")}</td>
           <td>${p2B}</td>
           <td>${p2C}</td>
-          <td>${winner ? escapeHtml(winner) : ""}</td>
+          <td>${winner ? escapeHtml(winnerLabel(winner, names)) : ""}</td>
         </tr>
       `;
         }).join("");
@@ -321,7 +361,7 @@
         if (!matchId) return log("missing matchId");
         if (!token) return log("missing token: login first");
 
-        const url = `${WS_BASE}/ws?matchId=${encodeURIComponent(matchId)}`;
+        const url = `${WS_BASE}/ws/${encodeURIComponent(matchId)}`;
         ws = new WebSocket(url);
 
         ws.onopen = () => {
@@ -339,7 +379,10 @@
 
             if (msg.type === "state") {
                 const s = msg.payload || {};
-                $("youSlot").textContent = s.you || "-";
+                const names = normalizeNames(s.playerNames);
+                lastNames = names;
+                setTableHeaders(names.p1, names.p2);
+                $("youSlot").textContent = (names[s.you] || s.you || "-");
                 $("phase").textContent = s.phase || "-";
                 $("round").textContent = (s.round ?? "-");
                 $("deadline").textContent = s.deadlineMs ? new Date(s.deadlineMs).toLocaleTimeString() : "-";
@@ -350,18 +393,19 @@
                 log("[state] phase=" + (s.phase || "?") + " round=" + (s.round ?? "?"));
             } else if (msg.type === "series_score") {
                 const ser = msg.payload?.series || {};
-                $("series").textContent = `p1 ${ser.p1Wins||0} : ${ser.p2Wins||0} p2 (draw ${ser.draws||0})`;
+                $("series").textContent = `${lastNames.p1} ${ser.p1Wins||0} : ${ser.p2Wins||0} ${lastNames.p2} (draw ${ser.draws||0})`;
                 log("[series_score] " + JSON.stringify(ser));
             } else if (msg.type === "rematch_status") {
                 log("[rematch_status] " + JSON.stringify(msg.payload));
             } else if (msg.type === "rematch_started") {
                 const ser = msg.payload?.series || {};
-                $("series").textContent = `p1 ${ser.p1Wins||0} : ${ser.p2Wins||0} p2 (draw ${ser.draws||0})`;
+                $("series").textContent = `${lastNames.p1} ${ser.p1Wins||0} : ${ser.p2Wins||0} ${lastNames.p2} (draw ${ser.draws||0})`;
                 log("[rematch_started]");
             } else if (msg.type === "round_result") {
                 log("[round_result] " + JSON.stringify(msg.payload));
             } else if (msg.type === "game_finished") {
-                log("[game_finished] winner=" + (msg.payload?.winner || "?"));
+                const w = msg.payload?.winner || "?";
+                log("[game_finished] winner=" + winnerLabel(w, lastNames));
             } else if (msg.type === "error") {
                 log("[error] " + JSON.stringify(msg.payload));
             } else {

@@ -39,6 +39,7 @@ type RoundHistoryItem struct {
 type StatePayload struct {
 	MatchID          string             `json:"matchId"`
 	You              string             `json:"you"` // "p1" | "p2"
+	PlayerNames      map[string]string  `json:"playerNames"`
 	PlayersConnected int                `json:"playersConnected"`
 	Phase            string             `json:"phase"` // waiting_players|waiting_secrets|playing|finished
 	Round            int                `json:"round"`
@@ -46,7 +47,8 @@ type StatePayload struct {
 	SecretsReady     map[string]bool    `json:"secretsReady"` // p1/p2
 	GuessesReady     map[string]bool    `json:"guessesReady"` // p1/p2 (текущий раунд)
 	History          []RoundHistoryItem `json:"history"`
-	Winner           string             `json:"winner"` // p1|p2|draw|"" (если не закончено)
+	Winner           string             `json:"winner"`                    // p1|p2|draw|"" (если не закончено)
+	RevealedSecrets  map[string]string  `json:"revealedSecrets,omitempty"` // показываем только после finished
 }
 
 type ErrorPayload struct {

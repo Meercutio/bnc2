@@ -116,7 +116,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.Auth.Sign(u.ID, h.TokenTTL)
+	token, err := h.Auth.SignWithName(u.ID, u.DisplayName, h.TokenTTL)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "internal", "failed to sign token")
 		return

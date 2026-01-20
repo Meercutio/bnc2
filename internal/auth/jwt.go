@@ -7,7 +7,8 @@ import (
 )
 
 type Claims struct {
-	UserID string `json:"uid"`
+	UserID      string `json:"uid"`
+	DisplayName string `json:"name,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -25,16 +26,23 @@ func NewService(secret []byte) *Service {
 }
 
 func (s *Service) Sign(userID string, ttl time.Duration) (string, error) {
-	return Sign(s.secret, userID, ttl)
+	return Sign(s.secret, userID, "", ttl)
+}
+
+// SignWithName signs a token and embeds a displayName into claims.
+// Useful when you want to render nicknames client-side without an extra DB call.
+func (s *Service) SignWithName(userID, displayName string, ttl time.Duration) (string, error) {
+	return Sign(s.secret, userID, displayName, ttl)
 }
 
 func (s *Service) Verify(token string) (*Claims, error) {
 	return Verify(s.secret, token)
 }
 
-func Sign(secret []byte, userID string, ttl time.Duration) (string, error) {
+func Sign(secret []byte, userID, displayName string, ttl time.Duration) (string, error) {
 	claims := Claims{
-		UserID: userID,
+		UserID:      userID,
+		DisplayName: displayName,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

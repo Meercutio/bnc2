@@ -120,7 +120,12 @@ paths:
       description: |
         Creates a new matchId. Then players connect via WebSocket.
 
-        WebSocket (not part of OpenAPI): /ws?matchId=<id>&token=<JWT>
+        WebSocket (not part of OpenAPI): /ws/{matchId}
+
+        Auth (JWT):
+          - Option A (clients with headers): Authorization: Bearer <JWT>
+          - Option B (browser WebSocket): first message: {"type":"auth","payload":{"token":"<JWT>"}}
+
         Messages:
           - set_secret {secret:"0000"}
           - submit_guess {guess:"0000"}

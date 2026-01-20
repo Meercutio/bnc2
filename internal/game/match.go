@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 	"sync"
 	"time"
 )
@@ -40,6 +41,7 @@ type Match struct {
 
 type Player struct {
 	id   string
+	name string
 	conn *ClientConn
 
 	connected        bool
@@ -63,7 +65,7 @@ func NewMatch(id string, roundDur time.Duration) *Match {
 	}
 }
 
-func (m *Match) Attach(playerID string, cc *ClientConn) (Slot, string, string) {
+func (m *Match) Attach(playerID, displayName string, cc *ClientConn) (Slot, string, string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -71,17 +73,24 @@ func (m *Match) Attach(playerID string, cc *ClientConn) (Slot, string, string) {
 	if m.p1.id == playerID && m.p1.id != "" {
 		m.p1.conn = cc
 		m.p1.connected = true
+		if strings.TrimSpace(displayName) != "" {
+			m.p1.name = strings.TrimSpace(displayName)
+		}
 		return P1, "", ""
 	}
 	if m.p2.id == playerID && m.p2.id != "" {
 		m.p2.conn = cc
 		m.p2.connected = true
+		if strings.TrimSpace(displayName) != "" {
+			m.p2.name = strings.TrimSpace(displayName)
+		}
 		return P2, "", ""
 	}
 
 	// new join
 	if m.p1.id == "" {
 		m.p1.id = playerID
+		m.p1.name = strings.TrimSpace(displayName)
 		m.p1.conn = cc
 		m.p1.connected = true
 		m.updatePhaseLocked()
@@ -89,6 +98,7 @@ func (m *Match) Attach(playerID string, cc *ClientConn) (Slot, string, string) {
 	}
 	if m.p2.id == "" && m.p1.id != playerID {
 		m.p2.id = playerID
+		m.p2.name = strings.TrimSpace(displayName)
 		m.p2.conn = cc
 		m.p2.connected = true
 		m.updatePhaseLocked()
@@ -484,9 +494,13 @@ func (m *Match) buildStateLocked(slot Slot) StatePayload {
 		connected++
 	}
 
-	return StatePayload{
-		MatchID:          m.id,
-		You:              you,
+	st := StatePayload{
+		MatchID: m.id,
+		You:     you,
+		PlayerNames: map[string]string{
+			"p1": m.p1.name,
+			"p2": m.p2.name,
+		},
 		PlayersConnected: connected,
 		Phase:            m.phase,
 		Round:            m.round,
@@ -502,6 +516,17 @@ func (m *Match) buildStateLocked(slot Slot) StatePayload {
 		History: m.history,
 		Winner:  m.winner,
 	}
+
+	// Reveal secrets only after the game is finished.
+	// Clients can show them in UI without exposing secrets in URLs/logs.
+	if m.phase == "finished" {
+		st.RevealedSecrets = map[string]string{
+			"p1": m.p1.secret,
+			"p2": m.p2.secret,
+		}
+	}
+
+	return st
 }
 
 func (m *Match) playerLocked(slot Slot) *Player {
