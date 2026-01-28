@@ -46,20 +46,17 @@ All rules and results are enforced **server-side**.
 ### Backend
 - Go (`net/http`)
 - WebSocket for real-time communication
-- In-memory state (single instance, MVP scope)
-- Clear match lifecycle:
-- `waiting_players`
-- `waiting_secrets`
-- `playing`
-- `finished`
 
 ### Frontend
 - Single-page application (HTML/CSS/JS)
 - Same-origin HTTP + WebSocket
 - UI is **state-driven** (renders only from server `state`)
-- No game logic duplicated on the client
 
 ---
+
+Run
+make up
+localhost:8080
 
 ## 📁 Project Structure
 
