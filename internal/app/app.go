@@ -141,7 +141,7 @@ func (a *App) Run(ctx context.Context) error {
 	return err
 }
 
-func (a *App) Close(ctx context.Context) error {
+func (a *App) Close(_ context.Context) error {
 	// best-effort
 	if a.db != nil {
 		a.db.Close()

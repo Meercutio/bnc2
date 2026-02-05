@@ -18,7 +18,7 @@ type memPersist struct {
 	m map[string]MatchSnapshot
 }
 
-func (p *memPersist) Save(ctx context.Context, matchID string, snap MatchSnapshot) error {
+func (p *memPersist) Save(_ context.Context, matchID string, snap MatchSnapshot) error {
 	if p.m == nil {
 		p.m = make(map[string]MatchSnapshot)
 	}
@@ -26,7 +26,7 @@ func (p *memPersist) Save(ctx context.Context, matchID string, snap MatchSnapsho
 	return nil
 }
 
-func (p *memPersist) Load(ctx context.Context, matchID string) (MatchSnapshot, bool, error) {
+func (p *memPersist) Load(_ context.Context, matchID string) (MatchSnapshot, bool, error) {
 	snap, ok := p.m[matchID]
 	return snap, ok, nil
 }
@@ -113,7 +113,12 @@ func TestWS_Endpoint_PathParam(t *testing.T) {
 				}
 				t.Fatalf("dial: status=%d err=%v", code, err)
 			}
-			defer ws.Close()
+			defer func(ws *websocket.Conn) {
+				err := ws.Close()
+				if err != nil {
+					t.Errorf("error WS close during cleanup")
+				}
+			}(ws)
 
 			if tc.sendAuthMsg {
 				_ = ws.WriteMessage(websocket.TextMessage, []byte(`{"type":"auth","payload":{"token":"good"}}`))
