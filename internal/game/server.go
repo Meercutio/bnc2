@@ -1,9 +1,12 @@
 package game
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"example.com/bc-mvp/internal/auth"
@@ -17,17 +20,19 @@ type Server struct {
 	cfg     Config
 	matches *MatchService
 	auth    TokenVerifier
+	mm      *Matchmaker
 }
 
 type TokenVerifier interface {
 	Verify(token string) (*auth.Claims, error)
 }
 
-func NewServer(cfg Config, matches *MatchService, verifier TokenVerifier) *Server {
+func NewServer(cfg Config, matches *MatchService, verifier TokenVerifier, mm *Matchmaker) *Server {
 	return &Server{
 		cfg:     cfg,
 		matches: matches,
 		auth:    verifier,
+		mm:      mm,
 	}
 }
 
@@ -42,7 +47,9 @@ func NewServer(cfg Config, matches *MatchService, verifier TokenVerifier) *Serve
 func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/match", s.handleCreateMatch)
 
-	// WebSocket: /ws/{matchId}
+	mux.HandleFunc("/api/matchmaking/join", s.handleMatchmakingJoin)
+	mux.HandleFunc("/api/matchmaking/stats", s.handleMatchmakingStats)
+
 	mux.HandleFunc("/ws/", s.handleWS)
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "missing matchId: use /ws/{matchId}", http.StatusBadRequest)
@@ -82,4 +89,82 @@ func writeJSON(w http.ResponseWriter, code int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+func (s *Server) handleMatchmakingStats(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	if s.mm == nil {
+		writeJSON(w, http.StatusNotImplemented, map[string]any{"error": "matchmaking disabled"})
+		return
+	}
+	waiting, forDur := s.mm.Stats()
+	writeJSON(w, http.StatusOK, map[string]any{
+		"waiting":      waiting,
+		"waitingForMs": forDur.Milliseconds(),
+	})
+}
+
+func (s *Server) handleMatchmakingJoin(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	if s.mm == nil {
+		writeJSON(w, http.StatusNotImplemented, map[string]any{"error": "matchmaking disabled"})
+		return
+	}
+
+	claims, err := s.verifyBearer(r)
+	if err != nil {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		return
+	}
+
+	// Long-poll: keep request open until matched or client aborts.
+	matchID, jerr := s.mm.Join(r.Context(), claims.UserID, claims.DisplayName, func() (string, error) {
+		id := randID(10)
+		_, err := s.matches.Create(r.Context(), id)
+		if err != nil {
+			return "", err
+		}
+		return id, nil
+	})
+
+	if jerr != nil {
+		if errorsIsContextDone(jerr) {
+			// если клиент отменил запрос — часто ответа не увидит, но пусть будет корректно
+			writeJSON(w, http.StatusAccepted, map[string]any{"status": "canceled"})
+			return
+		}
+		if jerr == ErrAlreadyWaiting {
+			writeJSON(w, http.StatusConflict, map[string]any{"error": "already_waiting"})
+			return
+		}
+		writeJSON(w, http.StatusInternalServerError, map[string]any{"error": "matchmaking_error"})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"status":  "matched",
+		"matchId": matchID,
+	})
+}
+
+func (s *Server) verifyBearer(r *http.Request) (*auth.Claims, error) {
+	h := r.Header.Get("Authorization")
+	if !strings.HasPrefix(h, "Bearer ") {
+		return nil, errors.New("missing bearer token")
+	}
+	tok := strings.TrimSpace(strings.TrimPrefix(h, "Bearer "))
+	if tok == "" {
+		return nil, errors.New("missing bearer token")
+	}
+	return s.auth.Verify(tok)
+}
+
+func errorsIsContextDone(err error) bool {
+	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
 }

@@ -1,159 +1,444 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="system">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Bulls & Cows</title>
+
     <style>
-        :root { --b:#111; --g:#e7e7e7; --mut:#666; }
-        body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 18px; color: var(--b); }
-        h1 { margin: 0 0 10px; font-size: 22px; }
+        :root {
+            --bg: #fafafa;
+            --panel: #ffffff;
+            --text: #111111;
+            --muted: #666666;
+            --border: #dddddd;
+            --shadow: 0 1px 0 rgba(0,0,0,0.03);
+
+            --btn-bg: #111;
+            --btn-text: #fff;
+            --btn-border: #111;
+
+            --btn2-bg: #fff;
+            --btn2-text: #111;
+            --btn2-border: #ddd;
+
+            --chip-bg: #fafafa;
+            --chip-border: #eee;
+
+            --overlay: rgba(0,0,0,0.35);
+            --ok: #0a7;
+            --err: #c33;
+        }
+
+        /* Dark */
+        html[data-theme="dark"] {
+            --bg: #0e0f12;
+            --panel: #14161b;
+            --text: #eef0f3;
+            --muted: #a4a9b3;
+            --border: #2a2f3a;
+            --shadow: 0 1px 0 rgba(255,255,255,0.03);
+
+            --btn-bg: #eef0f3;
+            --btn-text: #0e0f12;
+            --btn-border: #eef0f3;
+
+            --btn2-bg: #14161b;
+            --btn2-text: #eef0f3;
+            --btn2-border: #2a2f3a;
+
+            --chip-bg: #101217;
+            --chip-border: #2a2f3a;
+
+            --overlay: rgba(0,0,0,0.55);
+        }
+
+        /* System */
+        @media (prefers-color-scheme: dark) {
+            html[data-theme="system"] {
+                --bg: #0e0f12;
+                --panel: #14161b;
+                --text: #eef0f3;
+                --muted: #a4a9b3;
+                --border: #2a2f3a;
+                --shadow: 0 1px 0 rgba(255,255,255,0.03);
+
+                --btn-bg: #eef0f3;
+                --btn-text: #0e0f12;
+                --btn-border: #eef0f3;
+
+                --btn2-bg: #14161b;
+                --btn2-text: #eef0f3;
+                --btn2-border: #2a2f3a;
+
+                --chip-bg: #101217;
+                --chip-border: #2a2f3a;
+
+                --overlay: rgba(0,0,0,0.55);
+            }
+        }
+
+        body {
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            margin: 18px;
+            color: var(--text);
+            background: var(--bg);
+        }
+
+        h1 { margin: 0 0 10px; font-size: 20px; }
         h2 { margin: 0 0 10px; font-size: 16px; }
-        .muted { color: var(--mut); font-size: 12px; }
-        .gridTop { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+
+        code { color: var(--muted); }
+
+        .muted { color: var(--muted); font-size: 12px; }
+        .ok { color: var(--ok); font-weight: 700; }
+        .err { color: var(--err); font-weight: 700; }
+
+        .hidden { display: none !important; }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .row { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
+        label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
+        input, select {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            min-width: 220px;
+            background: var(--panel);
+            color: var(--text);
+            outline: none;
+        }
+        input[readonly] { opacity: .9; }
+
+        button {
+            padding: 10px 12px;
+            border: 1px solid var(--btn-border);
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 800;
+            letter-spacing: .2px;
+        }
+        button.secondary {
+            background: var(--btn2-bg);
+            color: var(--btn2-text);
+            border: 1px solid var(--btn2-border);
+            font-weight: 700;
+        }
+        button:disabled { opacity: .6; cursor:not-allowed; }
+
+        .pills { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+        .pill {
+            border: 1px solid var(--chip-border);
+            background: var(--chip-bg);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .kv { font-weight: 900; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+        th { font-size: 12px; color: var(--muted); font-weight: 900; }
+
+        .gridTop {
+            display: grid;
+            grid-template-columns: 1.25fr 0.75fr;
+            gap: 14px;
+            align-items: start;
+            margin-top: 12px;
+        }
+
         .center { display: grid; justify-items: center; margin-top: 14px; }
-        .card { border: 1px solid #ddd; border-radius: 14px; padding: 14px; background: #fff; }
-        .row { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
-        label { display:block; font-size:12px; color: var(--mut); margin-bottom:4px; }
-        input { padding: 10px; border: 1px solid #ccc; border-radius: 10px; min-width: 220px; }
-        button { padding: 10px 14px; border: 1px solid #333; background: #111; color: #fff; border-radius: 10px; cursor: pointer; }
-        button.secondary { background:#fff; color:#111; }
-        button:disabled { opacity: .55; cursor: not-allowed; }
-        .pills { margin-top: 10px; display:flex; gap: 8px; flex-wrap:wrap; }
-        .pill { display:inline-block; padding: 4px 10px; border: 1px solid #ddd; border-radius: 999px; font-size: 12px; }
-        .ok { color: #0a7; }
-        .err { color: #c22; }
-        pre { background:#f7f7f7; border-radius: 10px; padding: 10px; overflow:auto; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #e3e3e3; padding: 8px; font-size: 13px; text-align: center; }
-        th { background: #fafafa; }
         .gameWrap { width: min(980px, 100%); }
         .logsWrap { margin-top: 14px; }
-        details { border: 1px solid #ddd; border-radius: 14px; padding: 10px 14px; background:#fff; }
-        summary { cursor: pointer; font-weight: 600; }
-        .kv { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+        /* Header */
+        .topbar {
+            position: sticky;
+            top: 12px;
+            z-index: 5;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: var(--shadow);
+        }
+        .brand { font-size: 16px; font-weight: 1000; letter-spacing: .2px; }
+        .topbarRight { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+        details.accountDetails > summary {
+            list-style: none;
+            cursor: pointer;
+            user-select: none;
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--panel);
+            font-weight: 900;
+            font-size: 12px;
+        }
+        details.accountDetails > summary::-webkit-details-marker { display:none; }
+
+        #headerAuthSlot { margin-top: 10px; }
+
+        /* Overlay auth */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: var(--overlay);
+            padding: 18px;
+            z-index: 10;
+        }
+        .overlayInner { width: min(980px, 100%); }
+
+        #authPanel.compact { padding: 12px; }
+        #authPanel.compact h2 { margin-bottom: 8px; }
+        #authPanel.compact input { min-width: 180px; }
+
+        .divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+        @media (max-width: 900px) {
+            .gridTop { grid-template-columns: 1fr; }
+            input, select { min-width: 180px; }
+            .topbar { top: 0; }
+        }
     </style>
 </head>
 
 <body>
-<h1>Bulls & Cows</h1>
-<!--<div class="muted">WS + JWT + Rematch (series score). Пароль фронт не валидирует.</div>-->
 
-<!-- TOP: left = match controls, right = auth -->
-<div class="gridTop" style="margin-top:12px;">
-    <!-- LEFT TOP: MATCH -->
-    <div class="card">
-        <h2>Match</h2>
-        <div class="row">
-            <button id="btnCreateMatch">Create match</button>
-            <div>
-                <label>Match ID</label>
-                <input id="matchId" placeholder="will appear here" />
+<!-- AUTH OVERLAY -->
+<div id="overlay" class="overlay">
+    <div id="overlaySlot" class="overlayInner">
+        <!-- This same panel moves to header after login -->
+        <div class="card" id="authPanel">
+            <h2>Login / Register</h2>
+            <div class="row">
+                <div>
+                    <label>Email</label>
+                    <input id="email" placeholder="you@example.com" />
+                </div>
+                <div>
+                    <label>Password</label>
+                    <input id="password" type="password" placeholder="any" />
+                </div>
+                <div>
+                    <label>Display name (for register)</label>
+                    <input id="displayName" placeholder="Player One" />
+                </div>
             </div>
-        </div>
 
-        <div class="row" style="margin-top:10px;">
-            <button class="secondary" id="btnConnect">Connect WS</button>
-            <button class="secondary" id="btnDisconnect">Disconnect</button>
-            <button class="secondary" id="btnRematch" title="Request rematch (needs both players)">Rematch</button>
-        </div>
-
-        <div class="pills">
-            <div class="pill">You: <span class="kv" id="youSlot">-</span></div>
-            <div class="pill">Phase: <span class="kv" id="phase">-</span></div>
-            <div class="pill">Round: <span class="kv" id="round">-</span></div>
-            <div class="pill">Deadline: <span class="kv" id="deadline">-</span></div>
-            <div class="pill">Series: <span class="kv" id="series">p1 0 : 0 p2 (draw 0)</span></div>
-            <div class="pill">WS: <span class="kv" id="wsStatus">closed</span></div>
-        </div>
-    </div>
-
-    <!-- RIGHT TOP: AUTH -->
-    <div class="card">
-        <h2>Auth</h2>
-        <div class="row">
-            <div>
-                <label>Email</label>
-                <input id="email" placeholder="you@example.com" />
+            <div class="row" style="margin-top:10px;">
+                <button id="btnLogin">Login</button>
+                <button class="secondary" id="btnRegister">Register</button>
+                <button class="secondary" id="btnLogout">Logout</button>
             </div>
-            <div>
-                <label>Password</label>
-                <input id="password" type="password" placeholder="any" />
+
+            <div class="pills">
+                <div class="pill">Token: <span class="kv" id="tokenStatus"></span></div>
+                <div class="pill">Auth: <span class="kv" id="authMsg"></span></div>
             </div>
-            <div>
-                <label>Display name (for register)</label>
-                <input id="displayName" placeholder="Player One" />
+
+            <div class="divider"></div>
+
+            <div class="row">
+                <div>
+                    <label>Theme</label>
+                    <select id="themeSelect">
+                        <option value="system">System</option>
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
             </div>
-        </div>
 
-        <div class="row" style="margin-top:10px;">
-            <button id="btnRegister">Register</button>
-            <button class="secondary" id="btnLogin">Login</button>
-            <button class="secondary" id="btnLogout">Logout</button>
-            <button class="secondary" id="btnMe">/api/me</button>
-        </div>
-
-        <div class="pills">
-            <div class="pill">Token: <span class="kv" id="tokenStatus"></span></div>
-            <div class="pill">Auth: <span class="kv" id="authMsg"></span></div>
-        </div>
-
-        <pre id="meOut" style="margin-top:10px; max-height: 140px;"></pre>
-    </div>
-</div>
-
-<!-- CENTER: GAME -->
-<div class="center">
-    <div class="card gameWrap">
-        <h2>Game</h2>
-
-        <div class="row">
-            <div>
-                <label>Set secret (4 digits)</label>
-                <input id="secret" placeholder="e.g. 0011" maxlength="4" />
-            </div>
-            <button id="btnSetSecret">Set secret</button>
-
-            <div style="flex:1"></div>
-
-            <div>
-                <label>Submit guess (4 digits)</label>
-                <input id="guess" placeholder="e.g. 0101" maxlength="4" />
-            </div>
-            <button id="btnGuess">Submit guess</button>
-        </div>
-
-        <div style="margin-top:12px;">
-            <div class="muted">History (bulls/cows)</div>
-            <div style="margin-top:8px; overflow:auto;">
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Round</th>
-                        <th id="hP1Guess">P1 Guess</th>
-                        <th id="hP1Bulls">P1 Bulls</th>
-                        <th id="hP1Cows">P1 Cows</th>
-                        <th id="hP2Guess">P2 Guess</th>
-                        <th id="hP2Bulls">P2 Bulls</th>
-                        <th id="hP2Cows">P2 Cows</th>
-                        <th>Winner</th>
-                    </tr>
-                    </thead>
-                    <tbody id="historyBody">
-                    <tr><td colspan="8" class="muted">No data yet</td></tr>
-                    </tbody>
-                </table>
+            <div class="muted" style="margin-top:10px;">
+                После успешного входа панель переедет в меню <b>Account</b>, и откроется интерфейс игры.
             </div>
         </div>
     </div>
 </div>
 
-<!-- BOTTOM: LOGS (collapsible) -->
-<div class="logsWrap">
-    <details>
-        <summary>Logs</summary>
-        <pre id="log" style="height: 260px; margin-top:10px;"></pre>
-    </details>
+<!-- APP -->
+<div id="app" class="hidden">
+
+    <header class="topbar">
+        <div class="brand">Bulls & Cows</div>
+
+        <div class="topbarRight">
+            <div class="pill">User: <span class="kv" id="userBadge">-</span></div>
+
+            <div class="pill">Theme:
+                <select id="themeSelectTop" style="padding:6px 8px; min-width: 120px;">
+                    <option value="system">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+
+            <details id="accountDetails" class="accountDetails">
+                <summary>Account</summary>
+                <div id="headerAuthSlot"></div>
+                <div class="divider"></div>
+                <div class="row">
+                    <button class="secondary" id="btnMe">/api/me (debug)</button>
+                </div>
+                <pre id="meOut" style="margin-top:10px; max-height: 160px; overflow:auto;"></pre>
+            </details>
+        </div>
+    </header>
+
+    <!-- TOP -->
+    <div class="gridTop">
+
+        <!-- MATCH -->
+        <div class="card">
+            <h2>Match</h2>
+
+            <div class="row">
+                <button id="btnCreateAndJoin" title="Create a match and immediately connect">Create & Join</button>
+
+                <button id="btnFindMatch">Find match</button>
+                <button class="secondary hidden" id="btnCancelFind">Cancel</button>
+                <div class="pill">MM: <span class="kv" id="mmStatus">idle</span></div>
+
+                <button class="secondary" id="btnReconnect" title="Reconnect to last match">Reconnect</button>
+
+                <div style="flex:1"></div>
+
+                <div class="pill">WS: <span class="kv" id="wsStatus">closed</span></div>
+                <button class="secondary" id="btnLeave">Leave match</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="row">
+                <div>
+                    <label>Match ID</label>
+                    <input id="matchId" placeholder="paste match id" />
+                </div>
+
+                <button class="secondary" id="btnJoin">Join</button>
+                <button class="secondary" id="btnCopyLink">Copy invite link</button>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+                <div style="flex:1; min-width: 260px;">
+                    <label>Invite link</label>
+                    <input id="inviteLink" readonly placeholder="will appear after match id" />
+                </div>
+            </div>
+
+            <div class="pills">
+                <div class="pill">You: <span class="kv" id="youSlot">-</span></div>
+                <div class="pill">Phase: <span class="kv" id="phase">-</span></div>
+                <div class="pill">Round: <span class="kv" id="round">-</span></div>
+                <div class="pill">Deadline: <span class="kv" id="deadline">-</span></div>
+                <div class="pill">Series: <span class="kv" id="series">p1 0 : 0 p2 (draw 0)</span></div>
+            </div>
+
+            <div class="muted" style="margin-top:10px;">
+                Поделись ссылкой — второй игрок просто откроет её и нажмёт <b>Join</b>.
+            </div>
+        </div>
+
+        <!-- PROFILE -->
+        <div class="card">
+            <h2>Profile</h2>
+
+            <div class="pills">
+                <div class="pill">Name: <span class="kv" id="profName">-</span></div>
+                <div class="pill">Email: <span class="kv" id="profEmail">-</span></div>
+            </div>
+
+            <div class="pills">
+                <div class="pill">Wins: <span class="kv" id="profWins">0</span></div>
+                <div class="pill">Losses: <span class="kv" id="profLosses">0</span></div>
+                <div class="pill">Draws: <span class="kv" id="profDraws">0</span></div>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+                <button class="secondary" id="btnRefreshMe">Refresh</button>
+                <button class="secondary" id="btnLogoutTop">Logout</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- GAME -->
+    <div class="center">
+        <div class="card gameWrap">
+            <h2>Game</h2>
+
+            <div class="row">
+                <div>
+                    <label>Set secret (4 digits)</label>
+                    <input id="secret" placeholder="e.g. 0011" maxlength="4" inputmode="numeric" />
+                </div>
+                <button id="btnSetSecret">Set secret</button>
+
+                <div style="flex:1"></div>
+
+                <div>
+                    <label>Submit guess (4 digits)</label>
+                    <input id="guess" placeholder="e.g. 0101" maxlength="4" inputmode="numeric" />
+                </div>
+                <button id="btnGuess">Submit guess</button>
+
+                <button class="secondary" id="btnRematch" title="Request rematch (needs both players)">Rematch</button>
+            </div>
+
+            <div style="margin-top:12px;">
+                <div class="muted">History</div>
+                <div style="margin-top:8px; overflow:auto;">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th id="hP1Guess">P1 Guess</th>
+                            <th id="hP1Bulls">P1 Bulls</th>
+                            <th id="hP1Cows">P1 Cows</th>
+                            <th id="hP2Guess">P2 Guess</th>
+                            <th id="hP2Bulls">P2 Bulls</th>
+                            <th id="hP2Cows">P2 Cows</th>
+                            <th>Winner</th>
+                        </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                        <tr><td colspan="8" class="muted">No data yet</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="logsWrap">
+        <details>
+            <summary>Logs</summary>
+            <pre id="log" style="height: 260px; margin-top:10px; overflow:auto;"></pre>
+        </details>
+    </div>
+
 </div>
 
 <script>
@@ -162,30 +447,51 @@
 
     const $ = (id) => document.getElementById(id);
 
+    // ---------------- Theme
+    function applyTheme(v) {
+        const html = document.documentElement;
+        html.setAttribute("data-theme", v);
+        localStorage.setItem("theme", v);
+        if ($("themeSelect")) $("themeSelect").value = v;
+        if ($("themeSelectTop")) $("themeSelectTop").value = v;
+    }
+    function initTheme() {
+        const v = localStorage.getItem("theme") || "system";
+        applyTheme(v);
+        if ($("themeSelect")) $("themeSelect").onchange = (e) => applyTheme(e.target.value);
+        if ($("themeSelectTop")) $("themeSelectTop").onchange = (e) => applyTheme(e.target.value);
+    }
+
+    // ---------------- Token
     function getToken() { return localStorage.getItem("accessToken") || ""; }
     function setToken(t) {
         if (!t) localStorage.removeItem("accessToken");
         else localStorage.setItem("accessToken", t);
-        $("tokenStatus").textContent = t ? "saved" : "empty";
+        const el = $("tokenStatus");
+        if (el) el.textContent = t ? "saved" : "empty";
     }
-    setToken(getToken());
 
     function setAuthMsg(text, isErr=false) {
-        $("authMsg").textContent = text || "";
-        $("authMsg").className = isErr ? "err" : "ok";
+        const el = $("authMsg");
+        if (!el) return;
+        el.textContent = text || "";
+        el.className = isErr ? "err" : "ok";
     }
 
     function log(line) {
         const el = $("log");
+        if (!el) return;
         el.textContent += line + "\n";
         el.scrollTop = el.scrollHeight;
     }
 
+    // ---------------- API
     async function api(path, opts={}) {
         const headers = opts.headers || {};
         headers["Content-Type"] = "application/json";
         const t = getToken();
         if (t) headers["Authorization"] = "Bearer " + t;
+
         const res = await fetch(HTTP_BASE + path, { ...opts, headers });
         const text = await res.text();
         let json = null;
@@ -194,59 +500,150 @@
         return json;
     }
 
-    // -------- Auth
-    $("btnRegister").onclick = async () => {
-        try {
-            await api("/api/auth/register", {
-                method: "POST",
-                body: JSON.stringify({
-                    email: $("email").value,
-                    password: $("password").value,     // фронт НЕ валидирует длину
-                    displayName: $("displayName").value
-                })
-            });
-            setAuthMsg("Registered. Now login.", false);
-        } catch (e) {
-            setAuthMsg("Register error: " + JSON.stringify(e), true);
+    // ---------------- UI mode
+    function setAuthedUI(isAuthed) {
+        const overlay = $("overlay");
+        const app = $("app");
+        const authPanel = $("authPanel");
+        const overlaySlot = $("overlaySlot");
+        const headerAuthSlot = $("headerAuthSlot");
+        const accountDetails = $("accountDetails");
+
+        if (!overlay || !app || !authPanel || !overlaySlot || !headerAuthSlot) return;
+
+        if (isAuthed) {
+            overlay.classList.add("hidden");
+            app.classList.remove("hidden");
+            headerAuthSlot.appendChild(authPanel);
+            authPanel.classList.add("compact");
+            if (accountDetails) accountDetails.open = false;
+        } else {
+            app.classList.add("hidden");
+            overlay.classList.remove("hidden");
+            overlaySlot.appendChild(authPanel);
+            authPanel.classList.remove("compact");
+            if ($("userBadge")) $("userBadge").textContent = "-";
         }
-    };
+    }
 
-    $("btnLogin").onclick = async () => {
-        try {
-            const out = await api("/api/auth/login", {
-                method: "POST",
-                body: JSON.stringify({
-                    email: $("email").value,
-                    password: $("password").value
-                })
-            });
-            setToken(out?.accessToken || "");
-            setAuthMsg("Logged in.", false);
-        } catch (e) {
-            setAuthMsg("Login error: " + JSON.stringify(e), true);
+    async function refreshMe() {
+        const me = await api("/api/me", { method: "GET" });
+        const name = (me?.displayName || "").trim() || "-";
+        const email = (me?.email || "").trim() || "-";
+        const st = me?.stats || {};
+
+        $("userBadge").textContent = `${name} (${email})`;
+        $("profName").textContent = name;
+        $("profEmail").textContent = email;
+        $("profWins").textContent = String(st.wins ?? 0);
+        $("profLosses").textContent = String(st.losses ?? 0);
+        $("profDraws").textContent = String(st.draws ?? 0);
+        return me;
+    }
+
+    // ---------------- MatchId + invite link
+    function getQueryMatchId() {
+        const u = new URL(location.href);
+        const m = (u.searchParams.get("match") || "").trim();
+        return m;
+    }
+
+    function setInviteLink(matchId) {
+        const u = new URL(location.href);
+        if (matchId) u.searchParams.set("match", matchId);
+        else u.searchParams.delete("match");
+        $("inviteLink").value = matchId ? u.toString() : "";
+    }
+
+    function setMatchId(matchId, {persist=true, updateUrl=true} = {}) {
+        $("matchId").value = matchId || "";
+        setInviteLink(matchId || "");
+        if (persist) {
+            if (matchId) localStorage.setItem("lastMatchId", matchId);
+            else localStorage.removeItem("lastMatchId");
         }
-    };
-
-    $("btnLogout").onclick = () => {
-        setToken("");
-        $("meOut").textContent = "";
-        setAuthMsg("Logged out.", false);
-    };
-
-    $("btnMe").onclick = async () => {
-        try {
-            const me = await api("/api/me", { method: "GET" });
-            $("meOut").textContent = JSON.stringify(me, null, 2);
-            setAuthMsg("Loaded /api/me", false);
-        } catch (e) {
-            setAuthMsg("Me error: " + JSON.stringify(e), true);
+        if (updateUrl) {
+            const u = new URL(location.href);
+            if (matchId) u.searchParams.set("match", matchId);
+            else u.searchParams.delete("match");
+            history.replaceState(null, "", u.toString());
         }
-    };
+    }
 
-    // -------- Match + WS
+    function setMMStatus(s) { document.getElementById("mmStatus").textContent = s; }
+
+    let mmAbort = null;
+
+    function setMMUI(active) {
+        document.getElementById("btnFindMatch").disabled = active;
+        document.getElementById("btnCancelFind").classList.toggle("hidden", !active);
+    }
+
+    async function matchmakingJoin(signal) {
+        const token = getToken();
+        const res = await fetch(HTTP_BASE + "/api/matchmaking/join", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            signal
+        });
+        const text = await res.text();
+        let json = null;
+        try { json = text ? JSON.parse(text) : null; } catch {}
+        return { status: res.status, json };
+    }
+
+    async function findMatch() {
+        if (mmAbort) return;
+
+        disconnectWS(); // если уже были подключены к матчу
+
+        setMMStatus("searching…");
+        setMMUI(true);
+
+        mmAbort = new AbortController();
+        try {
+            const out = await matchmakingJoin(mmAbort.signal);
+            if (out.status === 200 && out.json?.matchId) {
+                const m = out.json.matchId;
+                setMMStatus("matched");
+                setMatchId(m, {persist:true, updateUrl:true});
+                connectWS(m);
+                log("[mm] matched: " + m);
+            } else if (out.status === 409) {
+                setMMStatus("searching…"); // уже ждём
+            } else {
+                setMMStatus("error");
+                log("[mm] unexpected: " + JSON.stringify(out));
+            }
+        } catch (e) {
+            if (e?.name === "AbortError") {
+                setMMStatus("idle");
+                log("[mm] canceled");
+            } else {
+                setMMStatus("error");
+                log("[mm] error: " + JSON.stringify(e));
+            }
+        } finally {
+            mmAbort = null;
+            setMMUI(false);
+            if (document.getElementById("mmStatus").textContent === "searching…") setMMStatus("idle");
+        }
+    }
+
+    function cancelFindMatch() {
+        if (!mmAbort) return;
+        mmAbort.abort();
+    }
+
+    document.getElementById("btnFindMatch").onclick = () => findMatch();
+    document.getElementById("btnCancelFind").onclick = () => cancelFindMatch();
+
+
+    // ---------------- WS
     let ws = null;
-
-    // Keep last known names for nicer UI (fallback to p1/p2).
     let lastNames = { p1: "p1", p2: "p2" };
 
     function normalizeNames(names) {
@@ -256,12 +653,12 @@
     }
 
     function setTableHeaders(p1, p2) {
-        if ($("hP1Guess")) $("hP1Guess").textContent = `${p1} Guess`;
-        if ($("hP1Bulls")) $("hP1Bulls").textContent = `${p1} Bulls`;
-        if ($("hP1Cows")) $("hP1Cows").textContent = `${p1} Cows`;
-        if ($("hP2Guess")) $("hP2Guess").textContent = `${p2} Guess`;
-        if ($("hP2Bulls")) $("hP2Bulls").textContent = `${p2} Bulls`;
-        if ($("hP2Cows")) $("hP2Cows").textContent = `${p2} Cows`;
+        $("hP1Guess").textContent = `${p1} Guess`;
+        $("hP1Bulls").textContent = `${p1} Bulls`;
+        $("hP1Cows").textContent = `${p1} Cows`;
+        $("hP2Guess").textContent = `${p2} Guess`;
+        $("hP2Bulls").textContent = `${p2} Bulls`;
+        $("hP2Cows").textContent = `${p2} Cows`;
     }
 
     function winnerLabel(winner, names) {
@@ -282,6 +679,15 @@
         ws.send(JSON.stringify({ type, payload }));
     }
 
+    function escapeHtml(s) {
+        return String(s)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
     function renderHistory(state) {
         const body = $("historyBody");
         const hist = state?.history || [];
@@ -290,8 +696,6 @@
         const names = normalizeNames(state?.playerNames);
         lastNames = names;
 
-        // At the end of the game we reveal opponent secrets.
-        // To keep history intact, we show them only in the last row and only in the Guess columns.
         const isFinished = state?.phase === "finished";
         const revealed = state?.revealedSecrets || {};
         const lastIdx = hist.length - 1;
@@ -301,7 +705,7 @@
             return;
         }
 
-        const rowHtml = hist.map((item, idx) => {
+        body.innerHTML = hist.map((item, idx) => {
             const r = item.round ?? "-";
             const p1 = item.p1 || {};
             const p2 = item.p2 || {};
@@ -309,9 +713,10 @@
             let p1Guess = p1.guess ?? (p1.missed ? "(missed)" : "");
             let p2Guess = p2.guess ?? (p2.missed ? "(missed)" : "");
 
+            // reveal opponent secrets on last row if finished
             if (isFinished && idx === lastIdx) {
-                if (revealed?.p2) p1Guess = revealed.p2; // show opponent secret for p1 column
-                if (revealed?.p1) p2Guess = revealed.p1; // show opponent secret for p2 column
+                if (revealed?.p2) p1Guess = revealed.p2;
+                if (revealed?.p1) p2Guess = revealed.p1;
             }
 
             const p1B = p1.bulls ?? 0;
@@ -332,34 +737,20 @@
         </tr>
       `;
         }).join("");
-
-        body.innerHTML = rowHtml;
     }
 
-    function escapeHtml(s) {
-        return String(s)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
+    function disconnectWS() {
+        if (ws) ws.close();
+        ws = null;
+        setWSStatus("closed");
     }
 
-    $("btnCreateMatch").onclick = async () => {
-        try {
-            const out = await api("/api/match", { method: "POST" });
-            $("matchId").value = out.matchId || out.matchID || out.match_id || "";
-            log("[http] created match: " + $("matchId").value);
-        } catch (e) {
-            log("[http] create match error: " + JSON.stringify(e));
-        }
-    };
-
-    $("btnConnect").onclick = () => {
-        const matchId = $("matchId").value.trim();
+    function connectWS(matchId) {
         const token = getToken();
-        if (!matchId) return log("missing matchId");
-        if (!token) return log("missing token: login first");
+        if (!matchId) return log("[ui] missing matchId");
+        if (!token) return log("[ui] missing token: login first");
+
+        disconnectWS();
 
         const url = `${WS_BASE}/ws/${encodeURIComponent(matchId)}`;
         ws = new WebSocket(url);
@@ -367,7 +758,6 @@
         ws.onopen = () => {
             setWSStatus("open");
             log("[ws] connected");
-            // browser WS does not allow custom headers -> send token as first message
             send("auth", { token });
         };
         ws.onclose = () => { setWSStatus("closed"); log("[ws] closed"); };
@@ -381,6 +771,7 @@
                 const s = msg.payload || {};
                 const names = normalizeNames(s.playerNames);
                 lastNames = names;
+
                 setTableHeaders(names.p1, names.p2);
                 $("youSlot").textContent = (names[s.you] || s.you || "-");
                 $("phase").textContent = s.phase || "-";
@@ -388,21 +779,10 @@
                 $("deadline").textContent = s.deadlineMs ? new Date(s.deadlineMs).toLocaleTimeString() : "-";
 
                 renderHistory(s);
-
-                // series может прилетать отдельными эвентами, но держим отображение, если есть
-                log("[state] phase=" + (s.phase || "?") + " round=" + (s.round ?? "?"));
             } else if (msg.type === "series_score") {
                 const ser = msg.payload?.series || {};
                 $("series").textContent = `${lastNames.p1} ${ser.p1Wins||0} : ${ser.p2Wins||0} ${lastNames.p2} (draw ${ser.draws||0})`;
                 log("[series_score] " + JSON.stringify(ser));
-            } else if (msg.type === "rematch_status") {
-                log("[rematch_status] " + JSON.stringify(msg.payload));
-            } else if (msg.type === "rematch_started") {
-                const ser = msg.payload?.series || {};
-                $("series").textContent = `${lastNames.p1} ${ser.p1Wins||0} : ${ser.p2Wins||0} ${lastNames.p2} (draw ${ser.draws||0})`;
-                log("[rematch_started]");
-            } else if (msg.type === "round_result") {
-                log("[round_result] " + JSON.stringify(msg.payload));
             } else if (msg.type === "game_finished") {
                 const w = msg.payload?.winner || "?";
                 log("[game_finished] winner=" + winnerLabel(w, lastNames));
@@ -412,16 +792,186 @@
                 log("[msg] " + JSON.stringify(msg));
             }
         };
+    }
+
+    // ---------------- Clipboard
+    async function copyText(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            log("[ui] copied to clipboard");
+            return true;
+        } catch {
+            // fallback
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            ta.remove();
+            log("[ui] copied (fallback)");
+            return true;
+        }
+    }
+
+    // ---------------- Auth actions
+    $("btnRegister").onclick = async () => {
+        try {
+            await api("/api/auth/register", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: $("email").value,
+                    password: $("password").value,
+                    displayName: $("displayName").value
+                })
+            });
+            setAuthMsg("Registered. Now login.", false);
+        } catch (e) {
+            setAuthMsg("Register error: " + JSON.stringify(e), true);
+        }
     };
 
-    $("btnDisconnect").onclick = () => {
-        if (ws) ws.close();
-        ws = null;
+    $("btnLogin").onclick = async () => {
+        try {
+            const out = await api("/api/auth/login", {
+                method: "POST",
+                body: JSON.stringify({ email: $("email").value, password: $("password").value })
+            });
+
+            setToken(out?.accessToken || "");
+            await refreshMe();
+
+            setAuthedUI(true);
+            setAuthMsg("Logged in.", false);
+
+            // auto-join if match is present (URL > lastMatch)
+            const m = getQueryMatchId() || (localStorage.getItem("lastMatchId") || "");
+            if (m) {
+                setMatchId(m, {persist:true, updateUrl:true});
+                connectWS(m);
+            }
+        } catch (e) {
+            setAuthMsg("Login error: " + JSON.stringify(e), true);
+            setToken("");
+            setAuthedUI(false);
+        }
     };
 
+    function doLogout() {
+        disconnectWS();
+        setToken("");
+        $("meOut").textContent = "";
+        setAuthMsg("Logged out.", false);
+        setAuthedUI(false);
+    }
+
+    $("btnLogout").onclick = () => doLogout();
+    $("btnLogoutTop").onclick = () => doLogout();
+
+    $("btnMe").onclick = async () => {
+        try {
+            const me = await api("/api/me", { method: "GET" });
+            $("meOut").textContent = JSON.stringify(me, null, 2);
+            log("[http] /api/me loaded");
+        } catch (e) {
+            $("meOut").textContent = JSON.stringify(e, null, 2);
+            log("[http] /api/me error");
+        }
+    };
+
+    $("btnRefreshMe").onclick = async () => {
+        try { await refreshMe(); log("[http] refreshed /api/me"); }
+        catch (e) { log("[http] refresh /api/me error: " + JSON.stringify(e)); }
+    };
+
+    // ---------------- Match actions
+    $("matchId").addEventListener("input", () => {
+        const m = $("matchId").value.trim();
+        setInviteLink(m);
+    });
+
+    $("btnCreateAndJoin").onclick = async () => {
+        try {
+            const out = await api("/api/match", { method: "POST" });
+            const m = out.matchId || out.matchID || out.match_id || "";
+            if (!m) throw new Error("no matchId in response");
+            setMatchId(m, {persist:true, updateUrl:true});
+            log("[http] created match: " + m);
+            connectWS(m);
+        } catch (e) {
+            log("[http] create match error: " + JSON.stringify(e));
+        }
+    };
+
+    $("btnJoin").onclick = async () => {
+        const m = $("matchId").value.trim();
+        if (!m) return log("[ui] enter matchId");
+        setMatchId(m, {persist:true, updateUrl:true});
+        connectWS(m);
+    };
+
+    $("btnReconnect").onclick = () => {
+        const m = localStorage.getItem("lastMatchId") || "";
+        if (!m) return log("[ui] no last match");
+        setMatchId(m, {persist:true, updateUrl:true});
+        connectWS(m);
+    };
+
+    $("btnCopyLink").onclick = async () => {
+        const link = $("inviteLink").value.trim();
+        if (!link) return log("[ui] no invite link");
+        await copyText(link);
+    };
+
+    $("btnLeave").onclick = () => {
+        disconnectWS();
+        setMatchId("", {persist:true, updateUrl:true});
+        $("youSlot").textContent = "-";
+        $("phase").textContent = "-";
+        $("round").textContent = "-";
+        $("deadline").textContent = "-";
+        $("series").textContent = "p1 0 : 0 p2 (draw 0)";
+        $("historyBody").innerHTML = `<tr><td colspan="8" class="muted">No data yet</td></tr>`;
+        log("[ui] left match");
+    };
+
+    // ---------------- Game actions
     $("btnSetSecret").onclick = () => send("set_secret", { secret: $("secret").value });
     $("btnGuess").onclick = () => send("submit_guess", { guess: $("guess").value });
     $("btnRematch").onclick = () => send("rematch_request", {});
+
+    // ---------------- Boot
+    (async function boot() {
+        initTheme();
+        setToken(getToken());
+
+        const t = getToken();
+        if (!t) {
+            setAuthedUI(false);
+            setAuthMsg("Please login.", false);
+            // prefill matchId from URL for convenience
+            const m = getQueryMatchId();
+            if (m) setMatchId(m, {persist:false, updateUrl:false});
+            return;
+        }
+
+        try {
+            await refreshMe();
+            setAuthedUI(true);
+            setAuthMsg("Token restored.", false);
+
+            // match auto join (URL > lastMatch)
+            const m = getQueryMatchId() || (localStorage.getItem("lastMatchId") || "");
+            if (m) {
+                setMatchId(m, {persist:true, updateUrl:true});
+                connectWS(m);
+            }
+        } catch (e) {
+            setToken("");
+            setAuthedUI(false);
+            setAuthMsg("Session expired. Please login again.", true);
+        }
+    })();
 </script>
+
 </body>
 </html>

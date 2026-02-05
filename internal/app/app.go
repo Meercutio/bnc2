@@ -76,12 +76,13 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger, opts Options)
 		Auth:     authSvc,
 		TokenTTL: cfg.Auth.TokenTTL,
 	}
+	mm := &game.Matchmaker{}
 
 	// --- Game ---
 	persist := game.NewRedisMatchStore(rdb, cfg.Redis.MatchTTL)
 	gameCfg := game.Config{RoundDuration: cfg.Game.RoundDuration}
 	matchSvc := game.NewMatchService(gameCfg, persist)
-	gameSrv := game.NewServer(gameCfg, matchSvc, authSvc)
+	gameSrv := game.NewServer(gameCfg, matchSvc, authSvc, mm)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -140,7 +141,7 @@ func (a *App) Run(ctx context.Context) error {
 	return err
 }
 
-func (a *App) Close(ctx context.Context) error {
+func (a *App) Close(_ context.Context) error {
 	// best-effort
 	if a.db != nil {
 		a.db.Close()
