@@ -44,7 +44,7 @@ func TestWS_Endpoint_PathParam(t *testing.T) {
 	cfg := Config{RoundDuration: 0}
 	persist := &memPersist{}
 	matchSvc := NewMatchService(cfg, persist)
-	server := NewServer(cfg, matchSvc, testVerifier{})
+	server := NewServer(cfg, matchSvc, testVerifier{}, &Matchmaker{})
 
 	mux := http.NewServeMux()
 	server.RegisterRoutes(mux)
