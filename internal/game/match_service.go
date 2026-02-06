@@ -41,7 +41,7 @@ func (s *MatchService) persistBestEffort(matchID string, snap MatchSnapshot) {
 	}
 }
 
-func (s *MatchService) Create(ctx context.Context, matchID string) (*Match, error) {
+func (s *MatchService) Create(_ context.Context, matchID string) (*Match, error) {
 	m := NewMatch(matchID, s.cfg.RoundDuration)
 
 	// hook: любое изменение матча будет сохранять snapshot
