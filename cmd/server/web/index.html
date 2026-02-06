@@ -220,7 +220,148 @@
             input, select { min-width: 180px; }
             .topbar { top: 0; }
         }
-    </style>
+    
+
+        /* ---------- UX: readiness & reconnect ---------- */
+        .netBanner{
+            margin-top: 10px;
+            padding: 10px 12px;
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            background: var(--chip-bg);
+            display:flex;
+            gap:10px;
+            align-items:center;
+        }
+        .netDot{ width:10px; height:10px; border-radius:999px; background: var(--muted); box-shadow: 0 0 0 3px rgba(0,0,0,0.02); }
+        .netDot.ok{ background: var(--ok); }
+        .netDot.err{ background: var(--err); }
+
+        .badge{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--chip-border);
+            background: var(--panel);
+            font-size: 12px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .badge.ok{ border-color: color-mix(in srgb, var(--ok) 50%, var(--chip-border)); }
+        .badge.err{ border-color: color-mix(in srgb, var(--err) 50%, var(--chip-border)); }
+        .badge.muted{ background: var(--chip-bg); border-color: var(--chip-border); color: var(--muted); }
+
+        .coach{
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+            background: var(--chip-bg);
+            margin-top: 10px;
+        }
+        .coachTop{ display:flex; gap:10px; align-items:flex-start; justify-content:space-between; }
+        .coachTitle{ font-weight: 800; font-size: 14px; letter-spacing: .2px; }
+        .coachHint{ margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+        .coachRight{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+
+        .statusBoard{
+            margin-top: 12px;
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .statusCol{
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--panel);
+            padding: 12px;
+        }
+        .statusName{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:10px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .statusRows{ margin-top: 8px; }
+        .statusRow{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap: 10px;
+            padding: 8px 0;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .statusRow:first-child{ border-top: 0; }
+        .statusKey{ color: var(--muted); font-size: 12px; }
+
+        .revealBox{
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+        }
+        .revealTitle{ font-weight: 800; margin-bottom: 6px; }
+        .revealRow{ display:flex; justify-content:space-between; gap: 10px; font-size: 13px; }
+        .revealRow code{ font-size: 13px; }
+
+        .gameWrap{ position: relative; display:grid; grid-template-columns: 1fr 360px; gap: 14px; align-items:start; }
+        .gameWrap > h2{ grid-column: 1 / -1; }
+        .gameWrap > :not(h2):not(#coach):not(#waitOverlay){ grid-column: 1; }
+        #coach{ grid-column: 2; grid-row: 2 / span 20; position: sticky; top: 74px; margin-top: 0; }
+
+        @media (max-width: 960px){
+            .gameWrap{ display:block; }
+            #coach{ position: static; margin-top: 10px; }
+        }
+
+        .waitOverlay{
+            position:absolute;
+            right: 14px;
+            bottom: 14px;
+            left: auto;
+            top: auto;
+            border-radius: 0;
+            background: transparent;
+            display:block;
+            padding: 0;
+            pointer-events: none;
+            z-index: 6;
+        }
+        .waitBox{
+            pointer-events: auto;
+            width: min(420px, calc(100vw - 48px));
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            padding: 14px;
+            box-shadow: 0 14px 40px rgba(0,0,0,0.18);
+        }
+        .waitTitle{ font-weight: 900; font-size: 16px; margin-bottom: 6px; }
+        .waitHint{ color: var(--muted); font-size: 13px; line-height: 1.35; }
+        .spinner{
+            width: 18px; height: 18px;
+            border-radius: 999px;
+            border: 2px solid var(--border);
+            border-top-color: var(--text);
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        button.small{
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        @media (max-width: 860px){
+            .statusBoard{ grid-template-columns: 1fr; }
+        }
+</style>
 </head>
 
 <body>
@@ -255,6 +396,14 @@
             <div class="pills">
                 <div class="pill">Token: <span class="kv" id="tokenStatus"></span></div>
                 <div class="pill">Auth: <span class="kv" id="authMsg"></span></div>
+            </div>
+
+
+            <div id="netBanner" class="netBanner hidden">
+                <span id="netDot" class="netDot"></span>
+                <div class="kv" id="netText">Соединение: закрыто</div>
+                <div style="flex:1"></div>
+                <button class="secondary small" id="btnReconnectNow" title="Try reconnect now">Reconnect</button>
             </div>
 
             <div class="divider"></div>
@@ -387,6 +536,82 @@
     <div class="center">
         <div class="card gameWrap">
             <h2>Game</h2>
+
+            <div id="coach" class="coach">
+                <div class="coachTop">
+                    <div>
+                        <div class="coachTitle" id="stageTitle">Подключитесь к матчу</div>
+                        <div class="coachHint" id="stageHint">Создайте матч или вставьте Match ID, затем нажмите Join.</div>
+                    </div>
+                    <div class="coachRight">
+                        <span class="badge muted" id="netBadge">offline</span>
+                    </div>
+                </div>
+
+                <div class="statusBoard">
+                    <div class="statusCol">
+                        <div class="statusName">
+                            <span id="youName">Вы</span>
+                            <span class="badge muted" id="youRole">-</span>
+                        </div>
+                        <div class="statusRows">
+                            <div class="statusRow">
+                                <span class="statusKey">Подключение</span>
+                                <span class="badge muted" id="youConn">-</span>
+                            </div>
+                            <div class="statusRow">
+                                <span class="statusKey">Секрет</span>
+                                <span class="badge muted" id="youSecret">-</span>
+                            </div>
+                            <div class="statusRow">
+                                <span class="statusKey">Ход</span>
+                                <span class="badge muted" id="youGuess">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="statusCol">
+                        <div class="statusName">
+                            <span id="oppName">Соперник</span>
+                            <span class="badge muted" id="oppRole">-</span>
+                        </div>
+                        <div class="statusRows">
+                            <div class="statusRow">
+                                <span class="statusKey">Подключение</span>
+                                <span class="badge muted" id="oppConn">-</span>
+                            </div>
+                            <div class="statusRow">
+                                <span class="statusKey">Секрет</span>
+                                <span class="badge muted" id="oppSecret">-</span>
+                            </div>
+                            <div class="statusRow">
+                                <span class="statusKey">Ход</span>
+                                <span class="badge muted" id="oppGuess">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="revealBox" class="revealBox hidden">
+                    <div class="revealTitle">Секреты после игры</div>
+                    <div class="revealRow"><span id="revealYouLabel">Вы</span><code id="revealYouSecret">----</code></div>
+                    <div class="revealRow" style="margin-top:6px;"><span id="revealOppLabel">Соперник</span><code id="revealOppSecret">----</code></div>
+                </div>
+            </div>
+
+            <div id="waitOverlay" class="waitOverlay hidden" aria-hidden="true">
+                <div class="waitBox">
+                    <div class="row" style="align-items:center;">
+                        <div class="spinner"></div>
+                        <div style="flex:1">
+                            <div class="waitTitle" id="waitTitle">Ожидание…</div>
+                            <div class="waitHint" id="waitHint">—</div>
+                        </div>
+                        <button class="secondary small" id="btnOverlayReconnect">Reconnect</button>
+                    </div>
+                </div>
+            </div>
+
 
             <div class="row">
                 <div>
@@ -644,6 +869,35 @@
 
     // ---------------- WS
     let ws = null;
+    let currentMatchId = "";
+    let wantReconnect = false;
+    let reconnectAttempt = 0;
+    let reconnectTimer = null;
+    let lastState = null;
+
+    // sync watchdog: if we connect but don't receive state soon, force reconnect
+    let awaitingState = false;
+    let syncTimer = null;
+
+    function clearSync() {
+        awaitingState = false;
+        if (syncTimer) {
+            clearTimeout(syncTimer);
+            syncTimer = null;
+        }
+    }
+
+    function armSync(sock) {
+        clearSync();
+        awaitingState = true;
+        syncTimer = setTimeout(() => {
+            if (ws !== sock || !awaitingState) return;
+            log('[ws] no state after auth — retry');
+            try { sock.close(); } catch {}
+        }, 2500);
+    }
+
+
     let lastNames = { p1: "p1", p2: "p2" };
 
     function normalizeNames(names) {
@@ -739,45 +993,318 @@
         }).join("");
     }
 
-    function disconnectWS() {
-        if (ws) ws.close();
-        ws = null;
-        setWSStatus("closed");
+    
+    // ---------------- Network UI helpers
+    function setNetBanner(show, text, dotKind = "muted", showBtn = true) {
+        const b = $("netBanner");
+        if (!b) return;
+        if (!show) {
+            b.classList.add("hidden");
+            return;
+        }
+        b.classList.remove("hidden");
+        $("netText").textContent = text || "";
+        const dot = $("netDot");
+        dot.className = "netDot" + (dotKind === "ok" ? " ok" : dotKind === "err" ? " err" : "");
+        $("btnReconnectNow").classList.toggle("hidden", !showBtn);
     }
 
-    function connectWS(matchId) {
+    function setNetBadge(kind, text) {
+        const el = $("netBadge");
+        el.className = "badge" + (kind ? " " + kind : "");
+        el.textContent = text;
+    }
+
+    function setWaitOverlay(show, title, hint, showBtn = true) {
+        const o = $("waitOverlay");
+        if (!o) return;
+        o.classList.toggle("hidden", !show);
+        o.setAttribute("aria-hidden", (!show).toString());
+        $("waitTitle").textContent = title || "Ожидание…";
+        $("waitHint").textContent = hint || "";
+        $("btnOverlayReconnect").classList.toggle("hidden", !showBtn);
+    }
+
+    function setBadge(id, kind, text) {
+        const el = $(id);
+        el.className = "badge" + (kind ? " " + kind : "");
+        el.textContent = text;
+    }
+
+    function otherSlot(you) { return you === "p1" ? "p2" : "p1"; }
+
+    function updateUXFromState(s) {
+        lastState = s;
+
+        const names = normalizeNames(s.playerNames);
+        lastNames = names;
+
+        const you = s.you || "p1";
+        const opp = otherSlot(you);
+
+        // Header pills (existing)
+        setTableHeaders(names.p1, names.p2);
+        $("youSlot").textContent = (names[you] || you || "-");
+        $("phase").textContent = s.phase || "-";
+        $("round").textContent = (s.round ?? "-");
+        $("deadline").textContent = s.deadlineMs ? new Date(s.deadlineMs).toLocaleTimeString() : "-";
+
+        // Status board
+        $("youName").textContent = names[you] || "Вы";
+        $("oppName").textContent = names[opp] || "Соперник";
+        setBadge("youRole", "muted", you.toUpperCase());
+        setBadge("oppRole", "muted", opp.toUpperCase());
+
+        // Connected (server gives only total count; we treat it as opponent online/offline)
+        const oppOnline = (s.playersConnected || 0) >= 2;
+        setBadge("youConn", "ok", "online");
+        setBadge("oppConn", oppOnline ? "ok" : "muted", oppOnline ? "online" : "offline");
+
+        // Secrets
+        const sr = s.secretsReady || {};
+        const youSecretReady = !!sr[you];
+        const oppSecretReady = !!sr[opp];
+        setBadge("youSecret", youSecretReady ? "ok" : "muted", youSecretReady ? "готов" : "не задан");
+        setBadge("oppSecret", oppSecretReady ? "ok" : "muted", oppSecretReady ? "готов" : (s.phase === "waiting_players" ? "не в матче" : "ожидание"));
+
+        // Guesses (current round)
+        const gr = s.guessesReady || {};
+        const youGuessReady = !!gr[you];
+        const oppGuessReady = !!gr[opp];
+        if (s.phase === "playing") {
+            setBadge("youGuess", youGuessReady ? "ok" : "muted", youGuessReady ? "принят" : "ожидается");
+            setBadge("oppGuess", oppGuessReady ? "ok" : "muted", oppGuessReady ? "принят" : "ожидается");
+        } else {
+            setBadge("youGuess", "muted", "—");
+            setBadge("oppGuess", "muted", "—");
+        }
+
+        // Reveal secrets (only after finished)
+        const rb = $("revealBox");
+        if (s.phase === "finished" && s.revealedSecrets) {
+            rb.classList.remove("hidden");
+            $("revealYouLabel").textContent = names[you] || "Вы";
+            $("revealOppLabel").textContent = names[opp] || "Соперник";
+            $("revealYouSecret").textContent = (s.revealedSecrets[you] || "----");
+            $("revealOppSecret").textContent = (s.revealedSecrets[opp] || "----");
+        } else {
+            rb.classList.add("hidden");
+        }
+
+        // Controls enable/disable
+        const wsOpen = !!ws && ws.readyState === WebSocket.OPEN;
+        const setSecretEnabled =
+            wsOpen && (s.phase === "waiting_secrets") && !youSecretReady;
+        const guessEnabled =
+            wsOpen && (s.phase === "playing") && !youGuessReady;
+
+        $("secret").disabled = !setSecretEnabled;
+        $("btnSetSecret").disabled = !setSecretEnabled;
+
+        $("guess").disabled = !guessEnabled;
+        $("btnGuess").disabled = !guessEnabled;
+
+        // Rematch: allow request after finished or any time (server will decide), but only when ws open
+        $("btnRematch").disabled = !wsOpen;
+
+        // Stage coach + waiting overlay
+        if (!wsOpen) {
+            $("stageTitle").textContent = "Нет соединения";
+            $("stageHint").textContent = "Проверьте сеть. Мы попробуем переподключиться автоматически.";
+            setNetBadge("muted", "offline");
+            setWaitOverlay(true, "Потеряно соединение", "Пробуем переподключиться…", true);
+            return;
+        }
+
+        setNetBadge("ok", "online");
+
+        if (s.phase === "waiting_players") {
+            $("stageTitle").textContent = "Ожидаем соперника";
+            $("stageHint").textContent = "Скопируйте invite link и отправьте второму игроку.";
+            setWaitOverlay(true, "Ожидаем соперника", "Отправьте invite link — второй игрок откроет ссылку и нажмёт Join.", false);
+        } else if (s.phase === "waiting_secrets") {
+            if (!youSecretReady) {
+                $("stageTitle").textContent = "Задайте секрет";
+                $("stageHint").textContent = "Введите 4 цифры (можно с нулями и повторами) и нажмите Set secret.";
+                setWaitOverlay(false, "", "", false);
+            } else if (!oppSecretReady) {
+                $("stageTitle").textContent = "Секрет принят";
+                $("stageHint").textContent = "Ждём, пока соперник задаст секрет…";
+                setWaitOverlay(true, "Ждём соперника", "Как только соперник задаст секрет — начнётся раунд.", false);
+            } else {
+                // оба готовы — скоро игра
+                $("stageTitle").textContent = "Почти готово";
+                $("stageHint").textContent = "Оба секрета заданы — стартуем раунд…";
+                setWaitOverlay(true, "Стартуем", "Подготовка раунда…", false);
+            }
+        } else if (s.phase === "playing") {
+            if (!youGuessReady) {
+                $("stageTitle").textContent = "Сделайте ход";
+                $("stageHint").textContent = s.deadlineMs
+                    ? ("Введите 4 цифры и отправьте до " + new Date(s.deadlineMs).toLocaleTimeString() + ".")
+                    : "Введите 4 цифры и отправьте ход.";
+                setWaitOverlay(false, "", "", false);
+            } else if (!oppGuessReady) {
+                $("stageTitle").textContent = "Ход принят";
+                $("stageHint").textContent = "Ждём ход соперника…";
+                setWaitOverlay(true, "Ждём соперника", "Ваш ход принят. Ожидаем соперника…", false);
+            } else {
+                $("stageTitle").textContent = "Раунд завершается";
+                $("stageHint").textContent = "Подсчёт результатов…";
+                setWaitOverlay(true, "Подсчёт", "Скоро появится результат раунда…", false);
+            }
+        } else if (s.phase === "finished") {
+            const w = s.winner || "";
+            $("stageTitle").textContent = "Игра завершена";
+            $("stageHint").textContent = w ? ("Победитель: " + winnerLabel(w, names) + ". Можно запросить реванш.") : "Можно запросить реванш.";
+            setWaitOverlay(false, "", "", false);
+        } else {
+            $("stageTitle").textContent = "Матч";
+            $("stageHint").textContent = "—";
+            setWaitOverlay(false, "", "", false);
+        }
+    }
+
+    // ---------------- Auto-reconnect
+    function clearReconnect() {
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+        }
+    }
+
+    function stopAutoReconnect() {
+        wantReconnect = false;
+        reconnectAttempt = 0;
+        clearReconnect();
+        clearSync();
+        setWaitOverlay(false, '', '', false);
+        setNetBadge('muted', 'offline');
+    }
+
+    function scheduleReconnect(reason = "") {
+        if (!wantReconnect || !currentMatchId) return;
+        if (reconnectTimer) return;
+
+        const base = 500;               // ms
+        const max = 8000;               // ms
+        const capAttempts = 12;
+        if (reconnectAttempt >= capAttempts) {
+            setWSStatus("closed");
+            setWaitOverlay(true, "Соединение потеряно", "Не удалось переподключиться автоматически. Нажмите Reconnect.", true);
+            return;
+        }
+
+        const backoff = Math.min(max, base * Math.pow(2, reconnectAttempt));
+        const jitter = Math.floor(Math.random() * 250);
+        const wait = backoff + jitter;
+
+        setWSStatus("reconnecting");
+        setWaitOverlay(true, "Потеряно соединение", `Переподключаемся… (попытка ${reconnectAttempt + 1})`, true);
+
+        reconnectTimer = setTimeout(() => {
+            reconnectTimer = null;
+            reconnectAttempt++;
+            openWS(currentMatchId, true);
+        }, wait);
+    }
+
+    function disconnectWS(intentional = true) {
+        clearReconnect();
+        clearSync();
+        if (intentional) stopAutoReconnect();
+
+        if (ws) {
+            try { ws.close(); } catch {}
+        }
+        ws = null;
+        setWSStatus("closed");
+        if (intentional) {
+            setWaitOverlay(false, "", "", false);
+        }
+    }
+
+    function openWS(matchId, isRetry = false) {
         const token = getToken();
         if (!matchId) return log("[ui] missing matchId");
         if (!token) return log("[ui] missing token: login first");
 
-        disconnectWS();
+        clearReconnect();
+        clearSync();
+
+        // Close previous socket (events from old sockets are ignored via guards below)
+        const prev = ws;
+        if (prev) {
+            try { prev.close(); } catch {}
+        }
 
         const url = `${WS_BASE}/ws/${encodeURIComponent(matchId)}`;
-        ws = new WebSocket(url);
+        const sock = new WebSocket(url);
+        ws = sock;
 
-        ws.onopen = () => {
+        setWSStatus(isRetry ? "reconnecting" : "connecting");
+        setNetBadge("muted", "connecting");
+        $('stageTitle').textContent = 'Подключаемся…';
+        $('stageHint').textContent = 'Идёт подключение к матчу и авторизация…';
+        setWaitOverlay(true, 'Подключаемся…', 'Авторизация и синхронизация…', true);
+
+        sock.onopen = () => {
+            if (ws !== sock) return;
             setWSStatus("open");
-            log("[ws] connected");
-            send("auth", { token });
-        };
-        ws.onclose = () => { setWSStatus("closed"); log("[ws] closed"); };
-        ws.onerror = (e) => { setWSStatus("error"); log("[ws] error " + e); };
+            setNetBadge("ok", "online");
 
-        ws.onmessage = (ev) => {
+            // send auth as the very first message (server expects it)
+            try {
+                sock.send(JSON.stringify({ type: "auth", payload: { token } }));
+            } catch {}
+
+            // wait for the first state; if it doesn't arrive, force reconnect
+            clearSync();
+            awaitingState = true;
+            setWaitOverlay(true, "Подключено", "Синхронизация состояния…", true);
+            syncTimer = setTimeout(() => {
+                if (ws !== sock || !awaitingState) return;
+                log("[ws] no state after auth, forcing reconnect");
+                try { sock.close(); } catch {}
+            }, 2500);
+
+            reconnectAttempt = 0;
+            log("[ws] connected");
+        };
+
+        sock.onclose = (ev) => {
+            if (ws !== sock) return;
+            clearSync();
+            ws = null;
+            setWSStatus("closed");
+            setNetBadge("muted", "offline");
+            const reason = (ev && ev.reason) ? ev.reason : "";
+            log("[ws] closed" + (reason ? " (" + reason + ")" : ""));
+            scheduleReconnect(reason);
+        };
+
+        sock.onerror = () => {
+            if (ws !== sock) return;
+            // keep socket handlers stable; close will follow in most cases
+            setWSStatus("error");
+            setNetBadge("muted", "offline");
+            log("[ws] error");
+            // close will usually follow, but schedule just in case
+            scheduleReconnect("ws error");
+        };
+
+        sock.onmessage = (ev) => {
+            if (ws !== sock) return;
             let msg = null;
             try { msg = JSON.parse(ev.data); } catch { return; }
 
             if (msg.type === "state") {
                 const s = msg.payload || {};
-                const names = normalizeNames(s.playerNames);
-                lastNames = names;
-
-                setTableHeaders(names.p1, names.p2);
-                $("youSlot").textContent = (names[s.you] || s.you || "-");
-                $("phase").textContent = s.phase || "-";
-                $("round").textContent = (s.round ?? "-");
-                $("deadline").textContent = s.deadlineMs ? new Date(s.deadlineMs).toLocaleTimeString() : "-";
-
+                // first state means we're authorized & attached
+                if (awaitingState) {
+                    clearSync();
+                }
+                updateUXFromState(s);
                 renderHistory(s);
             } else if (msg.type === "series_score") {
                 const ser = msg.payload?.series || {};
@@ -794,7 +1321,32 @@
         };
     }
 
-    // ---------------- Clipboard
+function connectWS(matchId) {
+        if (!matchId) return log("[ui] missing matchId");
+        currentMatchId = matchId;
+        wantReconnect = true;
+        reconnectAttempt = 0;
+        openWS(matchId, false);
+    }
+
+    // Try to restore connection when network/tab comes back.
+    window.addEventListener("online", () => {
+        if (!wantReconnect || !currentMatchId) return;
+        if (ws && ws.readyState === WebSocket.OPEN) return;
+        clearReconnect();
+        reconnectAttempt = 0;
+        openWS(currentMatchId, true);
+    });
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) return;
+        if (!wantReconnect || !currentMatchId) return;
+        if (ws && ws.readyState === WebSocket.OPEN) return;
+        clearReconnect();
+        reconnectAttempt = 0;
+        openWS(currentMatchId, true);
+    });
+// ---------------- Clipboard
     async function copyText(text) {
         try {
             await navigator.clipboard.writeText(text);
@@ -916,6 +1468,19 @@
         connectWS(m);
     };
 
+
+    $("btnReconnectNow").onclick = () => {
+        const m = $("matchId").value.trim() || currentMatchId || (localStorage.getItem("lastMatchId") || "");
+        if (!m) return log("[ui] no match to reconnect");
+        setMatchId(m, {persist:true, updateUrl:true});
+        currentMatchId = m;
+        wantReconnect = true;
+        reconnectAttempt = 0;
+        openWS(m, true);
+    };
+
+    $("btnOverlayReconnect").onclick = () => $("btnReconnectNow").click();
+
     $("btnCopyLink").onclick = async () => {
         const link = $("inviteLink").value.trim();
         if (!link) return log("[ui] no invite link");
@@ -923,7 +1488,10 @@
     };
 
     $("btnLeave").onclick = () => {
-        disconnectWS();
+        disconnectWS(true);
+        currentMatchId = "";
+        lastState = null;
+
         setMatchId("", {persist:true, updateUrl:true});
         $("youSlot").textContent = "-";
         $("phase").textContent = "-";
@@ -931,18 +1499,76 @@
         $("deadline").textContent = "-";
         $("series").textContent = "p1 0 : 0 p2 (draw 0)";
         $("historyBody").innerHTML = `<tr><td colspan="8" class="muted">No data yet</td></tr>`;
+
+        // UX reset
+        $("stageTitle").textContent = "Подключитесь к матчу";
+        $("stageHint").textContent = "Создайте матч или вставьте Match ID, затем нажмите Join.";
+        setNetBadge("muted", "offline");
+        setBadge("youRole", "muted", "-");
+        setBadge("oppRole", "muted", "-");
+        $("youName").textContent = "Вы";
+        $("oppName").textContent = "Соперник";
+        setBadge("youConn", "muted", "-");
+        setBadge("oppConn", "muted", "-");
+        setBadge("youSecret", "muted", "-");
+        setBadge("oppSecret", "muted", "-");
+        setBadge("youGuess", "muted", "-");
+        setBadge("oppGuess", "muted", "-");
+        $("revealBox").classList.add("hidden");
+        setWaitOverlay(false, "", "", false);
+
+        $("secret").disabled = true;
+        $("btnSetSecret").disabled = true;
+        $("guess").disabled = true;
+        $("btnGuess").disabled = true;
+        $("btnRematch").disabled = true;
+
         log("[ui] left match");
     };
 
+
+// ---------------- Input helpers
+    function digits4(v){
+        return String(v||"").replace(/\D+/g, "").slice(0, 4);
+    }
+    ["secret","guess"].forEach((id) => {
+        const el = $(id);
+        el.addEventListener("input", () => { el.value = digits4(el.value); });
+        el.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                if (id === "secret" && !$("btnSetSecret").disabled) $("btnSetSecret").click();
+                if (id === "guess" && !$("btnGuess").disabled) $("btnGuess").click();
+            }
+        });
+    });
+
     // ---------------- Game actions
-    $("btnSetSecret").onclick = () => send("set_secret", { secret: $("secret").value });
-    $("btnGuess").onclick = () => send("submit_guess", { guess: $("guess").value });
+    $("btnSetSecret").onclick = () => {
+        const v = digits4($("secret").value);
+        $("secret").value = v;
+        if (v.length !== 4) return log("[ui] secret must be 4 digits");
+        send("set_secret", { secret: v });
+    };
+    $("btnGuess").onclick = () => {
+        const v = digits4($("guess").value);
+        $("guess").value = v;
+        if (v.length !== 4) return log("[ui] guess must be 4 digits");
+        send("submit_guess", { guess: v });
+    };
     $("btnRematch").onclick = () => send("rematch_request", {});
 
     // ---------------- Boot
     (async function boot() {
         initTheme();
         setToken(getToken());
+
+        // Initial UX state
+        setNetBadge("muted", "offline");
+        $("secret").disabled = true;
+        $("btnSetSecret").disabled = true;
+        $("guess").disabled = true;
+        $("btnGuess").disabled = true;
+        $("btnRematch").disabled = true;
 
         const t = getToken();
         if (!t) {

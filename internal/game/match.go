@@ -66,45 +66,80 @@ func NewMatch(id string, roundDur time.Duration) *Match {
 }
 
 func (m *Match) Attach(playerID, displayName string, cc *ClientConn) (Slot, string, string) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
+	displayName = strings.TrimSpace(displayName)
 
-	// reconnect?
+	var old *ClientConn
+
+	m.mu.Lock()
+
+	// reconnect P1
 	if m.p1.id == playerID && m.p1.id != "" {
+		old = m.p1.conn
 		m.p1.conn = cc
 		m.p1.connected = true
-		if strings.TrimSpace(displayName) != "" {
-			m.p1.name = strings.TrimSpace(displayName)
+		if displayName != "" {
+			m.p1.name = displayName
+		}
+
+		// ВАЖНО: на reconnect нужно восстановить корректную фазу и отдать state на фронт
+		m.updatePhaseLocked()
+		m.broadcastStateLocked()
+		m.persistLocked()
+
+		m.mu.Unlock()
+		if old != nil && old != cc {
+			old.Close()
 		}
 		return P1, "", ""
 	}
+
+	// reconnect P2
 	if m.p2.id == playerID && m.p2.id != "" {
+		old = m.p2.conn
 		m.p2.conn = cc
 		m.p2.connected = true
-		if strings.TrimSpace(displayName) != "" {
-			m.p2.name = strings.TrimSpace(displayName)
+		if displayName != "" {
+			m.p2.name = displayName
+		}
+
+		// ВАЖНО: на reconnect нужно восстановить корректную фазу и отдать state на фронт
+		m.updatePhaseLocked()
+		m.broadcastStateLocked()
+		m.persistLocked()
+
+		m.mu.Unlock()
+		if old != nil && old != cc {
+			old.Close()
 		}
 		return P2, "", ""
 	}
 
-	// new join
+	// new attach
 	if m.p1.id == "" {
 		m.p1.id = playerID
-		m.p1.name = strings.TrimSpace(displayName)
+		m.p1.name = displayName
 		m.p1.conn = cc
 		m.p1.connected = true
 		m.updatePhaseLocked()
+		m.broadcastStateLocked()
+		m.persistLocked()
+		m.mu.Unlock()
 		return P1, "", ""
 	}
-	if m.p2.id == "" && m.p1.id != playerID {
+
+	if m.p2.id == "" {
 		m.p2.id = playerID
-		m.p2.name = strings.TrimSpace(displayName)
+		m.p2.name = displayName
 		m.p2.conn = cc
 		m.p2.connected = true
 		m.updatePhaseLocked()
+		m.broadcastStateLocked()
+		m.persistLocked()
+		m.mu.Unlock()
 		return P2, "", ""
 	}
 
+	m.mu.Unlock()
 	return "", "match_full", "match already has two players"
 }
 
