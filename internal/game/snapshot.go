@@ -6,8 +6,9 @@ import "time"
 type MatchSnapshot struct {
 	MatchID string `json:"matchId"`
 
-	Phase string `json:"phase"`
-	Round int    `json:"round"`
+	Phase       string `json:"phase"`
+	Round       int    `json:"round"`
+	RoundActive bool   `json:"roundActive,omitempty"` // backward-compatible: if absent, derived from Phase
 
 	// важное: сохраняем ID игроков, иначе после рестарта невозможно корректно reconnect
 	P1ID   string `json:"p1Id"`
@@ -24,6 +25,10 @@ type MatchSnapshot struct {
 	P1GuessSet bool   `json:"p1GuessSet"`
 	P2Guess    string `json:"p2Guess"`
 	P2GuessSet bool   `json:"p2GuessSet"`
+
+	// round-timeout flags (важно для корректного восстановления после рестарта)
+	P1Missed bool `json:"p1Missed,omitempty"`
+	P2Missed bool `json:"p2Missed,omitempty"`
 
 	// rematch flags
 	P1Rematch bool `json:"p1Rematch"`
@@ -51,6 +56,8 @@ func (m *Match) snapshotLocked() MatchSnapshot {
 		Phase:   m.phase,
 		Round:   m.round,
 
+		RoundActive: m.roundActive,
+
 		P1ID:   m.p1.id,
 		P1Name: m.p1.name,
 		P2ID:   m.p2.id,
@@ -65,6 +72,9 @@ func (m *Match) snapshotLocked() MatchSnapshot {
 		P1GuessSet: m.p1.guessSet,
 		P2Guess:    m.p2.guess,
 		P2GuessSet: m.p2.guessSet,
+
+		P1Missed: m.p1.missed,
+		P2Missed: m.p2.missed,
 
 		P1Rematch: m.p1.rematchRequested,
 		P2Rematch: m.p2.rematchRequested,
@@ -107,6 +117,9 @@ func (m *Match) restoreLocked(s MatchSnapshot) {
 	m.p2.guess = s.P2Guess
 	m.p2.guessSet = s.P2GuessSet
 
+	m.p1.missed = s.P1Missed
+	m.p2.missed = s.P2Missed
+
 	// rematch flags
 	m.p1.rematchRequested = s.P1Rematch
 	m.p2.rematchRequested = s.P2Rematch
@@ -125,6 +138,9 @@ func (m *Match) restoreLocked(s MatchSnapshot) {
 	m.winner = s.Winner
 	m.history = append([]RoundHistoryItem(nil), s.History...)
 
-	// активен раунд только если playing
-	m.roundActive = (m.phase == "playing")
+	// roundActive: новое поле, но для обратной совместимости восстанавливаем по Phase.
+	m.roundActive = s.RoundActive
+	if !m.roundActive && m.phase == "playing" {
+		m.roundActive = true
+	}
 }

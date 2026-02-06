@@ -2,6 +2,8 @@ package game
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 )
@@ -25,19 +27,36 @@ func NewMatchService(cfg Config, persist MatchPersistence) *MatchService {
 	}
 }
 
-func (s *MatchService) Create(ctx context.Context, matchID string) (*Match, error) {
+const persistTimeout = 2 * time.Second
+
+func (s *MatchService) persistOnce(matchID string, snap MatchSnapshot) error {
+	ctx, cancel := context.WithTimeout(context.Background(), persistTimeout)
+	defer cancel()
+	return s.persist.Save(ctx, matchID, snap)
+}
+
+func (s *MatchService) persistBestEffort(matchID string, snap MatchSnapshot) {
+	if err := s.persistOnce(matchID, snap); err != nil {
+		slog.Default().Warn("match persist failed", "matchId", matchID, "err", err)
+	}
+}
+
+func (s *MatchService) Create(_ context.Context, matchID string) (*Match, error) {
 	m := NewMatch(matchID, s.cfg.RoundDuration)
 
 	// hook: любое изменение матча будет сохранять snapshot
 	m.onPersist = func(snap MatchSnapshot) {
-		_ = s.persist.Save(ctx, matchID, snap) // MVP: без логирования
+		s.persistBestEffort(matchID, snap)
 	}
 
-	// первичное сохранение
+	// первичное сохранение — важно, чтобы матч можно было восстановить после рестарта
 	m.mu.Lock()
 	snap := m.snapshotLocked()
 	m.mu.Unlock()
-	_ = s.persist.Save(ctx, matchID, snap)
+
+	if err := s.persistOnce(matchID, snap); err != nil {
+		return nil, fmt.Errorf("persist initial snapshot: %w", err)
+	}
 
 	s.mu.Lock()
 	s.in[matchID] = m
@@ -60,30 +79,42 @@ func (s *MatchService) GetOrLoad(ctx context.Context, matchID string) (*Match, b
 	}
 
 	m = NewMatch(matchID, s.cfg.RoundDuration)
-	m.mu.Lock()
-	m.restoreLocked(snap)
-	m.mu.Unlock()
 
-	// hook снова навешиваем
+	// hook снова навешиваем (ВАЖНО: без request-context, иначе persist "отвалится" после завершения запроса)
 	m.onPersist = func(snap MatchSnapshot) {
-		_ = s.persist.Save(ctx, matchID, snap)
+		s.persistBestEffort(matchID, snap)
 	}
 
-	// если матч в playing и дедлайн ещё не прошёл — поднимаем таймер заново
 	m.mu.Lock()
-	if s.cfg.RoundDuration > 0 && m.phase == "playing" && m.roundActive && !m.deadline.IsZero() && time.Now().Before(m.deadline) {
-		// новый token, чтобы старые таймеры (до рестарта) не влияли
-		m.roundToken++
-		token := m.roundToken
+	m.restoreLocked(snap)
 
-		if m.roundTimer != nil {
-			m.roundTimer.Stop()
+	// reconcile: если матч в playing, но дедлайн уже прошёл — не зависаем в ожидании guess.
+	if s.cfg.RoundDuration > 0 && m.phase == "playing" && m.roundActive && !m.deadline.IsZero() {
+		now := time.Now()
+		if !now.Before(m.deadline) {
+			// дедлайн в прошлом — считаем пропуск для тех, кто не успел
+			if !m.p1.guessSet {
+				m.p1.missed = true
+			}
+			if !m.p2.guessSet {
+				m.p2.missed = true
+			}
+			m.broadcastStateLocked()
+			m.persistLocked()
+			m.finalizeRoundLocked()
+		} else {
+			// дедлайн в будущем — поднимаем таймер заново
+			m.roundToken++
+			token := m.roundToken
+
+			if m.roundTimer != nil {
+				m.roundTimer.Stop()
+			}
+			d := time.Until(m.deadline)
+			m.roundTimer = time.AfterFunc(d, func() {
+				m.onRoundTimeout(token)
+			})
 		}
-
-		d := time.Until(m.deadline)
-		m.roundTimer = time.AfterFunc(d, func() {
-			m.onRoundTimeout(token)
-		})
 	}
 	m.mu.Unlock()
 

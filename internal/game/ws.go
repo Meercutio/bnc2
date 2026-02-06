@@ -12,8 +12,15 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true }, // MVP
+	CheckOrigin: func(r *http.Request) bool { return true }, // MVP (в проде ограничить origin)
 }
+
+const (
+	writeWait      = 10 * time.Second
+	pongWait       = 60 * time.Second
+	pingPeriod     = (pongWait * 9) / 10
+	maxMessageSize = 8 * 1024
+)
 
 type ClientConn struct {
 	ws   *websocket.Conn
@@ -53,7 +60,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Вариант 1: token из headers
+	// Вариант 1: token из headers / Sec-WebSocket-Protocol
 	playerID, displayName, err := s.authFromRequest(r)
 	if err != nil {
 		http.Error(w, "invalid token", http.StatusUnauthorized)
@@ -64,6 +71,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+	ws.SetReadLimit(maxMessageSize)
 
 	// Если токена не было в headers — ожидаем auth-сообщение как первое.
 	if playerID == "" {
@@ -76,6 +84,13 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		playerID = pid
 		displayName = name
 	}
+
+	// Настраиваем ping/pong после успешной авторизации.
+	_ = ws.SetReadDeadline(time.Now().Add(pongWait))
+	ws.SetPongHandler(func(string) error {
+		_ = ws.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
 
 	cc := &ClientConn{
 		ws:   ws,
@@ -92,19 +107,31 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// writer loop (теперь уже после успешной авторизации)
+	// writer loop (обязательные правила: write deadline + выход на любой ошибке)
 	go func() {
-		ticker := time.NewTicker(25 * time.Second)
+		ticker := time.NewTicker(pingPeriod)
 		defer ticker.Stop()
+
 		for {
 			select {
 			case msg, ok := <-cc.send:
+				_ = ws.SetWriteDeadline(time.Now().Add(writeWait))
 				if !ok {
+					// channel closed
+					_ = ws.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 					return
 				}
-				_ = ws.WriteMessage(websocket.TextMessage, msg)
+				if err := ws.WriteMessage(websocket.TextMessage, msg); err != nil {
+					cc.Close()
+					return
+				}
+
 			case <-ticker.C:
-				_ = ws.WriteMessage(websocket.PingMessage, []byte{})
+				_ = ws.SetWriteDeadline(time.Now().Add(writeWait))
+				if err := ws.WriteMessage(websocket.PingMessage, nil); err != nil {
+					cc.Close()
+					return
+				}
 			}
 		}
 	}()
