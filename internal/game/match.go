@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -37,6 +38,10 @@ type Match struct {
 	seriesP2Wins int
 	seriesDraws  int
 	onPersist    func(MatchSnapshot)
+
+	// optional async hook
+	onGameFinished      func(GameFinishedEvent)
+	gameFinishedEmitted bool
 }
 
 type Player struct {
@@ -72,7 +77,7 @@ func (m *Match) Attach(playerID, displayName string, cc *ClientConn) (Slot, stri
 
 	m.mu.Lock()
 
-	// reconnect P1
+	// reconnect?
 	if m.p1.id == playerID && m.p1.id != "" {
 		old = m.p1.conn
 		m.p1.conn = cc
@@ -80,20 +85,18 @@ func (m *Match) Attach(playerID, displayName string, cc *ClientConn) (Slot, stri
 		if displayName != "" {
 			m.p1.name = displayName
 		}
-
-		// ВАЖНО: на reconnect нужно восстановить корректную фазу и отдать state на фронт
 		m.updatePhaseLocked()
 		m.broadcastStateLocked()
 		m.persistLocked()
-
+		m.emitGameFinishedLocked()
 		m.mu.Unlock()
+
+		// закрываем старое соединение ПОСЛЕ unlock, чтобы не держать мьютекс на I/O
 		if old != nil && old != cc {
 			old.Close()
 		}
 		return P1, "", ""
 	}
-
-	// reconnect P2
 	if m.p2.id == playerID && m.p2.id != "" {
 		old = m.p2.conn
 		m.p2.conn = cc
@@ -101,20 +104,19 @@ func (m *Match) Attach(playerID, displayName string, cc *ClientConn) (Slot, stri
 		if displayName != "" {
 			m.p2.name = displayName
 		}
-
-		// ВАЖНО: на reconnect нужно восстановить корректную фазу и отдать state на фронт
 		m.updatePhaseLocked()
 		m.broadcastStateLocked()
 		m.persistLocked()
-
+		m.emitGameFinishedLocked()
 		m.mu.Unlock()
+
 		if old != nil && old != cc {
 			old.Close()
 		}
 		return P2, "", ""
 	}
 
-	// new attach
+	// new join
 	if m.p1.id == "" {
 		m.p1.id = playerID
 		m.p1.name = displayName
@@ -126,8 +128,7 @@ func (m *Match) Attach(playerID, displayName string, cc *ClientConn) (Slot, stri
 		m.mu.Unlock()
 		return P1, "", ""
 	}
-
-	if m.p2.id == "" {
+	if m.p2.id == "" && m.p1.id != playerID {
 		m.p2.id = playerID
 		m.p2.name = displayName
 		m.p2.conn = cc
@@ -259,6 +260,7 @@ func (m *Match) startRematchLocked() {
 	// сбрасываем состояние матча, но оставляем игроков и соединения
 	m.phase = "waiting_secrets"
 	m.winner = ""
+	m.gameFinishedEmitted = false
 	m.round = 0
 	m.roundActive = false
 	m.deadline = time.Time{}
@@ -479,6 +481,7 @@ func (m *Match) finalizeRoundLocked() {
 		m.broadcastLocked(Envelope{Type: "game_finished", Payload: mustJSON(map[string]string{"winner": m.winner})})
 		m.broadcastStateLocked()
 		m.persistLocked()
+		m.emitGameFinishedLocked()
 		return
 	}
 
@@ -616,4 +619,33 @@ func (m *Match) persistLocked() {
 		return
 	}
 	m.onPersist(m.snapshotLocked())
+}
+
+func (m *Match) emitGameFinishedLocked() {
+	if m.onGameFinished == nil {
+		return
+	}
+	if m.phase != "finished" {
+		return
+	}
+	if m.gameFinishedEmitted {
+		return
+	}
+	// mark before emitting to avoid duplicates
+	m.gameFinishedEmitted = true
+	gameNo := m.seriesP1Wins + m.seriesP2Wins + m.seriesDraws
+	if gameNo <= 0 {
+		gameNo = 1
+	}
+	resultID := fmt.Sprintf("%s:%d", m.id, gameNo)
+	e := GameFinishedEvent{
+		ResultID:   resultID,
+		MatchID:    m.id,
+		GameNo:     gameNo,
+		P1ID:       m.p1.id,
+		P2ID:       m.p2.id,
+		Winner:     m.winner,
+		FinishedAt: time.Now(),
+	}
+	go m.onGameFinished(e)
 }

@@ -153,6 +153,8 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 			"wins":   st.Wins,
 			"losses": st.Losses,
 			"draws":  st.Draws,
+			"games":  st.Games,
+			"rating": st.Rating,
 		},
 	})
 }

@@ -17,6 +17,7 @@ type MatchService struct {
 
 	cfg     Config
 	persist MatchPersistence
+	sink    GameResultSink
 }
 
 func NewMatchService(cfg Config, persist MatchPersistence) *MatchService {
@@ -25,6 +26,12 @@ func NewMatchService(cfg Config, persist MatchPersistence) *MatchService {
 		cfg:     cfg,
 		persist: persist,
 	}
+}
+
+func (s *MatchService) SetResultSink(sink GameResultSink) {
+	s.mu.Lock()
+	s.sink = sink
+	s.mu.Unlock()
 }
 
 const persistTimeout = 2 * time.Second
@@ -41,8 +48,18 @@ func (s *MatchService) persistBestEffort(matchID string, snap MatchSnapshot) {
 	}
 }
 
-func (s *MatchService) Create(_ context.Context, matchID string) (*Match, error) {
+func (s *MatchService) Create(ctx context.Context, matchID string) (*Match, error) {
 	m := NewMatch(matchID, s.cfg.RoundDuration)
+
+	// best-effort, async game-finished sink
+	m.onGameFinished = func(e GameFinishedEvent) {
+		s.mu.Lock()
+		sink := s.sink
+		s.mu.Unlock()
+		if sink != nil {
+			sink.HandleGameFinished(e)
+		}
+	}
 
 	// hook: любое изменение матча будет сохранять snapshot
 	m.onPersist = func(snap MatchSnapshot) {
@@ -79,6 +96,14 @@ func (s *MatchService) GetOrLoad(ctx context.Context, matchID string) (*Match, b
 	}
 
 	m = NewMatch(matchID, s.cfg.RoundDuration)
+	m.onGameFinished = func(e GameFinishedEvent) {
+		s.mu.Lock()
+		sink := s.sink
+		s.mu.Unlock()
+		if sink != nil {
+			sink.HandleGameFinished(e)
+		}
+	}
 
 	// hook снова навешиваем (ВАЖНО: без request-context, иначе persist "отвалится" после завершения запроса)
 	m.onPersist = func(snap MatchSnapshot) {
@@ -116,6 +141,12 @@ func (s *MatchService) GetOrLoad(ctx context.Context, matchID string) (*Match, b
 			})
 		}
 	}
+	m.mu.Unlock()
+
+	// If the match is already finished (e.g. restored after server restart) — emit again.
+	// Downstream MUST be idempotent by matchId.
+	m.mu.Lock()
+	m.emitGameFinishedLocked()
 	m.mu.Unlock()
 
 	s.mu.Lock()
