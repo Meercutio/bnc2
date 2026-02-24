@@ -76,12 +76,15 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger, opts Options)
 		Auth:     authSvc,
 		TokenTTL: cfg.Auth.TokenTTL,
 	}
+	ratingH := &httpapi.RatingHandler{Stats: stats}
 	mm := &game.Matchmaker{}
 
 	// --- Game ---
 	persist := game.NewRedisMatchStore(rdb, cfg.Redis.MatchTTL)
 	gameCfg := game.Config{RoundDuration: cfg.Game.RoundDuration}
 	matchSvc := game.NewMatchService(gameCfg, persist)
+	// Update stats/rating on game finish (best-effort, idempotent by match_id).
+	matchSvc.SetResultSink(&PGGameResultSink{Stats: stats, Log: log})
 	gameSrv := game.NewServer(gameCfg, matchSvc, authSvc, mm)
 
 	mux := http.NewServeMux()
@@ -97,6 +100,8 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger, opts Options)
 	mux.HandleFunc("/api/auth/register", authH.Register)
 	mux.HandleFunc("/api/auth/login", authH.Login)
 	mux.Handle("/api/me", httpapi.AuthMiddleware(authSvc)(http.HandlerFunc(authH.Me)))
+	mux.HandleFunc("/api/rating/leaderboard", ratingH.Leaderboard)
+	mux.Handle("/api/rating/me", httpapi.AuthMiddleware(authSvc)(http.HandlerFunc(ratingH.Me)))
 
 	if opts.Static != nil {
 		mux.Handle("/", opts.Static)

@@ -152,6 +152,8 @@
         th, td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; }
         th { font-size: 12px; color: var(--muted); font-weight: 900; }
 
+        tr.hlRow td { font-weight: 900; }
+
         .gridTop {
             display: grid;
             grid-template-columns: 1.25fr 0.75fr;
@@ -309,37 +311,33 @@
         .revealRow{ display:flex; justify-content:space-between; gap: 10px; font-size: 13px; }
         .revealRow code{ font-size: 13px; }
 
-        .gameWrap{ position: relative; display:grid; grid-template-columns: 1fr 360px; gap: 14px; align-items:start; }
-        .gameWrap > h2{ grid-column: 1 / -1; }
-        .gameWrap > :not(h2):not(#coach):not(#waitOverlay){ grid-column: 1; }
-        #coach{ grid-column: 2; grid-row: 2 / span 20; position: sticky; top: 74px; margin-top: 0; }
+        .gameWrap{ position: relative; }
 
-        @media (max-width: 960px){
-            .gameWrap{ display:block; }
-            #coach{ position: static; margin-top: 10px; }
-        }
-
+        /* Waiting toast (non-blocking) */
         .waitOverlay{
-            position:absolute;
-            right: 14px;
-            bottom: 14px;
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
             left: auto;
             top: auto;
+            inset: auto;
             border-radius: 0;
             background: transparent;
-            display:block;
+            display:flex;
+            align-items:flex-end;
+            justify-content:flex-end;
             padding: 0;
             pointer-events: none;
             z-index: 6;
         }
         .waitBox{
-            pointer-events: auto;
-            width: min(420px, calc(100vw - 48px));
+            width: min(380px, calc(100vw - 32px));
             border-radius: 18px;
             border: 1px solid var(--border);
             background: var(--panel);
-            padding: 14px;
-            box-shadow: 0 14px 40px rgba(0,0,0,0.18);
+            padding: 16px;
+            box-shadow: 0 18px 55px rgba(0,0,0,0.22);
+            pointer-events: auto;
         }
         .waitTitle{ font-weight: 900; font-size: 16px; margin-bottom: 6px; }
         .waitHint{ color: var(--muted); font-size: 13px; line-height: 1.35; }
@@ -360,6 +358,7 @@
 
         @media (max-width: 860px){
             .statusBoard{ grid-template-columns: 1fr; }
+            .waitOverlay{ right: 10px; bottom: 10px; }
         }
 </style>
 </head>
@@ -443,6 +442,8 @@
                 </select>
             </div>
 
+            <button class="secondary small" id="btnShowRating">Rating</button>
+
             <details id="accountDetails" class="accountDetails">
                 <summary>Account</summary>
                 <div id="headerAuthSlot"></div>
@@ -522,6 +523,12 @@
                 <div class="pill">Wins: <span class="kv" id="profWins">0</span></div>
                 <div class="pill">Losses: <span class="kv" id="profLosses">0</span></div>
                 <div class="pill">Draws: <span class="kv" id="profDraws">0</span></div>
+            </div>
+
+            <div class="pills" style="margin-top:10px;">
+                <div class="pill">Rating: <span class="kv" id="profRating">1000</span></div>
+                <div class="pill">Games: <span class="kv" id="profGames">0</span></div>
+                <div class="pill">Rank: <span class="kv" id="profRank">-</span></div>
             </div>
 
             <div class="row" style="margin-top:10px;">
@@ -666,6 +673,52 @@
 
 </div>
 
+<!-- RATING MODAL (outside app, but hidden by default) -->
+<div id="ratingOverlay" class="overlay hidden" style="z-index: 20;">
+    <div class="overlayInner">
+        <div class="card">
+            <div class="row" style="justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="margin:0;">Leaderboard</h2>
+                    <div class="muted" id="ratingSub">Top players by rating (Elo)</div>
+                </div>
+                <div class="row" style="align-items:center;">
+                    <button class="secondary" id="btnRefreshRating">Refresh</button>
+                    <button id="btnCloseRating">Close</button>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="pills" id="myRatingBar">
+                <div class="pill">You: <span class="kv" id="myName">-</span></div>
+                <div class="pill">Rating: <span class="kv" id="myRating">-</span></div>
+                <div class="pill">Rank: <span class="kv" id="myRank">-</span></div>
+                <div class="pill">W/L/D: <span class="kv" id="myWLD">-</span></div>
+            </div>
+
+            <div style="max-height: 60vh; overflow:auto; margin-top: 10px;">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Player</th>
+                        <th>Rating</th>
+                        <th>Games</th>
+                        <th>W</th>
+                        <th>L</th>
+                        <th>D</th>
+                    </tr>
+                    </thead>
+                    <tbody id="ratingBody">
+                    <tr><td colspan="7" class="muted">Loading…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     const HTTP_BASE = location.origin;
     const WS_BASE = (location.protocol === "https:" ? "wss://" : "ws://") + location.host;
@@ -757,13 +810,88 @@
         const email = (me?.email || "").trim() || "-";
         const st = me?.stats || {};
 
+        window.__meId = me?.id || "";
+        window.__meName = name;
+
         $("userBadge").textContent = `${name} (${email})`;
         $("profName").textContent = name;
         $("profEmail").textContent = email;
         $("profWins").textContent = String(st.wins ?? 0);
         $("profLosses").textContent = String(st.losses ?? 0);
         $("profDraws").textContent = String(st.draws ?? 0);
+
+        $("profRating").textContent = String(st.rating ?? 1000);
+        $("profGames").textContent = String(st.games ?? 0);
+
+        // rank is computed via window-function, keep it separate
+        try {
+            const r = await api("/api/rating/me", { method: "GET" });
+            $("profRank").textContent = (r?.rank ? String(r.rank) : "-");
+        } catch {
+            $("profRank").textContent = "-";
+        }
         return me;
+    }
+
+    // ---------------- Rating / leaderboard
+    function openRating() {
+        $("ratingOverlay").classList.remove("hidden");
+        loadRating();
+    }
+
+    function closeRating() {
+        $("ratingOverlay").classList.add("hidden");
+    }
+
+    async function loadRating() {
+        const LIMIT = 20;
+        const body = $("ratingBody");
+        body.innerHTML = `<tr><td colspan="7" class="muted">Loading…</td></tr>`;
+        $("ratingSub").textContent = `Top ${LIMIT} players by rating (Elo)`;
+
+        // my bar
+        $("myName").textContent = window.__meName || "-";
+        $("myRating").textContent = "-";
+        $("myRank").textContent = "-";
+        $("myWLD").textContent = "-";
+
+        try {
+            const lb = await api(`/api/rating/leaderboard?limit=${LIMIT}`, { method: "GET" });
+            const items = (lb?.items || []).slice(0, LIMIT);
+
+            // Best-effort my rating
+            try {
+                const me = await api("/api/rating/me", { method: "GET" });
+                if (me) {
+                    $("myName").textContent = me.displayName || (window.__meName || "-");
+                    $("myRating").textContent = String(me.rating ?? "-");
+                    $("myRank").textContent = me.rank ? String(me.rank) : "-";
+                    $("myWLD").textContent = `${me.wins ?? 0}/${me.losses ?? 0}/${me.draws ?? 0}`;
+                }
+            } catch {}
+
+            if (!items.length) {
+                body.innerHTML = `<tr><td colspan="7" class="muted">No data yet</td></tr>`;
+                return;
+            }
+
+            body.innerHTML = items.map((e) => {
+                const isMe = window.__meId && e.userId === window.__meId;
+                return `
+                    <tr class="${isMe ? "hlRow" : ""}">
+                        <td>${e.rank}</td>
+                        <td>${escapeHtml(e.displayName || "-")}</td>
+                        <td>${e.rating}</td>
+                        <td>${e.games}</td>
+                        <td>${e.wins}</td>
+                        <td>${e.losses}</td>
+                        <td>${e.draws}</td>
+                    </tr>
+                `;
+            }).join("");
+        } catch (e) {
+            body.innerHTML = `<tr><td colspan="7" class="err">Failed to load leaderboard</td></tr>`;
+        }
     }
 
     // ---------------- MatchId + invite link
@@ -874,29 +1002,7 @@
     let reconnectAttempt = 0;
     let reconnectTimer = null;
     let lastState = null;
-
-    // sync watchdog: if we connect but don't receive state soon, force reconnect
-    let awaitingState = false;
-    let syncTimer = null;
-
-    function clearSync() {
-        awaitingState = false;
-        if (syncTimer) {
-            clearTimeout(syncTimer);
-            syncTimer = null;
-        }
-    }
-
-    function armSync(sock) {
-        clearSync();
-        awaitingState = true;
-        syncTimer = setTimeout(() => {
-            if (ws !== sock || !awaitingState) return;
-            log('[ws] no state after auth — retry');
-            try { sock.close(); } catch {}
-        }, 2500);
-    }
-
+    let wsEverOpened = false;
 
     let lastNames = { p1: "p1", p2: "p2" };
 
@@ -978,6 +1084,8 @@
             const p2B = p2.bulls ?? 0;
             const p2C = p2.cows ?? 0;
 
+            const winnerCell = (winner && idx === lastIdx) ? escapeHtml(winnerLabel(winner, names)) : "";
+
             return `
         <tr>
           <td>${r}</td>
@@ -987,7 +1095,7 @@
           <td>${escapeHtml(p2Guess || "")}</td>
           <td>${p2B}</td>
           <td>${p2C}</td>
-          <td>${winner ? escapeHtml(winnerLabel(winner, names)) : ""}</td>
+          <td>${winnerCell}</td>
         </tr>
       `;
         }).join("");
@@ -1177,9 +1285,10 @@
         wantReconnect = false;
         reconnectAttempt = 0;
         clearReconnect();
-        clearSync();
-        setWaitOverlay(false, '', '', false);
-        setNetBadge('muted', 'offline');
+        setNetBanner(false);
+        setWaitOverlay(false, "", "", false);
+        setNetBadge("muted", "offline");
+        wsEverOpened = false;
     }
 
     function scheduleReconnect(reason = "") {
@@ -1191,7 +1300,13 @@
         const capAttempts = 12;
         if (reconnectAttempt >= capAttempts) {
             setWSStatus("closed");
-            setWaitOverlay(true, "Соединение потеряно", "Не удалось переподключиться автоматически. Нажмите Reconnect.", true);
+            setNetBanner(true, "Не удалось подключиться. Нажмите Reconnect.", "err", true);
+            // Не показываем "потеряно соединение" при первом заходе (когда ещё ни разу не было успешного connect).
+            if (wsEverOpened) {
+                setWaitOverlay(true, "Соединение потеряно", "Не удалось переподключиться автоматически. Нажмите Reconnect.", true);
+            } else {
+                setWaitOverlay(false, "", "", false);
+            }
             return;
         }
 
@@ -1200,7 +1315,14 @@
         const wait = backoff + jitter;
 
         setWSStatus("reconnecting");
-        setWaitOverlay(true, "Потеряно соединение", `Переподключаемся… (попытка ${reconnectAttempt + 1})`, true);
+        if (wsEverOpened) {
+            setNetBanner(true, `Потеряно соединение${reason ? ": " + reason : ""}. Переподключаемся… (попытка ${reconnectAttempt + 1})`, "err", true);
+            setWaitOverlay(true, "Потеряно соединение", `Переподключаемся… (попытка ${reconnectAttempt + 1})`, true);
+        } else {
+            // Первый заход/авто-join: не пугаем "потеряно соединение", просто пытаемся подключиться.
+            setNetBanner(true, `Подключаемся… (попытка ${reconnectAttempt + 1})`, "muted", true);
+            setWaitOverlay(false, "", "", false);
+        }
 
         reconnectTimer = setTimeout(() => {
             reconnectTimer = null;
@@ -1211,7 +1333,6 @@
 
     function disconnectWS(intentional = true) {
         clearReconnect();
-        clearSync();
         if (intentional) stopAutoReconnect();
 
         if (ws) {
@@ -1220,6 +1341,7 @@
         ws = null;
         setWSStatus("closed");
         if (intentional) {
+            setNetBanner(false);
             setWaitOverlay(false, "", "", false);
         }
     }
@@ -1230,7 +1352,6 @@
         if (!token) return log("[ui] missing token: login first");
 
         clearReconnect();
-        clearSync();
 
         // Close previous socket (events from old sockets are ignored via guards below)
         const prev = ws;
@@ -1244,37 +1365,25 @@
 
         setWSStatus(isRetry ? "reconnecting" : "connecting");
         setNetBadge("muted", "connecting");
-        $('stageTitle').textContent = 'Подключаемся…';
-        $('stageHint').textContent = 'Идёт подключение к матчу и авторизация…';
-        setWaitOverlay(true, 'Подключаемся…', 'Авторизация и синхронизация…', true);
+        if (!isRetry) setNetBanner(true, "Подключаемся к матчу…", "muted", true);
 
         sock.onopen = () => {
             if (ws !== sock) return;
             setWSStatus("open");
+            setNetBanner(false);
+            setWaitOverlay(false, "", "", false);
             setNetBadge("ok", "online");
-
-            // send auth as the very first message (server expects it)
-            try {
-                sock.send(JSON.stringify({ type: "auth", payload: { token } }));
-            } catch {}
-
-            // wait for the first state; if it doesn't arrive, force reconnect
-            clearSync();
-            awaitingState = true;
-            setWaitOverlay(true, "Подключено", "Синхронизация состояния…", true);
-            syncTimer = setTimeout(() => {
-                if (ws !== sock || !awaitingState) return;
-                log("[ws] no state after auth, forcing reconnect");
-                try { sock.close(); } catch {}
-            }, 2500);
-
             reconnectAttempt = 0;
+            wsEverOpened = true;
             log("[ws] connected");
+            send("auth", { token });
+
+            // refresh UX with last known state (if any)
+            if (lastState) updateUXFromState(lastState);
         };
 
         sock.onclose = (ev) => {
             if (ws !== sock) return;
-            clearSync();
             ws = null;
             setWSStatus("closed");
             setNetBadge("muted", "offline");
@@ -1285,7 +1394,6 @@
 
         sock.onerror = () => {
             if (ws !== sock) return;
-            // keep socket handlers stable; close will follow in most cases
             setWSStatus("error");
             setNetBadge("muted", "offline");
             log("[ws] error");
@@ -1300,10 +1408,6 @@
 
             if (msg.type === "state") {
                 const s = msg.payload || {};
-                // first state means we're authorized & attached
-                if (awaitingState) {
-                    clearSync();
-                }
                 updateUXFromState(s);
                 renderHistory(s);
             } else if (msg.type === "series_score") {
@@ -1313,6 +1417,12 @@
             } else if (msg.type === "game_finished") {
                 const w = msg.payload?.winner || "?";
                 log("[game_finished] winner=" + winnerLabel(w, lastNames));
+
+                // рейтинг обновляется на сервере асинхронно — подтянем спустя небольшой лаг
+                setTimeout(() => {
+                    refreshMe().catch(() => {});
+                    if (!$("ratingOverlay").classList.contains("hidden")) loadRating();
+                }, 600);
             } else if (msg.type === "error") {
                 log("[error] " + JSON.stringify(msg.payload));
             } else {
@@ -1331,20 +1441,17 @@ function connectWS(matchId) {
 
     // Try to restore connection when network/tab comes back.
     window.addEventListener("online", () => {
-        if (!wantReconnect || !currentMatchId) return;
-        if (ws && ws.readyState === WebSocket.OPEN) return;
-        clearReconnect();
-        reconnectAttempt = 0;
-        openWS(currentMatchId, true);
+        if (wantReconnect && currentMatchId && (!ws || ws.readyState === WebSocket.CLOSED)) {
+            reconnectAttempt = 0;
+            openWS(currentMatchId, true);
+        }
     });
 
     document.addEventListener("visibilitychange", () => {
-        if (document.hidden) return;
-        if (!wantReconnect || !currentMatchId) return;
-        if (ws && ws.readyState === WebSocket.OPEN) return;
-        clearReconnect();
-        reconnectAttempt = 0;
-        openWS(currentMatchId, true);
+        if (!document.hidden && wantReconnect && currentMatchId && (!ws || ws.readyState === WebSocket.CLOSED)) {
+            reconnectAttempt = 0;
+            openWS(currentMatchId, true);
+        }
     });
 // ---------------- Clipboard
     async function copyText(text) {
@@ -1435,6 +1542,13 @@ function connectWS(matchId) {
         catch (e) { log("[http] refresh /api/me error: " + JSON.stringify(e)); }
     };
 
+    $("btnShowRating").onclick = () => openRating();
+    $("btnCloseRating").onclick = () => closeRating();
+    $("btnRefreshRating").onclick = () => loadRating();
+    $("ratingOverlay").addEventListener("click", (e) => {
+        if (e.target && e.target.id === "ratingOverlay") closeRating();
+    });
+
     // ---------------- Match actions
     $("matchId").addEventListener("input", () => {
         const m = $("matchId").value.trim();
@@ -1516,6 +1630,7 @@ function connectWS(matchId) {
         setBadge("oppGuess", "muted", "-");
         $("revealBox").classList.add("hidden");
         setWaitOverlay(false, "", "", false);
+        setNetBanner(false);
 
         $("secret").disabled = true;
         $("btnSetSecret").disabled = true;
