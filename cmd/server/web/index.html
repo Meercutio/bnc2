@@ -370,31 +370,31 @@
     <div id="overlaySlot" class="overlayInner">
         <!-- This same panel moves to header after login -->
         <div class="card" id="authPanel">
-            <h2>Login / Register</h2>
+            <h2 id="hAuth" data-i18n="hAuth">Login / Register</h2>
             <div class="row">
                 <div>
-                    <label>Email</label>
+                    <label data-i18n="lblEmail">Email</label>
                     <input id="email" placeholder="you@example.com" />
                 </div>
                 <div>
-                    <label>Password</label>
+                    <label data-i18n="lblPassword">Password</label>
                     <input id="password" type="password" placeholder="any" />
                 </div>
                 <div>
-                    <label>Display name (for register)</label>
+                    <label data-i18n="lblDisplayName">Display name (for register)</label>
                     <input id="displayName" placeholder="Player One" />
                 </div>
             </div>
 
             <div class="row" style="margin-top:10px;">
-                <button id="btnLogin">Login</button>
-                <button class="secondary" id="btnRegister">Register</button>
-                <button class="secondary" id="btnLogout">Logout</button>
+                <button id="btnLogin" data-i18n="btnLogin">Login</button>
+                <button class="secondary" id="btnRegister" data-i18n="btnRegister">Register</button>
+                <button class="secondary" id="btnLogout" data-i18n="btnLogout">Logout</button>
             </div>
 
             <div class="pills">
-                <div class="pill">Token: <span class="kv" id="tokenStatus"></span></div>
-                <div class="pill">Auth: <span class="kv" id="authMsg"></span></div>
+                <div class="pill"><span data-i18n="lblToken">Token</span>: <span class="kv" id="tokenStatus"></span></div>
+                <div class="pill"><span data-i18n="lblAuth">Auth</span>: <span class="kv" id="authMsg"></span></div>
             </div>
 
 
@@ -402,14 +402,14 @@
                 <span id="netDot" class="netDot"></span>
                 <div class="kv" id="netText">Соединение: закрыто</div>
                 <div style="flex:1"></div>
-                <button class="secondary small" id="btnReconnectNow" title="Try reconnect now">Reconnect</button>
+                <button class="secondary small" id="btnReconnectNow" data-i18n="btnReconnect" data-i18n-title="tipReconnectNow" title="Try reconnect now">Reconnect</button>
             </div>
 
             <div class="divider"></div>
 
             <div class="row">
                 <div>
-                    <label>Theme</label>
+                    <label data-i18n="lblTheme">Theme</label>
                     <select id="themeSelect">
                         <option value="system">System</option>
                         <option value="light">Light</option>
@@ -418,7 +418,7 @@
                 </div>
             </div>
 
-            <div class="muted" style="margin-top:10px;">
+            <div class="muted" style="margin-top:10px;" data-i18n-html="authAfterHtml">
                 После успешного входа панель переедет в меню <b>Account</b>, и откроется интерфейс игры.
             </div>
         </div>
@@ -432,9 +432,9 @@
         <div class="brand">Bulls & Cows</div>
 
         <div class="topbarRight">
-            <div class="pill">User: <span class="kv" id="userBadge">-</span></div>
+            <div class="pill"><span data-i18n="lblUser">User</span>: <span class="kv" id="userBadge">-</span></div>
 
-            <div class="pill">Theme:
+            <div class="pill"><span data-i18n="lblTheme">Theme</span>:
                 <select id="themeSelectTop" style="padding:6px 8px; min-width: 120px;">
                     <option value="system">System</option>
                     <option value="light">Light</option>
@@ -442,10 +442,12 @@
                 </select>
             </div>
 
-            <button class="secondary small" id="btnShowRating">Rating</button>
+            <button class="secondary small" id="btnRules" data-i18n="btnRules">Rules</button>
+            <button class="secondary small" id="btnShowRating" data-i18n="btnRating">Rating</button>
+            <button class="secondary small" id="btnLang" title="Switch language">EN</button>
 
             <details id="accountDetails" class="accountDetails">
-                <summary>Account</summary>
+                <summary id="summaryAccount" data-i18n="btnAccount">Account</summary>
                 <div id="headerAuthSlot"></div>
                 <div class="divider"></div>
                 <div class="row">
@@ -461,79 +463,82 @@
 
         <!-- MATCH -->
         <div class="card">
-            <h2>Match</h2>
+            <h2 id="hMatch" data-i18n="hMatch">Match</h2>
 
             <div class="row">
-                <button id="btnCreateAndJoin" title="Create a match and immediately connect">Create & Join</button>
+                <button id="btnCreateAndJoin" data-i18n="btnCreateJoin" data-i18n-title="tipCreateJoin" title="Create a match and immediately connect">Create & Join</button>
 
-                <button id="btnFindMatch">Find match</button>
-                <button class="secondary hidden" id="btnCancelFind">Cancel</button>
+                <button id="btnFindMatch" data-i18n="btnFindMatch">Find match</button>
+                <button class="secondary hidden" id="btnCancelFind" data-i18n="btnCancel">Cancel</button>
                 <div class="pill">MM: <span class="kv" id="mmStatus">idle</span></div>
 
-                <button class="secondary" id="btnReconnect" title="Reconnect to last match">Reconnect</button>
+                <button class="secondary" id="btnReconnect" data-i18n="btnReconnect" data-i18n-title="tipReconnect" title="Reconnect to last match">Reconnect</button>
 
                 <div style="flex:1"></div>
 
                 <div class="pill">WS: <span class="kv" id="wsStatus">closed</span></div>
-                <button class="secondary" id="btnLeave">Leave match</button>
+                <button class="secondary" id="btnLeave" data-i18n="btnLeave">Leave match</button>
             </div>
 
             <div class="divider"></div>
 
             <div class="row">
                 <div>
-                    <label>Match ID</label>
-                    <input id="matchId" placeholder="paste match id" />
+                    <label data-i18n="lblMatchId">Match ID</label>
+                    <input id="matchId" data-i18n-placeholder="phMatchId" placeholder="paste match id" />
                 </div>
 
-                <button class="secondary" id="btnJoin">Join</button>
-                <button class="secondary" id="btnCopyLink">Copy invite link</button>
+                <button class="secondary" id="btnJoin" data-i18n="btnJoin">Join</button>
+                <button class="secondary" id="btnCopyLink" data-i18n="btnCopyLink">Copy invite link</button>
             </div>
 
             <div class="row" style="margin-top:10px;">
                 <div style="flex:1; min-width: 260px;">
-                    <label>Invite link</label>
-                    <input id="inviteLink" readonly placeholder="will appear after match id" />
+                    <label data-i18n="lblInviteLink">Invite link</label>
+                    <input id="inviteLink" readonly data-i18n-placeholder="phInviteLink" placeholder="will appear after match id" />
                 </div>
             </div>
 
             <div class="pills">
-                <div class="pill">You: <span class="kv" id="youSlot">-</span></div>
-                <div class="pill">Phase: <span class="kv" id="phase">-</span></div>
-                <div class="pill">Round: <span class="kv" id="round">-</span></div>
-                <div class="pill">Deadline: <span class="kv" id="deadline">-</span></div>
-                <div class="pill">Series: <span class="kv" id="series">p1 0 : 0 p2 (draw 0)</span></div>
+                <div class="pill"><span data-i18n="lblYou">You</span>: <span class="kv" id="youSlot">-</span></div>
+                <div class="pill"><span data-i18n="lblPhase">Phase</span>: <span class="kv" id="phase">-</span></div>
+                <div class="pill"><span data-i18n="lblMode">Mode</span>: <span class="kv" id="matchMode">-</span></div>
+                <div class="pill"><span data-i18n="lblRound">Round</span>: <span class="kv" id="round">-</span></div>
+                <div class="pill"><span data-i18n="lblDeadline">Deadline</span>: <span class="kv" id="deadline">-</span></div>
+                <div class="pill"><span data-i18n="lblSeries">Series</span>: <span class="kv" id="series">p1 0 : 0 p2 (draw 0)</span></div>
             </div>
 
-            <div class="muted" style="margin-top:10px;">
+            <div id="friendlyNote" class="muted hidden" data-i18n="friendlyNote">Friendly match: rating is not affected.</div>
+
+            <div class="muted" style="margin-top:10px;" data-i18n-html="inviteHintHtml">
                 Поделись ссылкой — второй игрок просто откроет её и нажмёт <b>Join</b>.
             </div>
         </div>
 
         <!-- PROFILE -->
         <div class="card">
-            <h2>Profile</h2>
+            <h2 id="hProfile" data-i18n="hProfile">Profile</h2>
 
             <div class="pills">
-                <div class="pill">Name: <span class="kv" id="profName">-</span></div>
-                <div class="pill">Email: <span class="kv" id="profEmail">-</span></div>
+                <div class="pill"><span data-i18n="lblName">Name</span>: <span class="kv" id="profName">-</span></div>
+                <div class="pill"><span data-i18n="lblEmail">Email</span>: <span class="kv" id="profEmail">-</span></div>
             </div>
 
             <div class="pills">
-                <div class="pill">Wins: <span class="kv" id="profWins">0</span></div>
-                <div class="pill">Losses: <span class="kv" id="profLosses">0</span></div>
-                <div class="pill">Draws: <span class="kv" id="profDraws">0</span></div>
+                <div class="pill"><span data-i18n="lblWins">Wins</span>: <span class="kv" id="profWins">0</span></div>
+                <div class="pill"><span data-i18n="lblLosses">Losses</span>: <span class="kv" id="profLosses">0</span></div>
+                <div class="pill"><span data-i18n="lblDraws">Draws</span>: <span class="kv" id="profDraws">0</span></div>
             </div>
 
             <div class="pills" style="margin-top:10px;">
-                <div class="pill">Rating: <span class="kv" id="profRating">1000</span></div>
-                <div class="pill">Games: <span class="kv" id="profGames">0</span></div>
-                <div class="pill">Rank: <span class="kv" id="profRank">-</span></div>
+                <div class="pill"><span data-i18n="lblRating">Rating</span>: <span class="kv" id="profRating">1000</span></div>
+                <div class="pill"><span data-i18n="lblGames">Games</span>: <span class="kv" id="profGames">0</span></div>
+                <div class="pill"><span data-i18n="lblRank">Rank</span>: <span class="kv" id="profRank">-</span></div>
             </div>
 
             <div class="row" style="margin-top:10px;">
-                <button class="secondary" id="btnRefreshMe">Refresh</button>
-                <button class="secondary" id="btnLogoutTop">Logout</button>
+                <button class="secondary" id="btnRefreshMe" data-i18n="btnRefresh">Refresh</button>
+                <button class="secondary" id="btnLogoutTop" data-i18n="btnLogout">Logout</button>
             </div>
         </div>
 
@@ -542,7 +547,7 @@
     <!-- GAME -->
     <div class="center">
         <div class="card gameWrap">
-            <h2>Game</h2>
+            <h2 id="hGame" data-i18n="hGame">Game</h2>
 
             <div id="coach" class="coach">
                 <div class="coachTop">
@@ -558,20 +563,20 @@
                 <div class="statusBoard">
                     <div class="statusCol">
                         <div class="statusName">
-                            <span id="youName">Вы</span>
+                            <span id="youName" data-i18n="youName">You</span>
                             <span class="badge muted" id="youRole">-</span>
                         </div>
                         <div class="statusRows">
                             <div class="statusRow">
-                                <span class="statusKey">Подключение</span>
+                                <span class="statusKey" data-i18n="statusConn">Connection</span>
                                 <span class="badge muted" id="youConn">-</span>
                             </div>
                             <div class="statusRow">
-                                <span class="statusKey">Секрет</span>
+                                <span class="statusKey" data-i18n="statusSecret">Secret</span>
                                 <span class="badge muted" id="youSecret">-</span>
                             </div>
                             <div class="statusRow">
-                                <span class="statusKey">Ход</span>
+                                <span class="statusKey" data-i18n="statusMove">Move</span>
                                 <span class="badge muted" id="youGuess">-</span>
                             </div>
                         </div>
@@ -579,20 +584,20 @@
 
                     <div class="statusCol">
                         <div class="statusName">
-                            <span id="oppName">Соперник</span>
+                            <span id="oppName" data-i18n="oppName">Opponent</span>
                             <span class="badge muted" id="oppRole">-</span>
                         </div>
                         <div class="statusRows">
                             <div class="statusRow">
-                                <span class="statusKey">Подключение</span>
+                                <span class="statusKey" data-i18n="statusConn">Connection</span>
                                 <span class="badge muted" id="oppConn">-</span>
                             </div>
                             <div class="statusRow">
-                                <span class="statusKey">Секрет</span>
+                                <span class="statusKey" data-i18n="statusSecret">Secret</span>
                                 <span class="badge muted" id="oppSecret">-</span>
                             </div>
                             <div class="statusRow">
-                                <span class="statusKey">Ход</span>
+                                <span class="statusKey" data-i18n="statusMove">Move</span>
                                 <span class="badge muted" id="oppGuess">-</span>
                             </div>
                         </div>
@@ -600,7 +605,7 @@
                 </div>
 
                 <div id="revealBox" class="revealBox hidden">
-                    <div class="revealTitle">Секреты после игры</div>
+                    <div class="revealTitle" data-i18n="revealTitle">Secrets after game</div>
                     <div class="revealRow"><span id="revealYouLabel">Вы</span><code id="revealYouSecret">----</code></div>
                     <div class="revealRow" style="margin-top:6px;"><span id="revealOppLabel">Соперник</span><code id="revealOppSecret">----</code></div>
                 </div>
@@ -614,7 +619,7 @@
                             <div class="waitTitle" id="waitTitle">Ожидание…</div>
                             <div class="waitHint" id="waitHint">—</div>
                         </div>
-                        <button class="secondary small" id="btnOverlayReconnect">Reconnect</button>
+                        <button class="secondary small" id="btnOverlayReconnect" data-i18n="btnReconnect">Reconnect</button>
                     </div>
                 </div>
             </div>
@@ -622,40 +627,40 @@
 
             <div class="row">
                 <div>
-                    <label>Set secret (4 digits)</label>
-                    <input id="secret" placeholder="e.g. 0011" maxlength="4" inputmode="numeric" />
+                    <label data-i18n="lblSetSecret">Set secret (4 digits)</label>
+                    <input id="secret" data-i18n-placeholder="phSecret" placeholder="e.g. 0011" maxlength="4" inputmode="numeric" />
                 </div>
-                <button id="btnSetSecret">Set secret</button>
+                <button id="btnSetSecret" data-i18n="btnSetSecret">Set secret</button>
 
                 <div style="flex:1"></div>
 
                 <div>
-                    <label>Submit guess (4 digits)</label>
-                    <input id="guess" placeholder="e.g. 0101" maxlength="4" inputmode="numeric" />
+                    <label data-i18n="lblSubmitGuess">Submit guess (4 digits)</label>
+                    <input id="guess" data-i18n-placeholder="phGuess" placeholder="e.g. 0101" maxlength="4" inputmode="numeric" />
                 </div>
-                <button id="btnGuess">Submit guess</button>
+                <button id="btnGuess" data-i18n="btnSubmitGuess">Submit guess</button>
 
-                <button class="secondary" id="btnRematch" title="Request rematch (needs both players)">Rematch</button>
+                <button class="secondary" id="btnRematch" data-i18n="btnRematch" data-i18n-title="tipRematch" title="Request rematch (needs both players)">Rematch</button>
             </div>
 
             <div style="margin-top:12px;">
-                <div class="muted">History</div>
+                <div class="muted" data-i18n="lblHistory">History</div>
                 <div style="margin-top:8px; overflow:auto;">
                     <table>
                         <thead>
                         <tr>
-                            <th>Round</th>
+                            <th data-i18n="thRound">Round</th>
                             <th id="hP1Guess">P1 Guess</th>
                             <th id="hP1Bulls">P1 Bulls</th>
                             <th id="hP1Cows">P1 Cows</th>
                             <th id="hP2Guess">P2 Guess</th>
                             <th id="hP2Bulls">P2 Bulls</th>
                             <th id="hP2Cows">P2 Cows</th>
-                            <th>Winner</th>
+                            <th data-i18n="thWinner">Winner</th>
                         </tr>
                         </thead>
                         <tbody id="historyBody">
-                        <tr><td colspan="8" class="muted">No data yet</td></tr>
+                        <tr><td colspan="8" class="muted" data-i18n="noData">No data yet</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -666,7 +671,7 @@
     <!-- LOGS -->
     <div class="logsWrap">
         <details>
-            <summary>Logs</summary>
+            <summary id="sumLogs" data-i18n="sumLogs">Logs</summary>
             <pre id="log" style="height: 260px; margin-top:10px; overflow:auto;"></pre>
         </details>
     </div>
@@ -679,22 +684,22 @@
         <div class="card">
             <div class="row" style="justify-content: space-between; align-items: center;">
                 <div>
-                    <h2 style="margin:0;">Leaderboard</h2>
+                    <h2 style="margin:0;" id="hLeaderboard" data-i18n="hLeaderboard">Leaderboard</h2>
                     <div class="muted" id="ratingSub">Top players by rating (Elo)</div>
                 </div>
                 <div class="row" style="align-items:center;">
-                    <button class="secondary" id="btnRefreshRating">Refresh</button>
-                    <button id="btnCloseRating">Close</button>
+                    <button class="secondary" id="btnRefreshRating" data-i18n="btnRefresh">Refresh</button>
+                    <button id="btnCloseRating" data-i18n="btnClose">Close</button>
                 </div>
             </div>
 
             <div class="divider"></div>
 
             <div class="pills" id="myRatingBar">
-                <div class="pill">You: <span class="kv" id="myName">-</span></div>
+                <div class="pill"><span data-i18n="lblYou">You</span>: <span class="kv" id="myName">-</span></div>
                 <div class="pill">Rating: <span class="kv" id="myRating">-</span></div>
                 <div class="pill">Rank: <span class="kv" id="myRank">-</span></div>
-                <div class="pill">W/L/D: <span class="kv" id="myWLD">-</span></div>
+                <div class="pill"><span data-i18n="lblWLD">W/L/D</span>: <span class="kv" id="myWLD">-</span></div>
             </div>
 
             <div style="max-height: 60vh; overflow:auto; margin-top: 10px;">
@@ -702,18 +707,41 @@
                     <thead>
                     <tr>
                         <th>#</th>
-                        <th>Player</th>
-                        <th>Rating</th>
-                        <th>Games</th>
+                        <th data-i18n="thPlayer">Player</th>
+                        <th data-i18n="thRating">Rating</th>
+                        <th data-i18n="thGames">Games</th>
                         <th>W</th>
                         <th>L</th>
                         <th>D</th>
                     </tr>
                     </thead>
                     <tbody id="ratingBody">
-                    <tr><td colspan="7" class="muted">Loading…</td></tr>
+                    <tr><td colspan="7" class="muted" data-i18n="loading">Loading…</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RULES MODAL -->
+<div id="rulesOverlay" class="overlay hidden" style="z-index: 21;">
+    <div class="overlayInner">
+        <div class="card">
+            <div class="row" style="justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="margin:0;" id="hRules" data-i18n="hRules">Rules</h2>
+                    <div class="muted" id="rulesSub" data-i18n="rulesSub">How to play Bulls & Cows</div>
+                </div>
+                <div class="row" style="align-items:center;">
+                    <button id="btnCloseRules" data-i18n="btnClose">Close</button>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div id="rulesBody" style="line-height: 1.5; font-size: 14px;" data-i18n-html="rulesHtml">
+                <!-- filled by i18n -->
             </div>
         </div>
     </div>
@@ -724,6 +752,375 @@
     const WS_BASE = (location.protocol === "https:" ? "wss://" : "ws://") + location.host;
 
     const $ = (id) => document.getElementById(id);
+
+    // ---------------- i18n (RU/EN)
+    const I18N = {
+        ru: {
+            lblUser: "Пользователь",
+            lblTheme: "Тема",
+            btnRules: "Правила",
+            btnRating: "Рейтинг",
+            btnAccount: "Аккаунт",
+            btnClose: "Закрыть",
+            btnRefresh: "Обновить",
+            btnLogin: "Войти",
+            btnRegister: "Регистрация",
+            btnLogout: "Выйти",
+            lblEmail: "Email",
+            lblPassword: "Пароль",
+            lblDisplayName: "Имя (для регистрации)",
+            lblToken: "Токен",
+            lblAuth: "Авторизация",
+            hAuth: "Вход / Регистрация",
+            authAfterHtml: "После успешного входа панель переедет в меню <b>Аккаунт</b>, и откроется интерфейс игры.",
+            hMatch: "Матч",
+            hProfile: "Профиль",
+            hGame: "Игра",
+            sumLogs: "Логи",
+            btnCreateJoin: "Создать и подключиться",
+            tipCreateJoin: "Создать матч и сразу подключиться",
+            btnFindMatch: "Найти матч",
+            btnCancel: "Отмена",
+            btnReconnect: "Переподключиться",
+            tipReconnect: "Переподключиться к последнему матчу",
+            btnLeave: "Выйти из матча",
+            lblMatchId: "ID матча",
+            phMatchId: "вставьте id матча",
+            btnJoin: "Подключиться",
+            btnCopyLink: "Скопировать invite link",
+            lblInviteLink: "Invite link",
+            phInviteLink: "появится после id матча",
+            inviteHintHtml: "Поделись ссылкой — второй игрок просто откроет её и нажмёт <b>Подключиться</b>.",
+            lblYou: "Вы",
+            lblPhase: "Фаза",
+            lblMode: "Режим",
+            lblRound: "Раунд",
+            lblDeadline: "Дедлайн",
+            lblSeries: "Серия",
+            friendlyNote: "Дружеский матч: рейтинг не изменяется.",
+            lblName: "Имя",
+            lblWins: "Победы",
+            lblLosses: "Поражения",
+            lblDraws: "Ничьи",
+            lblRating: "Рейтинг",
+            lblGames: "Игр",
+            lblRank: "Место",
+            lblWLD: "В/П/Н",
+            youName: "Вы",
+            oppName: "Соперник",
+            statusConn: "Подключение",
+            statusSecret: "Секрет",
+            statusMove: "Ход",
+            revealTitle: "Секреты после игры",
+            lblSetSecret: "Задать секрет (4 цифры)",
+            phSecret: "например 0011",
+            btnSetSecret: "Задать секрет",
+            lblSubmitGuess: "Отправить попытку (4 цифры)",
+            phGuess: "например 0101",
+            btnSubmitGuess: "Отправить",
+            btnRematch: "Реванш",
+            tipRematch: "Запросить реванш (нужны оба игрока)",
+            lblHistory: "История",
+            thRound: "Раунд",
+            thWinner: "Победитель",
+            hLeaderboard: "Рейтинг игроков",
+            thPlayer: "Игрок",
+            thRating: "Рейтинг",
+            thGames: "Игр",
+            rulesSub: "Как играть в Bulls & Cows",
+            hRules: "Правила",
+            rulesHtml: `
+                <ol style="margin:0; padding-left: 18px;">
+                    <li><b>Каждый игрок загадывает секрет</b> — 4 цифры (0–9). Допускаются ведущие нули и повторы.</li>
+                    <li>Игроки делают попытки угадать секрет соперника. После каждого раунда вы получаете подсказку:
+                        <ul style="margin:6px 0 0 0; padding-left: 18px;">
+                            <li><b>Bulls</b> — цифра угадана и стоит на правильной позиции.</li>
+                            <li><b>Cows</b> — цифра есть в секрете, но позиция другая.</li>
+                        </ul>
+                    </li>
+                    <li><b>Побеждает</b> тот, кто первым угадает секрет соперника (4 Bulls).</li>
+                    <li>Если включён таймер раунда и время вышло — попытка считается пропущенной.</li>
+                    <li><b>Рейтинговый матч</b> начинается через кнопку <b>Найти матч</b> и влияет на рейтинг.</li>
+                    <li><b>Дружеский матч</b> создаётся по invite link и <b>не влияет</b> на рейтинг.</li>
+                </ol>
+            `,
+            stageConnectTitle: "Подключитесь к матчу",
+            stageConnectHint: "Создайте матч или вставьте ID матча, затем нажмите Подключиться.",
+            stageNoConnTitle: "Нет соединения",
+            stageNoConnHint: "Проверьте сеть. Мы попробуем переподключиться автоматически.",
+            stageWaitOpponentTitle: "Ожидаем соперника",
+            stageWaitOpponentHint: "Скопируйте invite link и отправьте второму игроку.",
+            waitOpponentTitle: "Ожидаем соперника",
+            waitOpponentHint: "Отправьте invite link — второй игрок откроет ссылку и нажмёт Подключиться.",
+            stageSetSecretTitle: "Задайте секрет",
+            stageSetSecretHint: "Введите 4 цифры (можно с нулями и повторами) и нажмите Задать секрет.",
+            stageSecretOkTitle: "Секрет принят",
+            stageSecretOkHint: "Ждём, пока соперник задаст секрет…",
+            waitStartTitle: "Стартуем",
+            waitStartHint: "Подготовка раунда…",
+            stageAlmostTitle: "Почти готово",
+            stageAlmostHint: "Оба секрета заданы — стартуем раунд…",
+            stageMakeMoveTitle: "Сделайте ход",
+            stageMakeMoveHintNoDeadline: "Введите 4 цифры и отправьте ход.",
+            stageMakeMoveHintDeadline: (ts) => `Введите 4 цифры и отправьте до ${ts}.`,
+            stageMoveOkTitle: "Ход принят",
+            stageMoveOkHint: "Ждём ход соперника…",
+            stageCountingTitle: "Раунд завершается",
+            stageCountingHint: "Подсчёт результатов…",
+            stageFinishedTitle: "Игра завершена",
+            stageFinishedHint: "Можно запросить реванш.",
+            stageFinishedHintWinner: (w) => `Победитель: ${w}. Можно запросить реванш.`,
+            waitTitleDefault: "Ожидание…",
+            waitLostTitle: "Потеряно соединение",
+            waitLostHint: "Пробуем переподключиться…",
+            netOffline: "offline",
+            netOnline: "online",
+            netConnecting: "подключение",
+            badgeReady: "готов",
+            badgeNotSet: "не задан",
+            badgeWaiting: "ожидание",
+            badgeNotInMatch: "не в матче",
+            badgeAccepted: "принят",
+            badgePending: "ожидается",
+            dash: "—",
+            modeRanked: "рейтинговый",
+            modeFriendly: "дружеский",
+            phase_waiting_players: "ожидание игроков",
+            phase_waiting_secrets: "ожидание секретов",
+            phase_playing: "игра",
+            phase_finished: "завершено",
+            mm_idle: "idle",
+            mm_searching: "поиск…",
+            mm_matched: "найден",
+            mm_error: "ошибка",
+            leaderboardTop: (n) => `Топ ${n} игроков по рейтингу (Elo)`,
+            loading: "Загрузка…",
+            noData: "Пока нет данных",
+            failedLeaderboard: "Не удалось загрузить рейтинг",
+            btnLang: "EN",
+            authPleaseLogin: "Пожалуйста, войдите.",
+            authTokenRestored: "Токен восстановлен.",
+            authSessionExpired: "Сессия истекла. Войдите снова.",
+            authLoggedOut: "Вы вышли.",
+            reconnectFailed: "Не удалось подключиться. Нажмите Переподключиться.",
+            reconnectLostTitle: "Соединение потеряно",
+            reconnectLostHint: (n) => `Переподключаемся… (попытка ${n})`,
+            reconnectLostBanner: (reason, n) => `Connection lost${reason ? ": " + reason : ""}. Reconnecting… (attempt ${n})`,
+            reconnectConnecting: (n) => `Connecting… (attempt ${n})`,
+            connectMatchBanner: "Подключаемся к матчу…",
+        },
+        en: {
+            lblUser: "User",
+            lblTheme: "Theme",
+            btnRules: "Rules",
+            btnRating: "Rating",
+            btnAccount: "Account",
+            btnClose: "Close",
+            btnRefresh: "Refresh",
+            btnLogin: "Login",
+            btnRegister: "Register",
+            btnLogout: "Logout",
+            lblEmail: "Email",
+            lblPassword: "Password",
+            lblDisplayName: "Display name (for register)",
+            lblToken: "Token",
+            lblAuth: "Auth",
+            hAuth: "Login / Register",
+            authAfterHtml: "After login, this panel moves into <b>Account</b>, and the game UI becomes available.",
+            hMatch: "Match",
+            hProfile: "Profile",
+            hGame: "Game",
+            sumLogs: "Logs",
+            btnCreateJoin: "Create & Join",
+            tipCreateJoin: "Create a match and connect immediately",
+            btnFindMatch: "Find match",
+            btnCancel: "Cancel",
+            btnReconnect: "Reconnect",
+            tipReconnect: "Reconnect to the last match",
+            btnLeave: "Leave match",
+            lblMatchId: "Match ID",
+            phMatchId: "paste match id",
+            btnJoin: "Join",
+            btnCopyLink: "Copy invite link",
+            lblInviteLink: "Invite link",
+            phInviteLink: "will appear after match id",
+            inviteHintHtml: "Share the link — the 2nd player opens it and clicks <b>Join</b>.",
+            lblYou: "You",
+            lblPhase: "Phase",
+            lblMode: "Mode",
+            lblRound: "Round",
+            lblDeadline: "Deadline",
+            lblSeries: "Series",
+            friendlyNote: "Friendly match: rating is not affected.",
+            lblName: "Name",
+            lblWins: "Wins",
+            lblLosses: "Losses",
+            lblDraws: "Draws",
+            lblRating: "Rating",
+            lblGames: "Games",
+            lblRank: "Rank",
+            lblWLD: "W/L/D",
+            youName: "You",
+            oppName: "Opponent",
+            statusConn: "Connection",
+            statusSecret: "Secret",
+            statusMove: "Move",
+            revealTitle: "Secrets after game",
+            lblSetSecret: "Set secret (4 digits)",
+            phSecret: "e.g. 0011",
+            btnSetSecret: "Set secret",
+            lblSubmitGuess: "Submit guess (4 digits)",
+            phGuess: "e.g. 0101",
+            btnSubmitGuess: "Submit guess",
+            btnRematch: "Rematch",
+            tipRematch: "Request rematch (needs both players)",
+            lblHistory: "History",
+            thRound: "Round",
+            thWinner: "Winner",
+            hLeaderboard: "Leaderboard",
+            thPlayer: "Player",
+            thRating: "Rating",
+            thGames: "Games",
+            rulesSub: "How to play Bulls & Cows",
+            hRules: "Rules",
+            rulesHtml: `
+                <ol style="margin:0; padding-left: 18px;">
+                    <li><b>Each player sets a secret</b> — 4 digits (0–9). Leading zeros and repeats are allowed.</li>
+                    <li>Players submit guesses. After each round you get hints:
+                        <ul style="margin:6px 0 0 0; padding-left: 18px;">
+                            <li><b>Bulls</b> — correct digit in the correct position.</li>
+                            <li><b>Cows</b> — digit exists, but in a different position.</li>
+                        </ul>
+                    </li>
+                    <li><b>You win</b> by guessing the opponent’s secret first (4 Bulls).</li>
+                    <li>If the round timer is enabled and time runs out — your attempt is missed.</li>
+                    <li><b>Ranked match</b> starts via <b>Find match</b> and affects rating.</li>
+                    <li><b>Friendly match</b> starts via invite link and <b>does not</b> affect rating.</li>
+                </ol>
+            `,
+            stageConnectTitle: "Connect to a match",
+            stageConnectHint: "Create a match or paste Match ID, then click Join.",
+            stageNoConnTitle: "No connection",
+            stageNoConnHint: "Check your network. We'll try to reconnect automatically.",
+            stageWaitOpponentTitle: "Waiting for opponent",
+            stageWaitOpponentHint: "Copy invite link and send it to the 2nd player.",
+            waitOpponentTitle: "Waiting for opponent",
+            waitOpponentHint: "Send invite link — the 2nd player opens it and clicks Join.",
+            stageSetSecretTitle: "Set your secret",
+            stageSetSecretHint: "Enter 4 digits (zeros and repeats allowed) and click Set secret.",
+            stageSecretOkTitle: "Secret accepted",
+            stageSecretOkHint: "Waiting for opponent to set a secret…",
+            waitStartTitle: "Starting",
+            waitStartHint: "Preparing the round…",
+            stageAlmostTitle: "Almost ready",
+            stageAlmostHint: "Both secrets are set — starting…",
+            stageMakeMoveTitle: "Make your move",
+            stageMakeMoveHintNoDeadline: "Enter 4 digits and submit.",
+            stageMakeMoveHintDeadline: (ts) => `Enter 4 digits and submit before ${ts}.`,
+            stageMoveOkTitle: "Move accepted",
+            stageMoveOkHint: "Waiting for opponent’s move…",
+            stageCountingTitle: "Finishing round",
+            stageCountingHint: "Calculating results…",
+            stageFinishedTitle: "Game finished",
+            stageFinishedHint: "You can request a rematch.",
+            stageFinishedHintWinner: (w) => `Winner: ${w}. You can request a rematch.`,
+            waitTitleDefault: "Waiting…",
+            waitLostTitle: "Connection lost",
+            waitLostHint: "Reconnecting…",
+            netOffline: "offline",
+            netOnline: "online",
+            netConnecting: "connecting",
+            badgeReady: "ready",
+            badgeNotSet: "not set",
+            badgeWaiting: "waiting",
+            badgeNotInMatch: "not in match",
+            badgeAccepted: "accepted",
+            badgePending: "pending",
+            dash: "—",
+            modeRanked: "ranked",
+            modeFriendly: "friendly",
+            phase_waiting_players: "waiting players",
+            phase_waiting_secrets: "waiting secrets",
+            phase_playing: "playing",
+            phase_finished: "finished",
+            mm_idle: "idle",
+            mm_searching: "searching…",
+            mm_matched: "matched",
+            mm_error: "error",
+            leaderboardTop: (n) => `Top ${n} players by rating (Elo)`,
+            loading: "Loading…",
+            noData: "No data yet",
+            failedLeaderboard: "Failed to load leaderboard",
+            btnLang: "RU",
+            authPleaseLogin: "Please login.",
+            authTokenRestored: "Token restored.",
+            authSessionExpired: "Session expired. Please login again.",
+            authLoggedOut: "Logged out.",
+            reconnectFailed: "Failed to connect. Click Reconnect.",
+            reconnectLostTitle: "Connection lost",
+            reconnectLostHint: (n) => `Reconnecting… (attempt ${n})`,
+            reconnectLostBanner: (reason, n) => `Connection lost${reason ? ": " + reason : ""}. Reconnecting… (attempt ${n})`,
+            reconnectConnecting: (n) => `Connecting… (attempt ${n})`,
+            connectMatchBanner: "Connecting to match…",
+        }
+    };
+
+    let currentLang = localStorage.getItem("lang") || "ru";
+
+    function t(key, ...args) {
+        const dict = I18N[currentLang] || I18N.ru;
+        const v = dict[key] ?? (I18N.ru[key] ?? key);
+        return typeof v === "function" ? v(...args) : v;
+    }
+
+    function applyI18n() {
+        document.documentElement.lang = currentLang;
+        // textContent
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+            const k = el.getAttribute("data-i18n");
+            el.textContent = t(k);
+        });
+        // placeholders
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+            const k = el.getAttribute("data-i18n-placeholder");
+            el.placeholder = t(k);
+        });
+        // titles
+        document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+            const k = el.getAttribute("data-i18n-title");
+            el.title = t(k);
+        });
+        // html content
+        document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+            const k = el.getAttribute("data-i18n-html");
+            el.innerHTML = t(k);
+        });
+
+        // Theme option labels (both selects)
+        document.querySelectorAll('#themeSelect option[value="system"], #themeSelectTop option[value="system"]').forEach(o => o.textContent = currentLang === "ru" ? "Системная" : "System");
+        document.querySelectorAll('#themeSelect option[value="light"], #themeSelectTop option[value="light"]').forEach(o => o.textContent = currentLang === "ru" ? "Светлая" : "Light");
+        document.querySelectorAll('#themeSelect option[value="dark"], #themeSelectTop option[value="dark"]').forEach(o => o.textContent = currentLang === "ru" ? "Тёмная" : "Dark");
+
+        // Language button label
+        const btn = $("btnLang");
+        if (btn) btn.textContent = t("btnLang");
+
+        // If we already have state — re-render dynamic strings in the current language
+        // Matchmaking status label
+        try { if (typeof mmStatusRaw !== "undefined") setMMStatus(mmStatusRaw); } catch {}
+
+        if (lastState) updateUXFromState(lastState);
+        else {
+            if ($("stageTitle")) $("stageTitle").textContent = t("stageConnectTitle");
+            if ($("stageHint")) $("stageHint").textContent = t("stageConnectHint");
+        }
+    }
+
+    function toggleLang() {
+        currentLang = currentLang === "ru" ? "en" : "ru";
+        localStorage.setItem("lang", currentLang);
+        applyI18n();
+    }
 
     // ---------------- Theme
     function applyTheme(v) {
@@ -742,11 +1139,11 @@
 
     // ---------------- Token
     function getToken() { return localStorage.getItem("accessToken") || ""; }
-    function setToken(t) {
-        if (!t) localStorage.removeItem("accessToken");
-        else localStorage.setItem("accessToken", t);
+    function setToken(token) {
+        if (!token) localStorage.removeItem("accessToken");
+        else localStorage.setItem("accessToken", token);
         const el = $("tokenStatus");
-        if (el) el.textContent = t ? "saved" : "empty";
+        if (el) el.textContent = token ? "saved" : "empty";
     }
 
     function setAuthMsg(text, isErr=false) {
@@ -767,8 +1164,8 @@
     async function api(path, opts={}) {
         const headers = opts.headers || {};
         headers["Content-Type"] = "application/json";
-        const t = getToken();
-        if (t) headers["Authorization"] = "Bearer " + t;
+        const tok = getToken();
+        if (tok) headers["Authorization"] = "Bearer " + tok;
 
         const res = await fetch(HTTP_BASE + path, { ...opts, headers });
         const text = await res.text();
@@ -846,8 +1243,8 @@
     async function loadRating() {
         const LIMIT = 20;
         const body = $("ratingBody");
-        body.innerHTML = `<tr><td colspan="7" class="muted">Loading…</td></tr>`;
-        $("ratingSub").textContent = `Top ${LIMIT} players by rating (Elo)`;
+        body.innerHTML = `<tr><td colspan="7" class="muted">${t("loading")}</td></tr>`;
+        $("ratingSub").textContent = t("leaderboardTop", LIMIT);
 
         // my bar
         $("myName").textContent = window.__meName || "-";
@@ -871,7 +1268,7 @@
             } catch {}
 
             if (!items.length) {
-                body.innerHTML = `<tr><td colspan="7" class="muted">No data yet</td></tr>`;
+                body.innerHTML = `<tr><td colspan="7" class="muted">${t("noData")}</td></tr>`;
                 return;
             }
 
@@ -890,10 +1287,18 @@
                 `;
             }).join("");
         } catch (e) {
-            body.innerHTML = `<tr><td colspan="7" class="err">Failed to load leaderboard</td></tr>`;
+            body.innerHTML = `<tr><td colspan="7" class="err">${t("failedLeaderboard")}</td></tr>`;
         }
     }
 
+
+    // ---------------- Rules modal
+    function openRules() {
+        $("rulesOverlay").classList.remove("hidden");
+    }
+    function closeRules() {
+        $("rulesOverlay").classList.add("hidden");
+    }
     // ---------------- MatchId + invite link
     function getQueryMatchId() {
         const u = new URL(location.href);
@@ -923,7 +1328,11 @@
         }
     }
 
-    function setMMStatus(s) { document.getElementById("mmStatus").textContent = s; }
+    let mmStatusRaw = "idle";
+    function setMMStatus(raw) {
+        mmStatusRaw = raw || "idle";
+        document.getElementById("mmStatus").textContent = mmLabel(mmStatusRaw);
+    }
 
     let mmAbort = null;
 
@@ -953,7 +1362,7 @@
 
         disconnectWS(); // если уже были подключены к матчу
 
-        setMMStatus("searching…");
+        setMMStatus("searching");
         setMMUI(true);
 
         mmAbort = new AbortController();
@@ -966,7 +1375,7 @@
                 connectWS(m);
                 log("[mm] matched: " + m);
             } else if (out.status === 409) {
-                setMMStatus("searching…"); // уже ждём
+                setMMStatus("searching"); // уже ждём
             } else {
                 setMMStatus("error");
                 log("[mm] unexpected: " + JSON.stringify(out));
@@ -982,7 +1391,7 @@
         } finally {
             mmAbort = null;
             setMMUI(false);
-            if (document.getElementById("mmStatus").textContent === "searching…") setMMStatus("idle");
+            if (mmStatusRaw === "searching") setMMStatus("idle");
         }
     }
 
@@ -1029,6 +1438,22 @@
         return winner;
     }
 
+    function phaseLabel(phase) {
+        if (!phase) return "-";
+        return t("phase_" + phase);
+    }
+
+    function winnerLabelLocalized(winner, names) {
+        if (!winner) return "";
+        if (winner === "draw") return currentLang === "ru" ? "ничья" : "draw";
+        return winnerLabel(winner, names);
+    }
+
+    function mmLabel(raw) {
+        if (!raw) return "-";
+        return t("mm_" + raw);
+    }
+
     function setWSStatus(s) { $("wsStatus").textContent = s; }
 
     function send(type, payload) {
@@ -1061,7 +1486,7 @@
         const lastIdx = hist.length - 1;
 
         if (!hist.length) {
-            body.innerHTML = `<tr><td colspan="8" class="muted">No data yet</td></tr>`;
+            body.innerHTML = `<tr><td colspan="8" class="muted" data-i18n="noData">No data yet</td></tr>`;
             return;
         }
 
@@ -1084,7 +1509,7 @@
             const p2B = p2.bulls ?? 0;
             const p2C = p2.cows ?? 0;
 
-            const winnerCell = (winner && idx === lastIdx) ? escapeHtml(winnerLabel(winner, names)) : "";
+            const winnerCell = (winner && idx === lastIdx) ? escapeHtml(winnerLabelLocalized(winner, names)) : "";
 
             return `
         <tr>
@@ -1128,7 +1553,7 @@
         if (!o) return;
         o.classList.toggle("hidden", !show);
         o.setAttribute("aria-hidden", (!show).toString());
-        $("waitTitle").textContent = title || "Ожидание…";
+        $("waitTitle").textContent = title || t("waitTitleDefault");
         $("waitHint").textContent = hint || "";
         $("btnOverlayReconnect").classList.toggle("hidden", !showBtn);
     }
@@ -1153,38 +1578,45 @@
         // Header pills (existing)
         setTableHeaders(names.p1, names.p2);
         $("youSlot").textContent = (names[you] || you || "-");
-        $("phase").textContent = s.phase || "-";
+        $("phase").textContent = phaseLabel(s.phase);
         $("round").textContent = (s.round ?? "-");
         $("deadline").textContent = s.deadlineMs ? new Date(s.deadlineMs).toLocaleTimeString() : "-";
 
+        if ($("matchMode")) {
+            $("matchMode").textContent = s.ranked ? t("modeRanked") : t("modeFriendly");
+        }
+        if ($("friendlyNote")) {
+            $("friendlyNote").classList.toggle("hidden", !!s.ranked);
+        }
+
         // Status board
-        $("youName").textContent = names[you] || "Вы";
-        $("oppName").textContent = names[opp] || "Соперник";
+        $("youName").textContent = names[you] || t("youName");
+        $("oppName").textContent = names[opp] || t("oppName");
         setBadge("youRole", "muted", you.toUpperCase());
         setBadge("oppRole", "muted", opp.toUpperCase());
 
         // Connected (server gives only total count; we treat it as opponent online/offline)
         const oppOnline = (s.playersConnected || 0) >= 2;
-        setBadge("youConn", "ok", "online");
-        setBadge("oppConn", oppOnline ? "ok" : "muted", oppOnline ? "online" : "offline");
+        setBadge("youConn", "ok", t("netOnline"));
+        setBadge("oppConn", oppOnline ? "ok" : "muted", oppOnline ? t("netOnline") : t("netOffline"));
 
         // Secrets
         const sr = s.secretsReady || {};
         const youSecretReady = !!sr[you];
         const oppSecretReady = !!sr[opp];
-        setBadge("youSecret", youSecretReady ? "ok" : "muted", youSecretReady ? "готов" : "не задан");
-        setBadge("oppSecret", oppSecretReady ? "ok" : "muted", oppSecretReady ? "готов" : (s.phase === "waiting_players" ? "не в матче" : "ожидание"));
+        setBadge("youSecret", youSecretReady ? "ok" : "muted", youSecretReady ? t("badgeReady") : t("badgeNotSet"));
+        setBadge("oppSecret", oppSecretReady ? "ok" : "muted", oppSecretReady ? t("badgeReady") : (s.phase === "waiting_players" ? t("badgeNotInMatch") : t("badgeWaiting")));
 
         // Guesses (current round)
         const gr = s.guessesReady || {};
         const youGuessReady = !!gr[you];
         const oppGuessReady = !!gr[opp];
         if (s.phase === "playing") {
-            setBadge("youGuess", youGuessReady ? "ok" : "muted", youGuessReady ? "принят" : "ожидается");
-            setBadge("oppGuess", oppGuessReady ? "ok" : "muted", oppGuessReady ? "принят" : "ожидается");
+            setBadge("youGuess", youGuessReady ? "ok" : "muted", youGuessReady ? t("badgeAccepted") : t("badgePending"));
+            setBadge("oppGuess", oppGuessReady ? "ok" : "muted", oppGuessReady ? t("badgeAccepted") : t("badgePending"));
         } else {
-            setBadge("youGuess", "muted", "—");
-            setBadge("oppGuess", "muted", "—");
+            setBadge("youGuess", "muted", t("dash"));
+            setBadge("oppGuess", "muted", t("dash"));
         }
 
         // Reveal secrets (only after finished)
@@ -1217,58 +1649,58 @@
 
         // Stage coach + waiting overlay
         if (!wsOpen) {
-            $("stageTitle").textContent = "Нет соединения";
-            $("stageHint").textContent = "Проверьте сеть. Мы попробуем переподключиться автоматически.";
-            setNetBadge("muted", "offline");
-            setWaitOverlay(true, "Потеряно соединение", "Пробуем переподключиться…", true);
+            $("stageTitle").textContent = t("stageNoConnTitle");
+            $("stageHint").textContent = t("stageNoConnHint");
+            setNetBadge("muted", t("netOffline"));
+            setWaitOverlay(true, t("waitLostTitle"), t("waitLostHint"), true);
             return;
         }
 
-        setNetBadge("ok", "online");
+        setNetBadge("ok", t("netOnline"));
 
         if (s.phase === "waiting_players") {
-            $("stageTitle").textContent = "Ожидаем соперника";
-            $("stageHint").textContent = "Скопируйте invite link и отправьте второму игроку.";
-            setWaitOverlay(true, "Ожидаем соперника", "Отправьте invite link — второй игрок откроет ссылку и нажмёт Join.", false);
+            $("stageTitle").textContent = t("stageWaitOpponentTitle");
+            $("stageHint").textContent = t("stageWaitOpponentHint");
+            setWaitOverlay(true, t("waitOpponentTitle"), t("waitOpponentHint"), false);
         } else if (s.phase === "waiting_secrets") {
             if (!youSecretReady) {
-                $("stageTitle").textContent = "Задайте секрет";
-                $("stageHint").textContent = "Введите 4 цифры (можно с нулями и повторами) и нажмите Set secret.";
+                $("stageTitle").textContent = t("stageSetSecretTitle");
+                $("stageHint").textContent = t("stageSetSecretHint");
                 setWaitOverlay(false, "", "", false);
             } else if (!oppSecretReady) {
-                $("stageTitle").textContent = "Секрет принят";
-                $("stageHint").textContent = "Ждём, пока соперник задаст секрет…";
-                setWaitOverlay(true, "Ждём соперника", "Как только соперник задаст секрет — начнётся раунд.", false);
+                $("stageTitle").textContent = t("stageSecretOkTitle");
+                $("stageHint").textContent = t("stageSecretOkHint");
+                setWaitOverlay(true, t("waitOpponentTitle"), t("stageSecretOkHint"), false);
             } else {
                 // оба готовы — скоро игра
-                $("stageTitle").textContent = "Почти готово";
-                $("stageHint").textContent = "Оба секрета заданы — стартуем раунд…";
-                setWaitOverlay(true, "Стартуем", "Подготовка раунда…", false);
+                $("stageTitle").textContent = t("stageAlmostTitle");
+                $("stageHint").textContent = t("stageAlmostHint");
+                setWaitOverlay(true, t("waitStartTitle"), t("waitStartHint"), false);
             }
         } else if (s.phase === "playing") {
             if (!youGuessReady) {
-                $("stageTitle").textContent = "Сделайте ход";
+                $("stageTitle").textContent = t("stageMakeMoveTitle");
                 $("stageHint").textContent = s.deadlineMs
-                    ? ("Введите 4 цифры и отправьте до " + new Date(s.deadlineMs).toLocaleTimeString() + ".")
-                    : "Введите 4 цифры и отправьте ход.";
+                    ? t("stageMakeMoveHintDeadline", new Date(s.deadlineMs).toLocaleTimeString())
+                    : t("stageMakeMoveHintNoDeadline");
                 setWaitOverlay(false, "", "", false);
             } else if (!oppGuessReady) {
-                $("stageTitle").textContent = "Ход принят";
-                $("stageHint").textContent = "Ждём ход соперника…";
-                setWaitOverlay(true, "Ждём соперника", "Ваш ход принят. Ожидаем соперника…", false);
+                $("stageTitle").textContent = t("stageMoveOkTitle");
+                $("stageHint").textContent = t("stageMoveOkHint");
+                setWaitOverlay(true, t("waitOpponentTitle"), t("stageMoveOkHint"), false);
             } else {
-                $("stageTitle").textContent = "Раунд завершается";
-                $("stageHint").textContent = "Подсчёт результатов…";
-                setWaitOverlay(true, "Подсчёт", "Скоро появится результат раунда…", false);
+                $("stageTitle").textContent = t("stageCountingTitle");
+                $("stageHint").textContent = t("stageCountingHint");
+                setWaitOverlay(true, t("stageCountingTitle"), t("stageCountingHint"), false);
             }
         } else if (s.phase === "finished") {
             const w = s.winner || "";
-            $("stageTitle").textContent = "Игра завершена";
-            $("stageHint").textContent = w ? ("Победитель: " + winnerLabel(w, names) + ". Можно запросить реванш.") : "Можно запросить реванш.";
+            $("stageTitle").textContent = t("stageFinishedTitle");
+            $("stageHint").textContent = w ? t("stageFinishedHintWinner", winnerLabelLocalized(w, names)) : t("stageFinishedHint");
             setWaitOverlay(false, "", "", false);
         } else {
-            $("stageTitle").textContent = "Матч";
-            $("stageHint").textContent = "—";
+            $("stageTitle").textContent = t("hMatch");
+            $("stageHint").textContent = t("dash");
             setWaitOverlay(false, "", "", false);
         }
     }
@@ -1287,7 +1719,7 @@
         clearReconnect();
         setNetBanner(false);
         setWaitOverlay(false, "", "", false);
-        setNetBadge("muted", "offline");
+        setNetBadge("muted", t("netOffline"));
         wsEverOpened = false;
     }
 
@@ -1300,10 +1732,10 @@
         const capAttempts = 12;
         if (reconnectAttempt >= capAttempts) {
             setWSStatus("closed");
-            setNetBanner(true, "Не удалось подключиться. Нажмите Reconnect.", "err", true);
+            setNetBanner(true, t("reconnectFailed"), "err", true);
             // Не показываем "потеряно соединение" при первом заходе (когда ещё ни разу не было успешного connect).
             if (wsEverOpened) {
-                setWaitOverlay(true, "Соединение потеряно", "Не удалось переподключиться автоматически. Нажмите Reconnect.", true);
+                setWaitOverlay(true, t("reconnectLostTitle"), t("reconnectFailed"), true);
             } else {
                 setWaitOverlay(false, "", "", false);
             }
@@ -1316,11 +1748,11 @@
 
         setWSStatus("reconnecting");
         if (wsEverOpened) {
-            setNetBanner(true, `Потеряно соединение${reason ? ": " + reason : ""}. Переподключаемся… (попытка ${reconnectAttempt + 1})`, "err", true);
-            setWaitOverlay(true, "Потеряно соединение", `Переподключаемся… (попытка ${reconnectAttempt + 1})`, true);
+            setNetBanner(true, t("reconnectLostBanner", reason, reconnectAttempt + 1), "err", true);
+            setWaitOverlay(true, t("reconnectLostTitle"), t("reconnectLostHint", reconnectAttempt + 1), true);
         } else {
             // Первый заход/авто-join: не пугаем "потеряно соединение", просто пытаемся подключиться.
-            setNetBanner(true, `Подключаемся… (попытка ${reconnectAttempt + 1})`, "muted", true);
+            setNetBanner(true, t("reconnectConnecting", reconnectAttempt + 1), "muted", true);
             setWaitOverlay(false, "", "", false);
         }
 
@@ -1364,15 +1796,15 @@
         ws = sock;
 
         setWSStatus(isRetry ? "reconnecting" : "connecting");
-        setNetBadge("muted", "connecting");
-        if (!isRetry) setNetBanner(true, "Подключаемся к матчу…", "muted", true);
+        setNetBadge("muted", t("netConnecting"));
+        if (!isRetry) setNetBanner(true, t("connectMatchBanner"), "muted", true);
 
         sock.onopen = () => {
             if (ws !== sock) return;
             setWSStatus("open");
             setNetBanner(false);
             setWaitOverlay(false, "", "", false);
-            setNetBadge("ok", "online");
+            setNetBadge("ok", t("netOnline"));
             reconnectAttempt = 0;
             wsEverOpened = true;
             log("[ws] connected");
@@ -1386,7 +1818,7 @@
             if (ws !== sock) return;
             ws = null;
             setWSStatus("closed");
-            setNetBadge("muted", "offline");
+            setNetBadge("muted", t("netOffline"));
             const reason = (ev && ev.reason) ? ev.reason : "";
             log("[ws] closed" + (reason ? " (" + reason + ")" : ""));
             scheduleReconnect(reason);
@@ -1395,7 +1827,7 @@
         sock.onerror = () => {
             if (ws !== sock) return;
             setWSStatus("error");
-            setNetBadge("muted", "offline");
+            setNetBadge("muted", t("netOffline"));
             log("[ws] error");
             // close will usually follow, but schedule just in case
             scheduleReconnect("ws error");
@@ -1519,7 +1951,7 @@ function connectWS(matchId) {
         disconnectWS();
         setToken("");
         $("meOut").textContent = "";
-        setAuthMsg("Logged out.", false);
+        setAuthMsg(t("authLoggedOut"), false);
         setAuthedUI(false);
     }
 
@@ -1548,6 +1980,14 @@ function connectWS(matchId) {
     $("ratingOverlay").addEventListener("click", (e) => {
         if (e.target && e.target.id === "ratingOverlay") closeRating();
     });
+
+    $("btnRules").onclick = () => openRules();
+    $("btnCloseRules").onclick = () => closeRules();
+    $("rulesOverlay").addEventListener("click", (e) => {
+        if (e.target && e.target.id === "rulesOverlay") closeRules();
+    });
+
+    $("btnLang").onclick = () => toggleLang();
 
     // ---------------- Match actions
     $("matchId").addEventListener("input", () => {
@@ -1612,12 +2052,12 @@ function connectWS(matchId) {
         $("round").textContent = "-";
         $("deadline").textContent = "-";
         $("series").textContent = "p1 0 : 0 p2 (draw 0)";
-        $("historyBody").innerHTML = `<tr><td colspan="8" class="muted">No data yet</td></tr>`;
+        $("historyBody").innerHTML = `<tr><td colspan="8" class="muted" data-i18n="noData">No data yet</td></tr>`;
 
         // UX reset
-        $("stageTitle").textContent = "Подключитесь к матчу";
-        $("stageHint").textContent = "Создайте матч или вставьте Match ID, затем нажмите Join.";
-        setNetBadge("muted", "offline");
+        $("stageTitle").textContent = t("stageConnectTitle");
+        $("stageHint").textContent = t("stageConnectHint");
+        setNetBadge("muted", t("netOffline"));
         setBadge("youRole", "muted", "-");
         setBadge("oppRole", "muted", "-");
         $("youName").textContent = "Вы";
@@ -1675,20 +2115,21 @@ function connectWS(matchId) {
     // ---------------- Boot
     (async function boot() {
         initTheme();
+        applyI18n();
         setToken(getToken());
 
         // Initial UX state
-        setNetBadge("muted", "offline");
+        setNetBadge("muted", t("netOffline"));
         $("secret").disabled = true;
         $("btnSetSecret").disabled = true;
         $("guess").disabled = true;
         $("btnGuess").disabled = true;
         $("btnRematch").disabled = true;
 
-        const t = getToken();
-        if (!t) {
+        const tok = getToken();
+        if (!tok) {
             setAuthedUI(false);
-            setAuthMsg("Please login.", false);
+            setAuthMsg(t("authPleaseLogin"), false);
             // prefill matchId from URL for convenience
             const m = getQueryMatchId();
             if (m) setMatchId(m, {persist:false, updateUrl:false});
@@ -1698,7 +2139,7 @@ function connectWS(matchId) {
         try {
             await refreshMe();
             setAuthedUI(true);
-            setAuthMsg("Token restored.", false);
+            setAuthMsg(t("authTokenRestored"), false);
 
             // match auto join (URL > lastMatch)
             const m = getQueryMatchId() || (localStorage.getItem("lastMatchId") || "");
@@ -1709,7 +2150,7 @@ function connectWS(matchId) {
         } catch (e) {
             setToken("");
             setAuthedUI(false);
-            setAuthMsg("Session expired. Please login again.", true);
+            setAuthMsg(t("authSessionExpired"), true);
         }
     })();
 </script>

@@ -126,7 +126,7 @@ func (s *Server) handleMatchmakingJoin(w http.ResponseWriter, r *http.Request) {
 	// Long-poll: keep request open until matched or client aborts.
 	matchID, jerr := s.mm.Join(r.Context(), claims.UserID, claims.DisplayName, func() (string, error) {
 		id := randID(10)
-		_, err := s.matches.Create(r.Context(), id)
+		_, err := s.matches.CreateRanked(r.Context(), id)
 		if err != nil {
 			return "", err
 		}

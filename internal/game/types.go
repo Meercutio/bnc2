@@ -38,6 +38,7 @@ type RoundHistoryItem struct {
 
 type StatePayload struct {
 	MatchID          string             `json:"matchId"`
+	Ranked           bool               `json:"ranked"`
 	You              string             `json:"you"` // "p1" | "p2"
 	PlayerNames      map[string]string  `json:"playerNames"`
 	PlayersConnected int                `json:"playersConnected"`

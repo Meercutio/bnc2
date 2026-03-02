@@ -10,6 +10,7 @@ import "time"
 type GameFinishedEvent struct {
 	ResultID   string    `json:"resultId"`
 	MatchID    string    `json:"matchId"`
+	Ranked     bool      `json:"ranked"`
 	GameNo     int       `json:"gameNo"`
 	P1ID       string    `json:"p1Id"`
 	P2ID       string    `json:"p2Id"`

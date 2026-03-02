@@ -48,8 +48,17 @@ func (s *MatchService) persistBestEffort(matchID string, snap MatchSnapshot) {
 	}
 }
 
+func (s *MatchService) CreateRanked(ctx context.Context, matchID string) (*Match, error) {
+	return s.createWithRanked(ctx, matchID, true)
+}
+
 func (s *MatchService) Create(ctx context.Context, matchID string) (*Match, error) {
+	return s.createWithRanked(ctx, matchID, false)
+}
+
+func (s *MatchService) createWithRanked(ctx context.Context, matchID string, ranked bool) (*Match, error) {
 	m := NewMatch(matchID, s.cfg.RoundDuration)
+	m.ranked = ranked
 
 	// best-effort, async game-finished sink
 	m.onGameFinished = func(e GameFinishedEvent) {
