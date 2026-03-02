@@ -5,6 +5,7 @@ import "time"
 // MatchSnapshot — сериализуемое состояние матча для Redis.
 type MatchSnapshot struct {
 	MatchID string `json:"matchId"`
+	Ranked  bool   `json:"ranked"`
 
 	Phase       string `json:"phase"`
 	Round       int    `json:"round"`
@@ -53,6 +54,7 @@ func (m *Match) snapshotLocked() MatchSnapshot {
 
 	return MatchSnapshot{
 		MatchID: m.id,
+		Ranked:  m.ranked,
 		Phase:   m.phase,
 		Round:   m.round,
 

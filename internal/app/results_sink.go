@@ -23,6 +23,10 @@ func (s *PGGameResultSink) HandleGameFinished(e game.GameFinishedEvent) {
 	if s == nil || s.Stats == nil {
 		return
 	}
+	if !e.Ranked {
+		// Friendly matches do not affect stats/rating.
+		return
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

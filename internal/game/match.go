@@ -17,8 +17,9 @@ const (
 )
 
 type Match struct {
-	id string
-	mu sync.Mutex
+	id     string
+	ranked bool // true => affects rating (matchmaking), false => friendly
+	mu     sync.Mutex
 
 	phase string // waiting_players|waiting_secrets|playing|finished
 
@@ -534,6 +535,7 @@ func (m *Match) buildStateLocked(slot Slot) StatePayload {
 
 	st := StatePayload{
 		MatchID: m.id,
+		Ranked:  m.ranked,
 		You:     you,
 		PlayerNames: map[string]string{
 			"p1": m.p1.name,
@@ -641,6 +643,7 @@ func (m *Match) emitGameFinishedLocked() {
 	e := GameFinishedEvent{
 		ResultID:   resultID,
 		MatchID:    m.id,
+		Ranked:     m.ranked,
 		GameNo:     gameNo,
 		P1ID:       m.p1.id,
 		P2ID:       m.p2.id,
