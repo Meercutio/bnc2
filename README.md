@@ -4,6 +4,9 @@ Real-time browser-based PvP game inspired by **Bulls and Cows**, built with **Go
 
 The project focuses on **correct game logic, deterministic server-side state, testability, and production-ready infrastructure**, while keeping the MVP simple and extensible.
 
+https://bnc2.onrender.com/
+to play
+
 ---
 
 ## ✨ Features
