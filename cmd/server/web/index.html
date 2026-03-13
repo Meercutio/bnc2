@@ -1481,8 +1481,6 @@
         const names = normalizeNames(state?.playerNames);
         lastNames = names;
 
-        const isFinished = state?.phase === "finished";
-        const revealed = state?.revealedSecrets || {};
         const lastIdx = hist.length - 1;
 
         if (!hist.length) {
@@ -1497,12 +1495,6 @@
 
             let p1Guess = p1.guess ?? (p1.missed ? "(missed)" : "");
             let p2Guess = p2.guess ?? (p2.missed ? "(missed)" : "");
-
-            // reveal opponent secrets on last row if finished
-            if (isFinished && idx === lastIdx) {
-                if (revealed?.p2) p1Guess = revealed.p2;
-                if (revealed?.p1) p2Guess = revealed.p1;
-            }
 
             const p1B = p1.bulls ?? 0;
             const p1C = p1.cows ?? 0;
