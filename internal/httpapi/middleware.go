@@ -3,7 +3,6 @@ package httpapi
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"example.com/bc-mvp/internal/auth"
 )
@@ -19,12 +18,11 @@ type TokenVerifier interface {
 func AuthMiddleware(verifier TokenVerifier) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			h := r.Header.Get("Authorization")
-			if !strings.HasPrefix(h, "Bearer ") {
+			token := auth.TokenFromRequest(r)
+			if token == "" {
 				writeError(w, http.StatusUnauthorized, "unauthorized", "missing bearer token")
 				return
 			}
-			token := strings.TrimPrefix(h, "Bearer ")
 
 			claims, err := verifier.Verify(token)
 			if err != nil {

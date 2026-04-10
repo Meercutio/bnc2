@@ -142,3 +142,30 @@ func TestWS_Endpoint_PathParam(t *testing.T) {
 		})
 	}
 }
+
+func TestCreateMatch_RequiresAuth(t *testing.T) {
+	cfg := Config{RoundDuration: 0}
+	persist := &memPersist{}
+	matchSvc := NewMatchService(cfg, persist)
+	server := NewServer(cfg, matchSvc, testVerifier{}, &Matchmaker{})
+
+	mux := http.NewServeMux()
+	server.RegisterRoutes(mux)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/match", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("status=%d want %d", rec.Code, http.StatusUnauthorized)
+	}
+
+	req = httptest.NewRequest(http.MethodPost, "/api/match", nil)
+	req.Header.Set("Authorization", "Bearer good")
+	rec = httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status=%d want %d", rec.Code, http.StatusOK)
+	}
+}

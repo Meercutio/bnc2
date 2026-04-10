@@ -67,7 +67,7 @@ func LoadFromEnv() (Config, error) {
 	c.HTTP.ShutdownTimeout = envDuration("HTTP_SHUTDOWN_TIMEOUT", 10*time.Second)
 
 	c.Postgres.URL = envString("DATABASE_URL", "postgres://bc:bc@localhost:5432/bc?sslmode=disable")
-	c.Postgres.RunMigrations = envBool("RUN_MIGRATIONS", false)
+	c.Postgres.RunMigrations = envBool("RUN_MIGRATIONS", true)
 	c.Postgres.MigrationsDir = envString("MIGRATIONS_DIR", "./db/migrations")
 
 	c.Redis.Addr = envString("REDIS_ADDR", "localhost:6379")

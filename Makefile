@@ -43,7 +43,7 @@ help:
 # -------------------------
 .PHONY: run
 run:
-	PORT=$(PORT) ROUND_DURATION=$(ROUND_DURATION) REDIS_ADDR=$(REDIS_ADDR) MATCH_TTL=$(MATCH_TTL) \
+	PORT=$(PORT) ROUND_DURATION=$(ROUND_DURATION) REDIS_ADDR=$(REDIS_ADDR) MATCH_TTL=$(MATCH_TTL) RUN_MIGRATIONS=true \
 	$(GO) run $(CMD_PATH)
 
 # -------------------------

@@ -99,6 +99,7 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger, opts Options)
 	// --- auth routes ---
 	mux.HandleFunc("/api/auth/register", authH.Register)
 	mux.HandleFunc("/api/auth/login", authH.Login)
+	mux.HandleFunc("/api/auth/logout", authH.Logout)
 	mux.Handle("/api/me", httpapi.AuthMiddleware(authSvc)(http.HandlerFunc(authH.Me)))
 	mux.HandleFunc("/api/rating/leaderboard", ratingH.Leaderboard)
 	mux.Handle("/api/rating/me", httpapi.AuthMiddleware(authSvc)(http.HandlerFunc(ratingH.Me)))
@@ -109,7 +110,7 @@ func New(ctx context.Context, cfg config.Config, log *slog.Logger, opts Options)
 
 	srv := &http.Server{
 		Addr:              cfg.HTTP.Addr,
-		Handler:           mux,
+		Handler:           httpapi.SecurityHeaders(mux),
 		ReadHeaderTimeout: cfg.HTTP.ReadHeaderTimeout,
 		ReadTimeout:       cfg.HTTP.ReadTimeout,
 		WriteTimeout:      cfg.HTTP.WriteTimeout,

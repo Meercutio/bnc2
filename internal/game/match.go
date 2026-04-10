@@ -153,6 +153,7 @@ func (m *Match) Detach(slot Slot) {
 	p.connected = false
 	p.conn = nil
 	m.updatePhaseLocked()
+	m.persistLocked()
 }
 
 func (m *Match) SetSecret(slot Slot, secret string) error {
@@ -554,7 +555,12 @@ func (m *Match) buildStateLocked(slot Slot) StatePayload {
 			"p2": m.p2.guessSet || m.p2.missed,
 		},
 		History: m.history,
-		Winner:  m.winner,
+		Series: SeriesScore{
+			P1Wins: m.seriesP1Wins,
+			P2Wins: m.seriesP2Wins,
+			Draws:  m.seriesDraws,
+		},
+		Winner: m.winner,
 	}
 
 	// Reveal secrets only after the game is finished.
@@ -582,6 +588,8 @@ func (m *Match) sendLocked(conn *ClientConn, env Envelope) {
 	}
 	b, _ := json.Marshal(env)
 	select {
+	case <-conn.done:
+		return
 	case conn.send <- b:
 	default:
 		// MVP: если клиент не успевает читать, просто дропаем (позже сделаем backpressure)
@@ -607,6 +615,20 @@ func valid4Digits(s string) bool {
 		}
 	}
 	return true
+}
+
+func (m *Match) ConnectedCount() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	count := 0
+	if m.p1.connected {
+		count++
+	}
+	if m.p2.connected {
+		count++
+	}
+	return count
 }
 
 func toMs(t time.Time) int64 {

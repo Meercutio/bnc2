@@ -84,10 +84,6 @@ func (s *MatchService) createWithRanked(ctx context.Context, matchID string, ran
 		return nil, fmt.Errorf("persist initial snapshot: %w", err)
 	}
 
-	s.mu.Lock()
-	s.in[matchID] = m
-	s.mu.Unlock()
-
 	return m, nil
 }
 
@@ -163,4 +159,17 @@ func (s *MatchService) GetOrLoad(ctx context.Context, matchID string) (*Match, b
 	s.mu.Unlock()
 
 	return m, true, nil
+}
+
+func (s *MatchService) ReleaseIfIdle(matchID string, m *Match) {
+	if m == nil || m.ConnectedCount() > 0 {
+		return
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if current, ok := s.in[matchID]; ok && current == m && m.ConnectedCount() == 0 {
+		delete(s.in, matchID)
+	}
 }
