@@ -55,8 +55,8 @@ func NewStatsStore(db *pgxpool.Pool) *StatsStore {
 
 func (s *StatsStore) InitForUser(ctx context.Context, userID string) error {
 	_, err := s.db.Exec(ctx, `
-		INSERT INTO player_stats (user_id, wins, losses, draws, games, rating)
-		VALUES ($1, 0, 0, 0, 0, 1000)
+		INSERT INTO player_stats (user_id)
+		VALUES ($1)
 		ON CONFLICT (user_id) DO NOTHING
 	`, userID)
 	return err
@@ -71,7 +71,9 @@ func (s *StatsStore) Get(ctx context.Context, userID string) (PlayerStats, error
 	`, userID).Scan(&st.UserID, &st.Wins, &st.Losses, &st.Draws, &st.Games, &st.Rating, &st.UpdatedAt)
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		// если вдруг статистики нет — это не фатально, можно считать нулями
+		if ensureErr := s.InitForUser(ctx, userID); ensureErr != nil {
+			return PlayerStats{}, ensureErr
+		}
 		return PlayerStats{UserID: userID, Rating: 1000}, nil
 	}
 	if err != nil {
@@ -135,6 +137,9 @@ func (s *StatsStore) MyRating(ctx context.Context, userID string) (MyRating, err
 		WHERE user_id = $1
 	`, userID).Scan(&out.UserID, &out.DisplayName, &out.Rating, &out.Games, &out.Wins, &out.Losses, &out.Draws, &out.Rank)
 	if errors.Is(err, pgx.ErrNoRows) {
+		if ensureErr := s.InitForUser(ctx, userID); ensureErr != nil {
+			return MyRating{}, ensureErr
+		}
 		return MyRating{UserID: userID, Rating: 1000, Rank: 0}, nil
 	}
 	return out, err

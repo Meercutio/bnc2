@@ -61,6 +61,10 @@ func (s *Server) handleCreateMatch(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
+	if _, err := s.verifyRequestAuth(r); err != nil {
+		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
+		return
+	}
 
 	matchID := randID(10)
 
@@ -117,7 +121,7 @@ func (s *Server) handleMatchmakingJoin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claims, err := s.verifyBearer(r)
+	claims, err := s.verifyRequestAuth(r)
 	if err != nil {
 		writeJSON(w, http.StatusUnauthorized, map[string]any{"error": "unauthorized"})
 		return
@@ -153,14 +157,10 @@ func (s *Server) handleMatchmakingJoin(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (s *Server) verifyBearer(r *http.Request) (*auth.Claims, error) {
-	h := r.Header.Get("Authorization")
-	if !strings.HasPrefix(h, "Bearer ") {
-		return nil, errors.New("missing bearer token")
-	}
-	tok := strings.TrimSpace(strings.TrimPrefix(h, "Bearer "))
+func (s *Server) verifyRequestAuth(r *http.Request) (*auth.Claims, error) {
+	tok := strings.TrimSpace(auth.TokenFromRequest(r))
 	if tok == "" {
-		return nil, errors.New("missing bearer token")
+		return nil, errors.New("missing auth token")
 	}
 	return s.auth.Verify(tok)
 }

@@ -8,11 +8,12 @@ import (
 	"sync"
 	"time"
 
+	"example.com/bc-mvp/internal/auth"
 	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true }, // MVP (в проде ограничить origin)
+	CheckOrigin: auth.AllowedWebSocketOrigin,
 }
 
 const (
@@ -25,14 +26,17 @@ const (
 type ClientConn struct {
 	ws   *websocket.Conn
 	send chan []byte
+	done chan struct{}
 
 	closeOnce sync.Once
 }
 
 func (c *ClientConn) Close() {
 	c.closeOnce.Do(func() {
-		close(c.send)
-		_ = c.ws.Close()
+		close(c.done)
+		if c.ws != nil {
+			_ = c.ws.Close()
+		}
 	})
 }
 
@@ -95,6 +99,7 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	cc := &ClientConn{
 		ws:   ws,
 		send: make(chan []byte, 64),
+		done: make(chan struct{}),
 	}
 
 	slot, errCode, errMsg := m.Attach(playerID, displayName, cc)
@@ -132,6 +137,9 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 					cc.Close()
 					return
 				}
+
+			case <-cc.done:
+				return
 			}
 		}
 	}()
@@ -190,13 +198,11 @@ func (s *Server) handleWS(w http.ResponseWriter, r *http.Request) {
 	m.Detach(slot)
 	cc.Close()
 	m.BroadcastState()
+	s.matches.ReleaseIfIdle(matchID, m)
 }
 
 func (s *Server) authFromRequest(r *http.Request) (userID string, displayName string, err error) {
-	// Authorization: Bearer <token>
-	h := r.Header.Get("Authorization")
-	if strings.HasPrefix(h, "Bearer ") {
-		tok := strings.TrimPrefix(h, "Bearer ")
+	if tok := auth.TokenFromRequest(r); tok != "" {
 		claims, err := s.auth.Verify(tok)
 		if err != nil {
 			return "", "", err

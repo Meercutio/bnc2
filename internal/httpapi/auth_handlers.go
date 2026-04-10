@@ -2,7 +2,10 @@ package httpapi
 
 import (
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
+	"net/mail"
 	"strings"
 	"time"
 
@@ -41,8 +44,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req RegisterRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "bad_request", "invalid json")
+	if err := decodeJSONBody(w, r, &req); err != nil {
 		return
 	}
 	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
@@ -52,8 +54,16 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "bad_request", "email, password and displayName are required")
 		return
 	}
-	if len(req.Password) < 1 {
-		writeError(w, http.StatusBadRequest, "bad_request", "password must be at least 1 chars")
+	if _, err := mail.ParseAddress(req.Email); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", "invalid email")
+		return
+	}
+	if len(req.Password) < 1 || len(req.Password) > 72 {
+		writeError(w, http.StatusBadRequest, "bad_request", "password must be 8-72 chars")
+		return
+	}
+	if len(req.DisplayName) > 40 {
+		writeError(w, http.StatusBadRequest, "bad_request", "displayName must be at most 40 chars")
 		return
 	}
 
@@ -71,7 +81,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		DisplayName:  req.DisplayName,
 	}
 
-	if err := h.Users.Create(r.Context(), u); err != nil {
+	if err := h.Users.CreateWithStats(r.Context(), u, 1000); err != nil {
 		if err == store.ErrEmailTaken {
 			writeError(w, http.StatusConflict, "email_taken", "email already exists")
 			return
@@ -79,9 +89,6 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "internal", "failed to create user")
 		return
 	}
-
-	// создаём пустую статистику
-	_ = h.Stats.InitForUser(r.Context(), userID)
 
 	// MVP: register возвращает 201 без токена (можно сделать сразу login, если хочешь)
 	w.WriteHeader(http.StatusCreated)
@@ -94,8 +101,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req LoginRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "bad_request", "invalid json")
+	if err := decodeJSONBody(w, r, &req); err != nil {
 		return
 	}
 	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
@@ -122,7 +128,18 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	auth.SetSessionCookie(w, r, token, h.TokenTTL)
 	writeJSON(w, http.StatusOK, LoginResponse{AccessToken: token})
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "use POST")
+		return
+	}
+
+	auth.ClearSessionCookie(w, r)
+	writeJSON(w, http.StatusOK, map[string]any{"ok": true})
 }
 
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
@@ -157,4 +174,20 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 			"rating": st.Rating,
 		},
 	})
+}
+
+func decodeJSONBody(w http.ResponseWriter, r *http.Request, dst any) error {
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	if err := dec.Decode(dst); err != nil {
+		writeError(w, http.StatusBadRequest, "bad_request", "invalid json")
+		return err
+	}
+	if err := dec.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+		writeError(w, http.StatusBadRequest, "bad_request", "invalid json")
+		return err
+	}
+	return nil
 }

@@ -7,360 +7,662 @@
 
     <style>
         :root {
-            --bg: #fafafa;
-            --panel: #ffffff;
-            --text: #111111;
-            --muted: #666666;
-            --border: #dddddd;
-            --shadow: 0 1px 0 rgba(0,0,0,0.03);
+            --bg: #efe6d9;
+            --bg-soft: rgba(255, 249, 241, 0.72);
+            --panel: rgba(255, 251, 245, 0.88);
+            --panel-strong: rgba(255, 252, 248, 0.96);
+            --text: #231b17;
+            --muted: #6e6055;
+            --border: rgba(92, 62, 41, 0.14);
+            --shadow: 0 22px 50px rgba(84, 53, 32, 0.12);
+            --shadow-soft: 0 10px 24px rgba(84, 53, 32, 0.08);
 
-            --btn-bg: #111;
-            --btn-text: #fff;
-            --btn-border: #111;
+            --btn-bg: linear-gradient(180deg, #a93936 0%, #822523 100%);
+            --btn-text: #fff8f2;
+            --btn-border: rgba(102, 29, 28, 0.45);
 
-            --btn2-bg: #fff;
-            --btn2-text: #111;
-            --btn2-border: #ddd;
+            --btn2-bg: rgba(255, 251, 245, 0.82);
+            --btn2-text: #231b17;
+            --btn2-border: rgba(92, 62, 41, 0.16);
 
-            --chip-bg: #fafafa;
-            --chip-border: #eee;
+            --chip-bg: rgba(255, 248, 239, 0.7);
+            --chip-border: rgba(92, 62, 41, 0.12);
 
-            --overlay: rgba(0,0,0,0.35);
-            --ok: #0a7;
-            --err: #c33;
+            --overlay: rgba(36, 24, 19, 0.44);
+            --ok: #1f7a61;
+            --err: #b34449;
+            --accent: #a93936;
+            --accent-soft: rgba(169, 57, 54, 0.12);
         }
 
-        /* Dark */
         html[data-theme="dark"] {
-            --bg: #0e0f12;
-            --panel: #14161b;
-            --text: #eef0f3;
-            --muted: #a4a9b3;
-            --border: #2a2f3a;
-            --shadow: 0 1px 0 rgba(255,255,255,0.03);
+            --bg: #171513;
+            --bg-soft: rgba(30, 27, 24, 0.82);
+            --panel: rgba(32, 28, 25, 0.88);
+            --panel-strong: rgba(36, 31, 28, 0.96);
+            --text: #f7efe7;
+            --muted: #b8aa9e;
+            --border: rgba(255, 231, 212, 0.11);
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+            --shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.2);
 
-            --btn-bg: #eef0f3;
-            --btn-text: #0e0f12;
-            --btn-border: #eef0f3;
+            --btn-bg: linear-gradient(180deg, #f3c56f 0%, #c7903c 100%);
+            --btn-text: #211710;
+            --btn-border: rgba(255, 222, 170, 0.26);
 
-            --btn2-bg: #14161b;
-            --btn2-text: #eef0f3;
-            --btn2-border: #2a2f3a;
+            --btn2-bg: rgba(31, 27, 24, 0.9);
+            --btn2-text: #f7efe7;
+            --btn2-border: rgba(255, 231, 212, 0.12);
 
-            --chip-bg: #101217;
-            --chip-border: #2a2f3a;
+            --chip-bg: rgba(40, 35, 31, 0.8);
+            --chip-border: rgba(255, 231, 212, 0.09);
 
-            --overlay: rgba(0,0,0,0.55);
+            --overlay: rgba(6, 5, 5, 0.58);
+            --ok: #62c6a5;
+            --err: #ff8f8f;
+            --accent: #f3c56f;
+            --accent-soft: rgba(243, 197, 111, 0.12);
         }
 
-        /* System */
         @media (prefers-color-scheme: dark) {
             html[data-theme="system"] {
-                --bg: #0e0f12;
-                --panel: #14161b;
-                --text: #eef0f3;
-                --muted: #a4a9b3;
-                --border: #2a2f3a;
-                --shadow: 0 1px 0 rgba(255,255,255,0.03);
+                --bg: #171513;
+                --bg-soft: rgba(30, 27, 24, 0.82);
+                --panel: rgba(32, 28, 25, 0.88);
+                --panel-strong: rgba(36, 31, 28, 0.96);
+                --text: #f7efe7;
+                --muted: #b8aa9e;
+                --border: rgba(255, 231, 212, 0.11);
+                --shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+                --shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.2);
 
-                --btn-bg: #eef0f3;
-                --btn-text: #0e0f12;
-                --btn-border: #eef0f3;
+                --btn-bg: linear-gradient(180deg, #f3c56f 0%, #c7903c 100%);
+                --btn-text: #211710;
+                --btn-border: rgba(255, 222, 170, 0.26);
 
-                --btn2-bg: #14161b;
-                --btn2-text: #eef0f3;
-                --btn2-border: #2a2f3a;
+                --btn2-bg: rgba(31, 27, 24, 0.9);
+                --btn2-text: #f7efe7;
+                --btn2-border: rgba(255, 231, 212, 0.12);
 
-                --chip-bg: #101217;
-                --chip-border: #2a2f3a;
+                --chip-bg: rgba(40, 35, 31, 0.8);
+                --chip-border: rgba(255, 231, 212, 0.09);
 
-                --overlay: rgba(0,0,0,0.55);
+                --overlay: rgba(6, 5, 5, 0.58);
+                --ok: #62c6a5;
+                --err: #ff8f8f;
+                --accent: #f3c56f;
+                --accent-soft: rgba(243, 197, 111, 0.12);
             }
         }
 
+        * { box-sizing: border-box; }
+
         body {
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-            margin: 18px;
+            position: relative;
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px;
             color: var(--text);
-            background: var(--bg);
+            background:
+                radial-gradient(circle at top left, rgba(255, 214, 170, 0.42), transparent 34%),
+                radial-gradient(circle at top right, rgba(171, 58, 55, 0.16), transparent 30%),
+                linear-gradient(180deg, #f7f1e8 0%, var(--bg) 100%);
+            font-family: "Avenir Next", "Segoe UI Variable", "Helvetica Neue", ui-sans-serif, sans-serif;
         }
 
-        h1 { margin: 0 0 10px; font-size: 20px; }
-        h2 { margin: 0 0 10px; font-size: 16px; }
+        html[data-theme="dark"] body {
+            background:
+                radial-gradient(circle at top left, rgba(243, 197, 111, 0.14), transparent 30%),
+                radial-gradient(circle at top right, rgba(169, 57, 54, 0.14), transparent 26%),
+                linear-gradient(180deg, #1f1b18 0%, var(--bg) 100%);
+        }
 
-        code { color: var(--muted); }
+        @media (prefers-color-scheme: dark) {
+            html[data-theme="system"] body {
+                background:
+                    radial-gradient(circle at top left, rgba(243, 197, 111, 0.14), transparent 30%),
+                    radial-gradient(circle at top right, rgba(169, 57, 54, 0.14), transparent 26%),
+                    linear-gradient(180deg, #1f1b18 0%, var(--bg) 100%);
+            }
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::before {
+            background:
+                linear-gradient(90deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 100%),
+                linear-gradient(rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 100%);
+            background-size: 42px 42px;
+            opacity: 0.22;
+            mix-blend-mode: soft-light;
+        }
+
+        body::after {
+            background: radial-gradient(circle at center, transparent 0%, transparent 62%, rgba(24, 16, 12, 0.08) 100%);
+        }
+
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        #app {
+            max-width: 1240px;
+            margin: 0 auto;
+        }
+
+        h1, h2, .brand {
+            font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+            letter-spacing: 0.02em;
+        }
+
+        h1 { margin: 0 0 12px; font-size: 28px; }
+        h2 { margin: 0 0 14px; font-size: 20px; }
+
+        code {
+            color: inherit;
+            font-family: "SFMono-Regular", "Menlo", "Monaco", monospace;
+        }
 
         .muted { color: var(--muted); font-size: 12px; }
-        .ok { color: var(--ok); font-weight: 700; }
-        .err { color: var(--err); font-weight: 700; }
+        .ok { color: var(--ok); font-weight: 800; }
+        .err { color: var(--err); font-weight: 800; }
 
         .hidden { display: none !important; }
 
         .card {
             border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 14px;
-            background: var(--panel);
+            border-radius: 28px;
+            padding: 22px;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 100%),
+                var(--panel);
             box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+            animation: riseIn 520ms ease both;
         }
 
-        .row { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; }
-        label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
+        @keyframes riseIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
         input, select {
-            padding: 10px 12px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
             min-width: 220px;
-            background: var(--panel);
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--panel-strong);
             color: var(--text);
             outline: none;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
+            transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
         }
-        input[readonly] { opacity: .9; }
+
+        input:focus, select:focus {
+            border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+            box-shadow:
+                0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent),
+                inset 0 1px 0 rgba(255,255,255,0.32);
+        }
+
+        input[readonly] { opacity: .94; }
 
         button {
-            padding: 10px 12px;
+            padding: 11px 14px;
             border: 1px solid var(--btn-border);
             background: var(--btn-bg);
             color: var(--btn-text);
-            border-radius: 10px;
+            border-radius: 16px;
             cursor: pointer;
             font-weight: 800;
-            letter-spacing: .2px;
+            letter-spacing: .02em;
+            box-shadow: 0 12px 24px rgba(118, 36, 33, 0.18);
+            transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
         }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 30px rgba(118, 36, 33, 0.24);
+        }
+
         button.secondary {
             background: var(--btn2-bg);
             color: var(--btn2-text);
             border: 1px solid var(--btn2-border);
+            box-shadow: var(--shadow-soft);
             font-weight: 700;
         }
-        button:disabled { opacity: .6; cursor:not-allowed; }
 
-        .pills { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-        .pill {
+        button:disabled {
+            opacity: .56;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .pill, .badge {
             border: 1px solid var(--chip-border);
             background: var(--chip-bg);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
+        }
+
+        .pill {
             border-radius: 999px;
-            padding: 6px 10px;
+            padding: 7px 11px;
             font-size: 12px;
             display: inline-flex;
             gap: 6px;
             align-items: center;
         }
+
         .kv { font-weight: 900; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; }
-        th { font-size: 12px; color: var(--muted); font-weight: 900; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
 
-        tr.hlRow td { font-weight: 900; }
+        th, td {
+            border-bottom: 1px solid var(--border);
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        th {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 900;
+        }
+
+        tr.hlRow td {
+            font-weight: 900;
+            background: color-mix(in srgb, var(--accent-soft) 70%, transparent);
+        }
 
         .gridTop {
             display: grid;
-            grid-template-columns: 1.25fr 0.75fr;
-            gap: 14px;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 18px;
             align-items: start;
-            margin-top: 12px;
+            margin-top: 18px;
         }
 
-        .center { display: grid; justify-items: center; margin-top: 14px; }
-        .gameWrap { width: min(980px, 100%); }
-        .logsWrap { margin-top: 14px; }
+        .center {
+            display: grid;
+            justify-items: stretch;
+            margin-top: 18px;
+        }
 
-        /* Header */
+        .gameWrap {
+            width: min(1040px, 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gameWrap::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, var(--accent-soft), transparent 34%);
+            pointer-events: none;
+        }
+
+        .logsWrap {
+            margin-top: 18px;
+            max-width: 1040px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .topbar {
             position: sticky;
             top: 12px;
             z-index: 5;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 10px 12px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+            padding: 14px 18px;
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            background: var(--panel);
             box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
         }
-        .brand { font-size: 16px; font-weight: 1000; letter-spacing: .2px; }
-        .topbarRight { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+        .brand {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .topbarRight {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        details.accountDetails {
+            min-width: 160px;
+        }
 
         details.accountDetails > summary {
             list-style: none;
             cursor: pointer;
             user-select: none;
-            padding: 6px 10px;
+            padding: 8px 12px;
             border: 1px solid var(--border);
-            border-radius: 10px;
-            background: var(--panel);
+            border-radius: 16px;
+            background: var(--panel-strong);
+            box-shadow: var(--shadow-soft);
             font-weight: 900;
             font-size: 12px;
         }
+
         details.accountDetails > summary::-webkit-details-marker { display:none; }
 
         #headerAuthSlot { margin-top: 10px; }
 
-        /* Overlay auth */
         .overlay {
             position: fixed;
             inset: 0;
             display: grid;
             place-items: center;
             background: var(--overlay);
+            backdrop-filter: blur(18px);
             padding: 18px;
             z-index: 10;
         }
-        .overlayInner { width: min(980px, 100%); }
 
-        #authPanel.compact { padding: 12px; }
-        #authPanel.compact h2 { margin-bottom: 8px; }
+        .overlayInner { width: min(1040px, 100%); }
+
+        #authPanel {
+            background:
+                radial-gradient(circle at top right, var(--accent-soft), transparent 32%),
+                var(--panel);
+        }
+
+        #authPanel.compact {
+            padding: 16px;
+            border-radius: 22px;
+        }
+
+        #authPanel.compact h2 { margin-bottom: 10px; }
         #authPanel.compact input { min-width: 180px; }
 
-        .divider { height: 1px; background: var(--border); margin: 12px 0; }
-
-        @media (max-width: 900px) {
-            .gridTop { grid-template-columns: 1fr; }
-            input, select { min-width: 180px; }
-            .topbar { top: 0; }
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 14px 0;
         }
-    
 
-        /* ---------- UX: readiness & reconnect ---------- */
-        .netBanner{
-            margin-top: 10px;
-            padding: 10px 12px;
+        .netBanner {
+            margin-top: 12px;
+            padding: 12px 14px;
             border: 1px dashed var(--border);
-            border-radius: 12px;
-            background: var(--chip-bg);
-            display:flex;
-            gap:10px;
-            align-items:center;
+            border-radius: 18px;
+            background: var(--bg-soft);
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
-        .netDot{ width:10px; height:10px; border-radius:999px; background: var(--muted); box-shadow: 0 0 0 3px rgba(0,0,0,0.02); }
-        .netDot.ok{ background: var(--ok); }
-        .netDot.err{ background: var(--err); }
 
-        .badge{
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
-            padding: 5px 10px;
+        .netDot {
+            width: 10px;
+            height: 10px;
             border-radius: 999px;
-            border: 1px solid var(--chip-border);
-            background: var(--panel);
+            background: var(--muted);
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.22);
+        }
+
+        .netDot.ok { background: var(--ok); }
+        .netDot.err { background: var(--err); }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
             font-size: 12px;
             line-height: 1;
             white-space: nowrap;
         }
-        .badge.ok{ border-color: color-mix(in srgb, var(--ok) 50%, var(--chip-border)); }
-        .badge.err{ border-color: color-mix(in srgb, var(--err) 50%, var(--chip-border)); }
-        .badge.muted{ background: var(--chip-bg); border-color: var(--chip-border); color: var(--muted); }
 
-        .coach{
+        .badge.ok { border-color: color-mix(in srgb, var(--ok) 50%, var(--chip-border)); }
+        .badge.err { border-color: color-mix(in srgb, var(--err) 50%, var(--chip-border)); }
+        .badge.muted { color: var(--muted); }
+
+        .coach {
             border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 12px;
-            background: var(--chip-bg);
-            margin-top: 10px;
+            border-radius: 24px;
+            padding: 18px;
+            background:
+                linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 42%, transparent), transparent 70%),
+                var(--chip-bg);
+            margin-top: 14px;
         }
-        .coachTop{ display:flex; gap:10px; align-items:flex-start; justify-content:space-between; }
-        .coachTitle{ font-weight: 800; font-size: 14px; letter-spacing: .2px; }
-        .coachHint{ margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.35; }
-        .coachRight{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
 
-        .statusBoard{
-            margin-top: 12px;
-            display:grid;
+        .coachTop {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .coachTitle {
+            font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+            font-weight: 700;
+            font-size: 22px;
+        }
+
+        .coachHint {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+            max-width: 56ch;
+        }
+
+        .coachRight {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .statusBoard {
+            margin-top: 14px;
+            display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
         }
-        .statusCol{
+
+        .statusCol {
             border: 1px solid var(--border);
-            border-radius: 14px;
-            background: var(--panel);
-            padding: 12px;
+            border-radius: 20px;
+            background: var(--panel-strong);
+            padding: 16px;
+            box-shadow: var(--shadow-soft);
         }
-        .statusName{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            gap:10px;
+
+        .statusName {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
             font-weight: 800;
             margin-bottom: 6px;
         }
-        .statusRows{ margin-top: 8px; }
-        .statusRow{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
+
+        .statusRows { margin-top: 8px; }
+
+        .statusRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             gap: 10px;
-            padding: 8px 0;
+            padding: 10px 0;
             border-top: 1px solid var(--border);
             font-size: 13px;
         }
-        .statusRow:first-child{ border-top: 0; }
-        .statusKey{ color: var(--muted); font-size: 12px; }
 
-        .revealBox{
-            margin-top: 10px;
-            padding: 10px 12px;
-            border-radius: 14px;
+        .statusRow:first-child { border-top: 0; }
+        .statusKey { color: var(--muted); font-size: 12px; }
+
+        .revealBox {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 18px;
             border: 1px solid var(--border);
-            background: var(--panel);
+            background: var(--panel-strong);
         }
-        .revealTitle{ font-weight: 800; margin-bottom: 6px; }
-        .revealRow{ display:flex; justify-content:space-between; gap: 10px; font-size: 13px; }
-        .revealRow code{ font-size: 13px; }
 
-        .gameWrap{ position: relative; }
+        .revealTitle {
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
 
-        /* Waiting toast (non-blocking) */
-        .waitOverlay{
+        .revealRow {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .revealRow code { font-size: 13px; }
+
+        .waitOverlay {
             position: fixed;
-            right: 16px;
-            bottom: 16px;
-            left: auto;
-            top: auto;
-            inset: auto;
-            border-radius: 0;
+            right: 18px;
+            bottom: 18px;
+            inset-inline-start: auto;
+            inset-block-start: auto;
             background: transparent;
-            display:flex;
-            align-items:flex-end;
-            justify-content:flex-end;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
             padding: 0;
             pointer-events: none;
             z-index: 6;
         }
-        .waitBox{
-            width: min(380px, calc(100vw - 32px));
-            border-radius: 18px;
+
+        .waitBox {
+            width: min(420px, calc(100vw - 36px));
+            border-radius: 24px;
             border: 1px solid var(--border);
             background: var(--panel);
-            padding: 16px;
-            box-shadow: 0 18px 55px rgba(0,0,0,0.22);
+            padding: 18px;
+            box-shadow: 0 22px 55px rgba(0,0,0,0.18);
             pointer-events: auto;
+            backdrop-filter: blur(16px);
         }
-        .waitTitle{ font-weight: 900; font-size: 16px; margin-bottom: 6px; }
-        .waitHint{ color: var(--muted); font-size: 13px; line-height: 1.35; }
-        .spinner{
-            width: 18px; height: 18px;
+
+        .waitTitle {
+            font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+            font-weight: 700;
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+
+        .waitHint {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
             border-radius: 999px;
             border: 2px solid var(--border);
-            border-top-color: var(--text);
+            border-top-color: var(--accent);
             animation: spin 0.9s linear infinite;
         }
+
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        button.small{
-            padding: 8px 10px;
-            border-radius: 10px;
+        button.small {
+            padding: 8px 11px;
+            border-radius: 14px;
             font-size: 12px;
         }
 
-        @media (max-width: 860px){
-            .statusBoard{ grid-template-columns: 1fr; }
-            .waitOverlay{ right: 10px; bottom: 10px; }
+        pre {
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: var(--panel);
+            padding: 14px;
+            box-shadow: var(--shadow-soft);
         }
-</style>
+
+        details > summary {
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        @media (max-width: 980px) {
+            body { padding: 18px; }
+            .gridTop { grid-template-columns: 1fr; }
+            .topbar { top: 0; }
+        }
+
+        @media (max-width: 860px) {
+            input, select { min-width: 180px; }
+            .statusBoard { grid-template-columns: 1fr; }
+            .waitOverlay { right: 10px; bottom: 10px; }
+            .brand { font-size: 24px; }
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 14px; }
+            .card { padding: 18px; border-radius: 22px; }
+            .topbar { padding: 12px 14px; border-radius: 22px; }
+            .row { gap: 10px; }
+        }
+    </style>
 </head>
 
 <body>
@@ -371,7 +673,7 @@
         <!-- This same panel moves to header after login -->
         <div class="card" id="authPanel">
             <h2 id="hAuth" data-i18n="hAuth">Login / Register</h2>
-            <div class="row">
+            <div id="authFormFields" class="row">
                 <div>
                     <label data-i18n="lblEmail">Email</label>
                     <input id="email" placeholder="you@example.com" />
@@ -386,15 +688,22 @@
                 </div>
             </div>
 
-            <div class="row" style="margin-top:10px;">
+            <div id="authGuestActions" class="row" style="margin-top:10px;">
                 <button id="btnLogin" data-i18n="btnLogin">Login</button>
                 <button class="secondary" id="btnRegister" data-i18n="btnRegister">Register</button>
+            </div>
+
+            <div id="authSessionActions" class="row hidden" style="margin-top:10px;">
                 <button class="secondary" id="btnLogout" data-i18n="btnLogout">Logout</button>
             </div>
 
             <div class="pills">
-                <div class="pill"><span data-i18n="lblToken">Token</span>: <span class="kv" id="tokenStatus"></span></div>
+                <div class="pill"><span data-i18n="lblSession">Session</span>: <span class="kv" id="sessionStatus"></span></div>
                 <div class="pill"><span data-i18n="lblAuth">Auth</span>: <span class="kv" id="authMsg"></span></div>
+            </div>
+
+            <div id="authSecureHint" class="muted hidden" style="margin-top:10px;" data-i18n="authSecureHint">
+                Сессия хранится в защищённой HttpOnly cookie и не лежит в localStorage.
             </div>
 
 
@@ -449,11 +758,6 @@
             <details id="accountDetails" class="accountDetails">
                 <summary id="summaryAccount" data-i18n="btnAccount">Account</summary>
                 <div id="headerAuthSlot"></div>
-                <div class="divider"></div>
-                <div class="row">
-                    <button class="secondary" id="btnMe">/api/me (debug)</button>
-                </div>
-                <pre id="meOut" style="margin-top:10px; max-height: 160px; overflow:auto;"></pre>
             </details>
         </div>
     </header>
@@ -747,1405 +1051,7 @@
     </div>
 </div>
 
-<script>
-    const HTTP_BASE = location.origin;
-    const WS_BASE = (location.protocol === "https:" ? "wss://" : "ws://") + location.host;
-
-    const $ = (id) => document.getElementById(id);
-
-    // ---------------- i18n (RU/EN)
-    const I18N = {
-        ru: {
-            lblUser: "Пользователь",
-            lblTheme: "Тема",
-            btnRules: "Правила",
-            btnRating: "Рейтинг",
-            btnAccount: "Аккаунт",
-            btnClose: "Закрыть",
-            btnRefresh: "Обновить",
-            btnLogin: "Войти",
-            btnRegister: "Регистрация",
-            btnLogout: "Выйти",
-            lblEmail: "Email",
-            lblPassword: "Пароль",
-            lblDisplayName: "Имя (для регистрации)",
-            lblToken: "Токен",
-            lblAuth: "Авторизация",
-            hAuth: "Вход / Регистрация",
-            authAfterHtml: "После успешного входа панель переедет в меню <b>Аккаунт</b>, и откроется интерфейс игры.",
-            hMatch: "Матч",
-            hProfile: "Профиль",
-            hGame: "Игра",
-            sumLogs: "Логи",
-            btnCreateJoin: "Создать и подключиться",
-            tipCreateJoin: "Создать матч и сразу подключиться",
-            btnFindMatch: "Найти матч",
-            btnCancel: "Отмена",
-            btnReconnect: "Переподключиться",
-            tipReconnect: "Переподключиться к последнему матчу",
-            btnLeave: "Выйти из матча",
-            lblMatchId: "ID матча",
-            phMatchId: "вставьте id матча",
-            btnJoin: "Подключиться",
-            btnCopyLink: "Скопировать invite link",
-            lblInviteLink: "Invite link",
-            phInviteLink: "появится после id матча",
-            inviteHintHtml: "Поделись ссылкой — второй игрок просто откроет её и нажмёт <b>Подключиться</b>.",
-            lblYou: "Вы",
-            lblPhase: "Фаза",
-            lblMode: "Режим",
-            lblRound: "Раунд",
-            lblDeadline: "Дедлайн",
-            lblSeries: "Серия",
-            friendlyNote: "Дружеский матч: рейтинг не изменяется.",
-            lblName: "Имя",
-            lblWins: "Победы",
-            lblLosses: "Поражения",
-            lblDraws: "Ничьи",
-            lblRating: "Рейтинг",
-            lblGames: "Игр",
-            lblRank: "Место",
-            lblWLD: "В/П/Н",
-            youName: "Вы",
-            oppName: "Соперник",
-            statusConn: "Подключение",
-            statusSecret: "Секрет",
-            statusMove: "Ход",
-            revealTitle: "Секреты после игры",
-            lblSetSecret: "Задать секрет (4 цифры)",
-            phSecret: "например 0011",
-            btnSetSecret: "Задать секрет",
-            lblSubmitGuess: "Отправить попытку (4 цифры)",
-            phGuess: "например 0101",
-            btnSubmitGuess: "Отправить",
-            btnRematch: "Реванш",
-            tipRematch: "Запросить реванш (нужны оба игрока)",
-            lblHistory: "История",
-            thRound: "Раунд",
-            thWinner: "Победитель",
-            hLeaderboard: "Рейтинг игроков",
-            thPlayer: "Игрок",
-            thRating: "Рейтинг",
-            thGames: "Игр",
-            rulesSub: "Как играть в Bulls & Cows",
-            hRules: "Правила",
-            rulesHtml: `
-                <ol style="margin:0; padding-left: 18px;">
-                    <li><b>Каждый игрок загадывает секрет</b> — 4 цифры (0–9). Допускаются ведущие нули и повторы.</li>
-                    <li>Игроки делают попытки угадать секрет соперника. После каждого раунда вы получаете подсказку:
-                        <ul style="margin:6px 0 0 0; padding-left: 18px;">
-                            <li><b>Bulls</b> — цифра угадана и стоит на правильной позиции.</li>
-                            <li><b>Cows</b> — цифра есть в секрете, но позиция другая.</li>
-                        </ul>
-                    </li>
-                    <li><b>Побеждает</b> тот, кто первым угадает секрет соперника (4 Bulls).</li>
-                    <li>Если включён таймер раунда и время вышло — попытка считается пропущенной.</li>
-                    <li><b>Рейтинговый матч</b> начинается через кнопку <b>Найти матч</b> и влияет на рейтинг.</li>
-                    <li><b>Дружеский матч</b> создаётся по invite link и <b>не влияет</b> на рейтинг.</li>
-                </ol>
-            `,
-            stageConnectTitle: "Подключитесь к матчу",
-            stageConnectHint: "Создайте матч или вставьте ID матча, затем нажмите Подключиться.",
-            stageNoConnTitle: "Нет соединения",
-            stageNoConnHint: "Проверьте сеть. Мы попробуем переподключиться автоматически.",
-            stageWaitOpponentTitle: "Ожидаем соперника",
-            stageWaitOpponentHint: "Скопируйте invite link и отправьте второму игроку.",
-            waitOpponentTitle: "Ожидаем соперника",
-            waitOpponentHint: "Отправьте invite link — второй игрок откроет ссылку и нажмёт Подключиться.",
-            stageSetSecretTitle: "Задайте секрет",
-            stageSetSecretHint: "Введите 4 цифры (можно с нулями и повторами) и нажмите Задать секрет.",
-            stageSecretOkTitle: "Секрет принят",
-            stageSecretOkHint: "Ждём, пока соперник задаст секрет…",
-            waitStartTitle: "Стартуем",
-            waitStartHint: "Подготовка раунда…",
-            stageAlmostTitle: "Почти готово",
-            stageAlmostHint: "Оба секрета заданы — стартуем раунд…",
-            stageMakeMoveTitle: "Сделайте ход",
-            stageMakeMoveHintNoDeadline: "Введите 4 цифры и отправьте ход.",
-            stageMakeMoveHintDeadline: (ts) => `Введите 4 цифры и отправьте до ${ts}.`,
-            stageMoveOkTitle: "Ход принят",
-            stageMoveOkHint: "Ждём ход соперника…",
-            stageCountingTitle: "Раунд завершается",
-            stageCountingHint: "Подсчёт результатов…",
-            stageFinishedTitle: "Игра завершена",
-            stageFinishedHint: "Можно запросить реванш.",
-            stageFinishedHintWinner: (w) => `Победитель: ${w}. Можно запросить реванш.`,
-            waitTitleDefault: "Ожидание…",
-            waitLostTitle: "Потеряно соединение",
-            waitLostHint: "Пробуем переподключиться…",
-            netOffline: "offline",
-            netOnline: "online",
-            netConnecting: "подключение",
-            badgeReady: "готов",
-            badgeNotSet: "не задан",
-            badgeWaiting: "ожидание",
-            badgeNotInMatch: "не в матче",
-            badgeAccepted: "принят",
-            badgePending: "ожидается",
-            dash: "—",
-            modeRanked: "рейтинговый",
-            modeFriendly: "дружеский",
-            phase_waiting_players: "ожидание игроков",
-            phase_waiting_secrets: "ожидание секретов",
-            phase_playing: "игра",
-            phase_finished: "завершено",
-            mm_idle: "idle",
-            mm_searching: "поиск…",
-            mm_matched: "найден",
-            mm_error: "ошибка",
-            leaderboardTop: (n) => `Топ ${n} игроков по рейтингу (Elo)`,
-            loading: "Загрузка…",
-            noData: "Пока нет данных",
-            failedLeaderboard: "Не удалось загрузить рейтинг",
-            btnLang: "EN",
-            authPleaseLogin: "Пожалуйста, войдите.",
-            authTokenRestored: "Токен восстановлен.",
-            authSessionExpired: "Сессия истекла. Войдите снова.",
-            authLoggedOut: "Вы вышли.",
-            reconnectFailed: "Не удалось подключиться. Нажмите Переподключиться.",
-            reconnectLostTitle: "Соединение потеряно",
-            reconnectLostHint: (n) => `Переподключаемся… (попытка ${n})`,
-            reconnectLostBanner: (reason, n) => `Connection lost${reason ? ": " + reason : ""}. Reconnecting… (attempt ${n})`,
-            reconnectConnecting: (n) => `Connecting… (attempt ${n})`,
-            connectMatchBanner: "Подключаемся к матчу…",
-        },
-        en: {
-            lblUser: "User",
-            lblTheme: "Theme",
-            btnRules: "Rules",
-            btnRating: "Rating",
-            btnAccount: "Account",
-            btnClose: "Close",
-            btnRefresh: "Refresh",
-            btnLogin: "Login",
-            btnRegister: "Register",
-            btnLogout: "Logout",
-            lblEmail: "Email",
-            lblPassword: "Password",
-            lblDisplayName: "Display name (for register)",
-            lblToken: "Token",
-            lblAuth: "Auth",
-            hAuth: "Login / Register",
-            authAfterHtml: "After login, this panel moves into <b>Account</b>, and the game UI becomes available.",
-            hMatch: "Match",
-            hProfile: "Profile",
-            hGame: "Game",
-            sumLogs: "Logs",
-            btnCreateJoin: "Create & Join",
-            tipCreateJoin: "Create a match and connect immediately",
-            btnFindMatch: "Find match",
-            btnCancel: "Cancel",
-            btnReconnect: "Reconnect",
-            tipReconnect: "Reconnect to the last match",
-            btnLeave: "Leave match",
-            lblMatchId: "Match ID",
-            phMatchId: "paste match id",
-            btnJoin: "Join",
-            btnCopyLink: "Copy invite link",
-            lblInviteLink: "Invite link",
-            phInviteLink: "will appear after match id",
-            inviteHintHtml: "Share the link — the 2nd player opens it and clicks <b>Join</b>.",
-            lblYou: "You",
-            lblPhase: "Phase",
-            lblMode: "Mode",
-            lblRound: "Round",
-            lblDeadline: "Deadline",
-            lblSeries: "Series",
-            friendlyNote: "Friendly match: rating is not affected.",
-            lblName: "Name",
-            lblWins: "Wins",
-            lblLosses: "Losses",
-            lblDraws: "Draws",
-            lblRating: "Rating",
-            lblGames: "Games",
-            lblRank: "Rank",
-            lblWLD: "W/L/D",
-            youName: "You",
-            oppName: "Opponent",
-            statusConn: "Connection",
-            statusSecret: "Secret",
-            statusMove: "Move",
-            revealTitle: "Secrets after game",
-            lblSetSecret: "Set secret (4 digits)",
-            phSecret: "e.g. 0011",
-            btnSetSecret: "Set secret",
-            lblSubmitGuess: "Submit guess (4 digits)",
-            phGuess: "e.g. 0101",
-            btnSubmitGuess: "Submit guess",
-            btnRematch: "Rematch",
-            tipRematch: "Request rematch (needs both players)",
-            lblHistory: "History",
-            thRound: "Round",
-            thWinner: "Winner",
-            hLeaderboard: "Leaderboard",
-            thPlayer: "Player",
-            thRating: "Rating",
-            thGames: "Games",
-            rulesSub: "How to play Bulls & Cows",
-            hRules: "Rules",
-            rulesHtml: `
-                <ol style="margin:0; padding-left: 18px;">
-                    <li><b>Each player sets a secret</b> — 4 digits (0–9). Leading zeros and repeats are allowed.</li>
-                    <li>Players submit guesses. After each round you get hints:
-                        <ul style="margin:6px 0 0 0; padding-left: 18px;">
-                            <li><b>Bulls</b> — correct digit in the correct position.</li>
-                            <li><b>Cows</b> — digit exists, but in a different position.</li>
-                        </ul>
-                    </li>
-                    <li><b>You win</b> by guessing the opponent’s secret first (4 Bulls).</li>
-                    <li>If the round timer is enabled and time runs out — your attempt is missed.</li>
-                    <li><b>Ranked match</b> starts via <b>Find match</b> and affects rating.</li>
-                    <li><b>Friendly match</b> starts via invite link and <b>does not</b> affect rating.</li>
-                </ol>
-            `,
-            stageConnectTitle: "Connect to a match",
-            stageConnectHint: "Create a match or paste Match ID, then click Join.",
-            stageNoConnTitle: "No connection",
-            stageNoConnHint: "Check your network. We'll try to reconnect automatically.",
-            stageWaitOpponentTitle: "Waiting for opponent",
-            stageWaitOpponentHint: "Copy invite link and send it to the 2nd player.",
-            waitOpponentTitle: "Waiting for opponent",
-            waitOpponentHint: "Send invite link — the 2nd player opens it and clicks Join.",
-            stageSetSecretTitle: "Set your secret",
-            stageSetSecretHint: "Enter 4 digits (zeros and repeats allowed) and click Set secret.",
-            stageSecretOkTitle: "Secret accepted",
-            stageSecretOkHint: "Waiting for opponent to set a secret…",
-            waitStartTitle: "Starting",
-            waitStartHint: "Preparing the round…",
-            stageAlmostTitle: "Almost ready",
-            stageAlmostHint: "Both secrets are set — starting…",
-            stageMakeMoveTitle: "Make your move",
-            stageMakeMoveHintNoDeadline: "Enter 4 digits and submit.",
-            stageMakeMoveHintDeadline: (ts) => `Enter 4 digits and submit before ${ts}.`,
-            stageMoveOkTitle: "Move accepted",
-            stageMoveOkHint: "Waiting for opponent’s move…",
-            stageCountingTitle: "Finishing round",
-            stageCountingHint: "Calculating results…",
-            stageFinishedTitle: "Game finished",
-            stageFinishedHint: "You can request a rematch.",
-            stageFinishedHintWinner: (w) => `Winner: ${w}. You can request a rematch.`,
-            waitTitleDefault: "Waiting…",
-            waitLostTitle: "Connection lost",
-            waitLostHint: "Reconnecting…",
-            netOffline: "offline",
-            netOnline: "online",
-            netConnecting: "connecting",
-            badgeReady: "ready",
-            badgeNotSet: "not set",
-            badgeWaiting: "waiting",
-            badgeNotInMatch: "not in match",
-            badgeAccepted: "accepted",
-            badgePending: "pending",
-            dash: "—",
-            modeRanked: "ranked",
-            modeFriendly: "friendly",
-            phase_waiting_players: "waiting players",
-            phase_waiting_secrets: "waiting secrets",
-            phase_playing: "playing",
-            phase_finished: "finished",
-            mm_idle: "idle",
-            mm_searching: "searching…",
-            mm_matched: "matched",
-            mm_error: "error",
-            leaderboardTop: (n) => `Top ${n} players by rating (Elo)`,
-            loading: "Loading…",
-            noData: "No data yet",
-            failedLeaderboard: "Failed to load leaderboard",
-            btnLang: "RU",
-            authPleaseLogin: "Please login.",
-            authTokenRestored: "Token restored.",
-            authSessionExpired: "Session expired. Please login again.",
-            authLoggedOut: "Logged out.",
-            reconnectFailed: "Failed to connect. Click Reconnect.",
-            reconnectLostTitle: "Connection lost",
-            reconnectLostHint: (n) => `Reconnecting… (attempt ${n})`,
-            reconnectLostBanner: (reason, n) => `Connection lost${reason ? ": " + reason : ""}. Reconnecting… (attempt ${n})`,
-            reconnectConnecting: (n) => `Connecting… (attempt ${n})`,
-            connectMatchBanner: "Connecting to match…",
-        }
-    };
-
-    let currentLang = localStorage.getItem("lang") || "ru";
-
-    function t(key, ...args) {
-        const dict = I18N[currentLang] || I18N.ru;
-        const v = dict[key] ?? (I18N.ru[key] ?? key);
-        return typeof v === "function" ? v(...args) : v;
-    }
-
-    function applyI18n() {
-        document.documentElement.lang = currentLang;
-        // textContent
-        document.querySelectorAll("[data-i18n]").forEach((el) => {
-            const k = el.getAttribute("data-i18n");
-            el.textContent = t(k);
-        });
-        // placeholders
-        document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
-            const k = el.getAttribute("data-i18n-placeholder");
-            el.placeholder = t(k);
-        });
-        // titles
-        document.querySelectorAll("[data-i18n-title]").forEach((el) => {
-            const k = el.getAttribute("data-i18n-title");
-            el.title = t(k);
-        });
-        // html content
-        document.querySelectorAll("[data-i18n-html]").forEach((el) => {
-            const k = el.getAttribute("data-i18n-html");
-            el.innerHTML = t(k);
-        });
-
-        // Theme option labels (both selects)
-        document.querySelectorAll('#themeSelect option[value="system"], #themeSelectTop option[value="system"]').forEach(o => o.textContent = currentLang === "ru" ? "Системная" : "System");
-        document.querySelectorAll('#themeSelect option[value="light"], #themeSelectTop option[value="light"]').forEach(o => o.textContent = currentLang === "ru" ? "Светлая" : "Light");
-        document.querySelectorAll('#themeSelect option[value="dark"], #themeSelectTop option[value="dark"]').forEach(o => o.textContent = currentLang === "ru" ? "Тёмная" : "Dark");
-
-        // Language button label
-        const btn = $("btnLang");
-        if (btn) btn.textContent = t("btnLang");
-
-        // If we already have state — re-render dynamic strings in the current language
-        // Matchmaking status label
-        try { if (typeof mmStatusRaw !== "undefined") setMMStatus(mmStatusRaw); } catch {}
-
-        if (lastState) updateUXFromState(lastState);
-        else {
-            if ($("stageTitle")) $("stageTitle").textContent = t("stageConnectTitle");
-            if ($("stageHint")) $("stageHint").textContent = t("stageConnectHint");
-        }
-    }
-
-    function toggleLang() {
-        currentLang = currentLang === "ru" ? "en" : "ru";
-        localStorage.setItem("lang", currentLang);
-        applyI18n();
-    }
-
-    // ---------------- Theme
-    function applyTheme(v) {
-        const html = document.documentElement;
-        html.setAttribute("data-theme", v);
-        localStorage.setItem("theme", v);
-        if ($("themeSelect")) $("themeSelect").value = v;
-        if ($("themeSelectTop")) $("themeSelectTop").value = v;
-    }
-    function initTheme() {
-        const v = localStorage.getItem("theme") || "system";
-        applyTheme(v);
-        if ($("themeSelect")) $("themeSelect").onchange = (e) => applyTheme(e.target.value);
-        if ($("themeSelectTop")) $("themeSelectTop").onchange = (e) => applyTheme(e.target.value);
-    }
-
-    // ---------------- Token
-    function getToken() { return localStorage.getItem("accessToken") || ""; }
-    function setToken(token) {
-        if (!token) localStorage.removeItem("accessToken");
-        else localStorage.setItem("accessToken", token);
-        const el = $("tokenStatus");
-        if (el) el.textContent = token ? "saved" : "empty";
-    }
-
-    function setAuthMsg(text, isErr=false) {
-        const el = $("authMsg");
-        if (!el) return;
-        el.textContent = text || "";
-        el.className = isErr ? "err" : "ok";
-    }
-
-    function log(line) {
-        const el = $("log");
-        if (!el) return;
-        el.textContent += line + "\n";
-        el.scrollTop = el.scrollHeight;
-    }
-
-    // ---------------- API
-    async function api(path, opts={}) {
-        const headers = opts.headers || {};
-        headers["Content-Type"] = "application/json";
-        const tok = getToken();
-        if (tok) headers["Authorization"] = "Bearer " + tok;
-
-        const res = await fetch(HTTP_BASE + path, { ...opts, headers });
-        const text = await res.text();
-        let json = null;
-        try { json = text ? JSON.parse(text) : null; } catch {}
-        if (!res.ok) throw { status: res.status, body: json || text };
-        return json;
-    }
-
-    // ---------------- UI mode
-    function setAuthedUI(isAuthed) {
-        const overlay = $("overlay");
-        const app = $("app");
-        const authPanel = $("authPanel");
-        const overlaySlot = $("overlaySlot");
-        const headerAuthSlot = $("headerAuthSlot");
-        const accountDetails = $("accountDetails");
-
-        if (!overlay || !app || !authPanel || !overlaySlot || !headerAuthSlot) return;
-
-        if (isAuthed) {
-            overlay.classList.add("hidden");
-            app.classList.remove("hidden");
-            headerAuthSlot.appendChild(authPanel);
-            authPanel.classList.add("compact");
-            if (accountDetails) accountDetails.open = false;
-        } else {
-            app.classList.add("hidden");
-            overlay.classList.remove("hidden");
-            overlaySlot.appendChild(authPanel);
-            authPanel.classList.remove("compact");
-            if ($("userBadge")) $("userBadge").textContent = "-";
-        }
-    }
-
-    async function refreshMe() {
-        const me = await api("/api/me", { method: "GET" });
-        const name = (me?.displayName || "").trim() || "-";
-        const email = (me?.email || "").trim() || "-";
-        const st = me?.stats || {};
-
-        window.__meId = me?.id || "";
-        window.__meName = name;
-
-        $("userBadge").textContent = `${name} (${email})`;
-        $("profName").textContent = name;
-        $("profEmail").textContent = email;
-        $("profWins").textContent = String(st.wins ?? 0);
-        $("profLosses").textContent = String(st.losses ?? 0);
-        $("profDraws").textContent = String(st.draws ?? 0);
-
-        $("profRating").textContent = String(st.rating ?? 1000);
-        $("profGames").textContent = String(st.games ?? 0);
-
-        // rank is computed via window-function, keep it separate
-        try {
-            const r = await api("/api/rating/me", { method: "GET" });
-            $("profRank").textContent = (r?.rank ? String(r.rank) : "-");
-        } catch {
-            $("profRank").textContent = "-";
-        }
-        return me;
-    }
-
-    // ---------------- Rating / leaderboard
-    function openRating() {
-        $("ratingOverlay").classList.remove("hidden");
-        loadRating();
-    }
-
-    function closeRating() {
-        $("ratingOverlay").classList.add("hidden");
-    }
-
-    async function loadRating() {
-        const LIMIT = 20;
-        const body = $("ratingBody");
-        body.innerHTML = `<tr><td colspan="7" class="muted">${t("loading")}</td></tr>`;
-        $("ratingSub").textContent = t("leaderboardTop", LIMIT);
-
-        // my bar
-        $("myName").textContent = window.__meName || "-";
-        $("myRating").textContent = "-";
-        $("myRank").textContent = "-";
-        $("myWLD").textContent = "-";
-
-        try {
-            const lb = await api(`/api/rating/leaderboard?limit=${LIMIT}`, { method: "GET" });
-            const items = (lb?.items || []).slice(0, LIMIT);
-
-            // Best-effort my rating
-            try {
-                const me = await api("/api/rating/me", { method: "GET" });
-                if (me) {
-                    $("myName").textContent = me.displayName || (window.__meName || "-");
-                    $("myRating").textContent = String(me.rating ?? "-");
-                    $("myRank").textContent = me.rank ? String(me.rank) : "-";
-                    $("myWLD").textContent = `${me.wins ?? 0}/${me.losses ?? 0}/${me.draws ?? 0}`;
-                }
-            } catch {}
-
-            if (!items.length) {
-                body.innerHTML = `<tr><td colspan="7" class="muted">${t("noData")}</td></tr>`;
-                return;
-            }
-
-            body.innerHTML = items.map((e) => {
-                const isMe = window.__meId && e.userId === window.__meId;
-                return `
-                    <tr class="${isMe ? "hlRow" : ""}">
-                        <td>${e.rank}</td>
-                        <td>${escapeHtml(e.displayName || "-")}</td>
-                        <td>${e.rating}</td>
-                        <td>${e.games}</td>
-                        <td>${e.wins}</td>
-                        <td>${e.losses}</td>
-                        <td>${e.draws}</td>
-                    </tr>
-                `;
-            }).join("");
-        } catch (e) {
-            body.innerHTML = `<tr><td colspan="7" class="err">${t("failedLeaderboard")}</td></tr>`;
-        }
-    }
-
-
-    // ---------------- Rules modal
-    function openRules() {
-        $("rulesOverlay").classList.remove("hidden");
-    }
-    function closeRules() {
-        $("rulesOverlay").classList.add("hidden");
-    }
-    // ---------------- MatchId + invite link
-    function getQueryMatchId() {
-        const u = new URL(location.href);
-        const m = (u.searchParams.get("match") || "").trim();
-        return m;
-    }
-
-    function setInviteLink(matchId) {
-        const u = new URL(location.href);
-        if (matchId) u.searchParams.set("match", matchId);
-        else u.searchParams.delete("match");
-        $("inviteLink").value = matchId ? u.toString() : "";
-    }
-
-    function setMatchId(matchId, {persist=true, updateUrl=true} = {}) {
-        $("matchId").value = matchId || "";
-        setInviteLink(matchId || "");
-        if (persist) {
-            if (matchId) localStorage.setItem("lastMatchId", matchId);
-            else localStorage.removeItem("lastMatchId");
-        }
-        if (updateUrl) {
-            const u = new URL(location.href);
-            if (matchId) u.searchParams.set("match", matchId);
-            else u.searchParams.delete("match");
-            history.replaceState(null, "", u.toString());
-        }
-    }
-
-    let mmStatusRaw = "idle";
-    function setMMStatus(raw) {
-        mmStatusRaw = raw || "idle";
-        document.getElementById("mmStatus").textContent = mmLabel(mmStatusRaw);
-    }
-
-    let mmAbort = null;
-
-    function setMMUI(active) {
-        document.getElementById("btnFindMatch").disabled = active;
-        document.getElementById("btnCancelFind").classList.toggle("hidden", !active);
-    }
-
-    async function matchmakingJoin(signal) {
-        const token = getToken();
-        const res = await fetch(HTTP_BASE + "/api/matchmaking/join", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + token
-            },
-            signal
-        });
-        const text = await res.text();
-        let json = null;
-        try { json = text ? JSON.parse(text) : null; } catch {}
-        return { status: res.status, json };
-    }
-
-    async function findMatch() {
-        if (mmAbort) return;
-
-        disconnectWS(); // если уже были подключены к матчу
-
-        setMMStatus("searching");
-        setMMUI(true);
-
-        mmAbort = new AbortController();
-        try {
-            const out = await matchmakingJoin(mmAbort.signal);
-            if (out.status === 200 && out.json?.matchId) {
-                const m = out.json.matchId;
-                setMMStatus("matched");
-                setMatchId(m, {persist:true, updateUrl:true});
-                connectWS(m);
-                log("[mm] matched: " + m);
-            } else if (out.status === 409) {
-                setMMStatus("searching"); // уже ждём
-            } else {
-                setMMStatus("error");
-                log("[mm] unexpected: " + JSON.stringify(out));
-            }
-        } catch (e) {
-            if (e?.name === "AbortError") {
-                setMMStatus("idle");
-                log("[mm] canceled");
-            } else {
-                setMMStatus("error");
-                log("[mm] error: " + JSON.stringify(e));
-            }
-        } finally {
-            mmAbort = null;
-            setMMUI(false);
-            if (mmStatusRaw === "searching") setMMStatus("idle");
-        }
-    }
-
-    function cancelFindMatch() {
-        if (!mmAbort) return;
-        mmAbort.abort();
-    }
-
-    document.getElementById("btnFindMatch").onclick = () => findMatch();
-    document.getElementById("btnCancelFind").onclick = () => cancelFindMatch();
-
-
-    // ---------------- WS
-    let ws = null;
-    let currentMatchId = "";
-    let wantReconnect = false;
-    let reconnectAttempt = 0;
-    let reconnectTimer = null;
-    let lastState = null;
-    let wsEverOpened = false;
-
-    let lastNames = { p1: "p1", p2: "p2" };
-
-    function normalizeNames(names) {
-        const p1 = (names?.p1 || "").trim() || "p1";
-        const p2 = (names?.p2 || "").trim() || "p2";
-        return { p1, p2 };
-    }
-
-    function setTableHeaders(p1, p2) {
-        $("hP1Guess").textContent = `${p1} Guess`;
-        $("hP1Bulls").textContent = `${p1} Bulls`;
-        $("hP1Cows").textContent = `${p1} Cows`;
-        $("hP2Guess").textContent = `${p2} Guess`;
-        $("hP2Bulls").textContent = `${p2} Bulls`;
-        $("hP2Cows").textContent = `${p2} Cows`;
-    }
-
-    function winnerLabel(winner, names) {
-        if (!winner) return "";
-        if (winner === "draw") return "draw";
-        if (winner === "p1") return names.p1;
-        if (winner === "p2") return names.p2;
-        return winner;
-    }
-
-    function phaseLabel(phase) {
-        if (!phase) return "-";
-        return t("phase_" + phase);
-    }
-
-    function winnerLabelLocalized(winner, names) {
-        if (!winner) return "";
-        if (winner === "draw") return currentLang === "ru" ? "ничья" : "draw";
-        return winnerLabel(winner, names);
-    }
-
-    function mmLabel(raw) {
-        if (!raw) return "-";
-        return t("mm_" + raw);
-    }
-
-    function setWSStatus(s) { $("wsStatus").textContent = s; }
-
-    function send(type, payload) {
-        if (!ws || ws.readyState !== WebSocket.OPEN) {
-            log("[ws] not connected");
-            return;
-        }
-        ws.send(JSON.stringify({ type, payload }));
-    }
-
-    function escapeHtml(s) {
-        return String(s)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
-    }
-
-    function renderHistory(state) {
-        const body = $("historyBody");
-        const hist = state?.history || [];
-        const winner = state?.winner || "";
-
-        const names = normalizeNames(state?.playerNames);
-        lastNames = names;
-
-        const lastIdx = hist.length - 1;
-
-        if (!hist.length) {
-            body.innerHTML = `<tr><td colspan="8" class="muted" data-i18n="noData">No data yet</td></tr>`;
-            return;
-        }
-
-        body.innerHTML = hist.map((item, idx) => {
-            const r = item.round ?? "-";
-            const p1 = item.p1 || {};
-            const p2 = item.p2 || {};
-
-            let p1Guess = p1.guess ?? (p1.missed ? "(missed)" : "");
-            let p2Guess = p2.guess ?? (p2.missed ? "(missed)" : "");
-
-            const p1B = p1.bulls ?? 0;
-            const p1C = p1.cows ?? 0;
-            const p2B = p2.bulls ?? 0;
-            const p2C = p2.cows ?? 0;
-
-            const winnerCell = (winner && idx === lastIdx) ? escapeHtml(winnerLabelLocalized(winner, names)) : "";
-
-            return `
-        <tr>
-          <td>${r}</td>
-          <td>${escapeHtml(p1Guess || "")}</td>
-          <td>${p1B}</td>
-          <td>${p1C}</td>
-          <td>${escapeHtml(p2Guess || "")}</td>
-          <td>${p2B}</td>
-          <td>${p2C}</td>
-          <td>${winnerCell}</td>
-        </tr>
-      `;
-        }).join("");
-    }
-
-    
-    // ---------------- Network UI helpers
-    function setNetBanner(show, text, dotKind = "muted", showBtn = true) {
-        const b = $("netBanner");
-        if (!b) return;
-        if (!show) {
-            b.classList.add("hidden");
-            return;
-        }
-        b.classList.remove("hidden");
-        $("netText").textContent = text || "";
-        const dot = $("netDot");
-        dot.className = "netDot" + (dotKind === "ok" ? " ok" : dotKind === "err" ? " err" : "");
-        $("btnReconnectNow").classList.toggle("hidden", !showBtn);
-    }
-
-    function setNetBadge(kind, text) {
-        const el = $("netBadge");
-        el.className = "badge" + (kind ? " " + kind : "");
-        el.textContent = text;
-    }
-
-    function setWaitOverlay(show, title, hint, showBtn = true) {
-        const o = $("waitOverlay");
-        if (!o) return;
-        o.classList.toggle("hidden", !show);
-        o.setAttribute("aria-hidden", (!show).toString());
-        $("waitTitle").textContent = title || t("waitTitleDefault");
-        $("waitHint").textContent = hint || "";
-        $("btnOverlayReconnect").classList.toggle("hidden", !showBtn);
-    }
-
-    function setBadge(id, kind, text) {
-        const el = $(id);
-        el.className = "badge" + (kind ? " " + kind : "");
-        el.textContent = text;
-    }
-
-    function otherSlot(you) { return you === "p1" ? "p2" : "p1"; }
-
-    function updateUXFromState(s) {
-        lastState = s;
-
-        const names = normalizeNames(s.playerNames);
-        lastNames = names;
-
-        const you = s.you || "p1";
-        const opp = otherSlot(you);
-
-        // Header pills (existing)
-        setTableHeaders(names.p1, names.p2);
-        $("youSlot").textContent = (names[you] || you || "-");
-        $("phase").textContent = phaseLabel(s.phase);
-        $("round").textContent = (s.round ?? "-");
-        $("deadline").textContent = s.deadlineMs ? new Date(s.deadlineMs).toLocaleTimeString() : "-";
-
-        if ($("matchMode")) {
-            $("matchMode").textContent = s.ranked ? t("modeRanked") : t("modeFriendly");
-        }
-        if ($("friendlyNote")) {
-            $("friendlyNote").classList.toggle("hidden", !!s.ranked);
-        }
-
-        // Status board
-        $("youName").textContent = names[you] || t("youName");
-        $("oppName").textContent = names[opp] || t("oppName");
-        setBadge("youRole", "muted", you.toUpperCase());
-        setBadge("oppRole", "muted", opp.toUpperCase());
-
-        // Connected (server gives only total count; we treat it as opponent online/offline)
-        const oppOnline = (s.playersConnected || 0) >= 2;
-        setBadge("youConn", "ok", t("netOnline"));
-        setBadge("oppConn", oppOnline ? "ok" : "muted", oppOnline ? t("netOnline") : t("netOffline"));
-
-        // Secrets
-        const sr = s.secretsReady || {};
-        const youSecretReady = !!sr[you];
-        const oppSecretReady = !!sr[opp];
-        setBadge("youSecret", youSecretReady ? "ok" : "muted", youSecretReady ? t("badgeReady") : t("badgeNotSet"));
-        setBadge("oppSecret", oppSecretReady ? "ok" : "muted", oppSecretReady ? t("badgeReady") : (s.phase === "waiting_players" ? t("badgeNotInMatch") : t("badgeWaiting")));
-
-        // Guesses (current round)
-        const gr = s.guessesReady || {};
-        const youGuessReady = !!gr[you];
-        const oppGuessReady = !!gr[opp];
-        if (s.phase === "playing") {
-            setBadge("youGuess", youGuessReady ? "ok" : "muted", youGuessReady ? t("badgeAccepted") : t("badgePending"));
-            setBadge("oppGuess", oppGuessReady ? "ok" : "muted", oppGuessReady ? t("badgeAccepted") : t("badgePending"));
-        } else {
-            setBadge("youGuess", "muted", t("dash"));
-            setBadge("oppGuess", "muted", t("dash"));
-        }
-
-        // Reveal secrets (only after finished)
-        const rb = $("revealBox");
-        if (s.phase === "finished" && s.revealedSecrets) {
-            rb.classList.remove("hidden");
-            $("revealYouLabel").textContent = names[you] || "Вы";
-            $("revealOppLabel").textContent = names[opp] || "Соперник";
-            $("revealYouSecret").textContent = (s.revealedSecrets[you] || "----");
-            $("revealOppSecret").textContent = (s.revealedSecrets[opp] || "----");
-        } else {
-            rb.classList.add("hidden");
-        }
-
-        // Controls enable/disable
-        const wsOpen = !!ws && ws.readyState === WebSocket.OPEN;
-        const setSecretEnabled =
-            wsOpen && (s.phase === "waiting_secrets") && !youSecretReady;
-        const guessEnabled =
-            wsOpen && (s.phase === "playing") && !youGuessReady;
-
-        $("secret").disabled = !setSecretEnabled;
-        $("btnSetSecret").disabled = !setSecretEnabled;
-
-        $("guess").disabled = !guessEnabled;
-        $("btnGuess").disabled = !guessEnabled;
-
-        // Rematch: allow request after finished or any time (server will decide), but only when ws open
-        $("btnRematch").disabled = !wsOpen;
-
-        // Stage coach + waiting overlay
-        if (!wsOpen) {
-            $("stageTitle").textContent = t("stageNoConnTitle");
-            $("stageHint").textContent = t("stageNoConnHint");
-            setNetBadge("muted", t("netOffline"));
-            setWaitOverlay(true, t("waitLostTitle"), t("waitLostHint"), true);
-            return;
-        }
-
-        setNetBadge("ok", t("netOnline"));
-
-        if (s.phase === "waiting_players") {
-            $("stageTitle").textContent = t("stageWaitOpponentTitle");
-            $("stageHint").textContent = t("stageWaitOpponentHint");
-            setWaitOverlay(true, t("waitOpponentTitle"), t("waitOpponentHint"), false);
-        } else if (s.phase === "waiting_secrets") {
-            if (!youSecretReady) {
-                $("stageTitle").textContent = t("stageSetSecretTitle");
-                $("stageHint").textContent = t("stageSetSecretHint");
-                setWaitOverlay(false, "", "", false);
-            } else if (!oppSecretReady) {
-                $("stageTitle").textContent = t("stageSecretOkTitle");
-                $("stageHint").textContent = t("stageSecretOkHint");
-                setWaitOverlay(true, t("waitOpponentTitle"), t("stageSecretOkHint"), false);
-            } else {
-                // оба готовы — скоро игра
-                $("stageTitle").textContent = t("stageAlmostTitle");
-                $("stageHint").textContent = t("stageAlmostHint");
-                setWaitOverlay(true, t("waitStartTitle"), t("waitStartHint"), false);
-            }
-        } else if (s.phase === "playing") {
-            if (!youGuessReady) {
-                $("stageTitle").textContent = t("stageMakeMoveTitle");
-                $("stageHint").textContent = s.deadlineMs
-                    ? t("stageMakeMoveHintDeadline", new Date(s.deadlineMs).toLocaleTimeString())
-                    : t("stageMakeMoveHintNoDeadline");
-                setWaitOverlay(false, "", "", false);
-            } else if (!oppGuessReady) {
-                $("stageTitle").textContent = t("stageMoveOkTitle");
-                $("stageHint").textContent = t("stageMoveOkHint");
-                setWaitOverlay(true, t("waitOpponentTitle"), t("stageMoveOkHint"), false);
-            } else {
-                $("stageTitle").textContent = t("stageCountingTitle");
-                $("stageHint").textContent = t("stageCountingHint");
-                setWaitOverlay(true, t("stageCountingTitle"), t("stageCountingHint"), false);
-            }
-        } else if (s.phase === "finished") {
-            const w = s.winner || "";
-            $("stageTitle").textContent = t("stageFinishedTitle");
-            $("stageHint").textContent = w ? t("stageFinishedHintWinner", winnerLabelLocalized(w, names)) : t("stageFinishedHint");
-            setWaitOverlay(false, "", "", false);
-        } else {
-            $("stageTitle").textContent = t("hMatch");
-            $("stageHint").textContent = t("dash");
-            setWaitOverlay(false, "", "", false);
-        }
-    }
-
-    // ---------------- Auto-reconnect
-    function clearReconnect() {
-        if (reconnectTimer) {
-            clearTimeout(reconnectTimer);
-            reconnectTimer = null;
-        }
-    }
-
-    function stopAutoReconnect() {
-        wantReconnect = false;
-        reconnectAttempt = 0;
-        clearReconnect();
-        setNetBanner(false);
-        setWaitOverlay(false, "", "", false);
-        setNetBadge("muted", t("netOffline"));
-        wsEverOpened = false;
-    }
-
-    function scheduleReconnect(reason = "") {
-        if (!wantReconnect || !currentMatchId) return;
-        if (reconnectTimer) return;
-
-        const base = 500;               // ms
-        const max = 8000;               // ms
-        const capAttempts = 12;
-        if (reconnectAttempt >= capAttempts) {
-            setWSStatus("closed");
-            setNetBanner(true, t("reconnectFailed"), "err", true);
-            // Не показываем "потеряно соединение" при первом заходе (когда ещё ни разу не было успешного connect).
-            if (wsEverOpened) {
-                setWaitOverlay(true, t("reconnectLostTitle"), t("reconnectFailed"), true);
-            } else {
-                setWaitOverlay(false, "", "", false);
-            }
-            return;
-        }
-
-        const backoff = Math.min(max, base * Math.pow(2, reconnectAttempt));
-        const jitter = Math.floor(Math.random() * 250);
-        const wait = backoff + jitter;
-
-        setWSStatus("reconnecting");
-        if (wsEverOpened) {
-            setNetBanner(true, t("reconnectLostBanner", reason, reconnectAttempt + 1), "err", true);
-            setWaitOverlay(true, t("reconnectLostTitle"), t("reconnectLostHint", reconnectAttempt + 1), true);
-        } else {
-            // Первый заход/авто-join: не пугаем "потеряно соединение", просто пытаемся подключиться.
-            setNetBanner(true, t("reconnectConnecting", reconnectAttempt + 1), "muted", true);
-            setWaitOverlay(false, "", "", false);
-        }
-
-        reconnectTimer = setTimeout(() => {
-            reconnectTimer = null;
-            reconnectAttempt++;
-            openWS(currentMatchId, true);
-        }, wait);
-    }
-
-    function disconnectWS(intentional = true) {
-        clearReconnect();
-        if (intentional) stopAutoReconnect();
-
-        if (ws) {
-            try { ws.close(); } catch {}
-        }
-        ws = null;
-        setWSStatus("closed");
-        if (intentional) {
-            setNetBanner(false);
-            setWaitOverlay(false, "", "", false);
-        }
-    }
-
-    function openWS(matchId, isRetry = false) {
-        const token = getToken();
-        if (!matchId) return log("[ui] missing matchId");
-        if (!token) return log("[ui] missing token: login first");
-
-        clearReconnect();
-
-        // Close previous socket (events from old sockets are ignored via guards below)
-        const prev = ws;
-        if (prev) {
-            try { prev.close(); } catch {}
-        }
-
-        const url = `${WS_BASE}/ws/${encodeURIComponent(matchId)}`;
-        const sock = new WebSocket(url);
-        ws = sock;
-
-        setWSStatus(isRetry ? "reconnecting" : "connecting");
-        setNetBadge("muted", t("netConnecting"));
-        if (!isRetry) setNetBanner(true, t("connectMatchBanner"), "muted", true);
-
-        sock.onopen = () => {
-            if (ws !== sock) return;
-            setWSStatus("open");
-            setNetBanner(false);
-            setWaitOverlay(false, "", "", false);
-            setNetBadge("ok", t("netOnline"));
-            reconnectAttempt = 0;
-            wsEverOpened = true;
-            log("[ws] connected");
-            send("auth", { token });
-
-            // refresh UX with last known state (if any)
-            if (lastState) updateUXFromState(lastState);
-        };
-
-        sock.onclose = (ev) => {
-            if (ws !== sock) return;
-            ws = null;
-            setWSStatus("closed");
-            setNetBadge("muted", t("netOffline"));
-            const reason = (ev && ev.reason) ? ev.reason : "";
-            log("[ws] closed" + (reason ? " (" + reason + ")" : ""));
-            scheduleReconnect(reason);
-        };
-
-        sock.onerror = () => {
-            if (ws !== sock) return;
-            setWSStatus("error");
-            setNetBadge("muted", t("netOffline"));
-            log("[ws] error");
-            // close will usually follow, but schedule just in case
-            scheduleReconnect("ws error");
-        };
-
-        sock.onmessage = (ev) => {
-            if (ws !== sock) return;
-            let msg = null;
-            try { msg = JSON.parse(ev.data); } catch { return; }
-
-            if (msg.type === "state") {
-                const s = msg.payload || {};
-                updateUXFromState(s);
-                renderHistory(s);
-            } else if (msg.type === "series_score") {
-                const ser = msg.payload?.series || {};
-                $("series").textContent = `${lastNames.p1} ${ser.p1Wins||0} : ${ser.p2Wins||0} ${lastNames.p2} (draw ${ser.draws||0})`;
-                log("[series_score] " + JSON.stringify(ser));
-            } else if (msg.type === "game_finished") {
-                const w = msg.payload?.winner || "?";
-                log("[game_finished] winner=" + winnerLabel(w, lastNames));
-
-                // рейтинг обновляется на сервере асинхронно — подтянем спустя небольшой лаг
-                setTimeout(() => {
-                    refreshMe().catch(() => {});
-                    if (!$("ratingOverlay").classList.contains("hidden")) loadRating();
-                }, 600);
-            } else if (msg.type === "error") {
-                log("[error] " + JSON.stringify(msg.payload));
-            } else {
-                log("[msg] " + JSON.stringify(msg));
-            }
-        };
-    }
-
-function connectWS(matchId) {
-        if (!matchId) return log("[ui] missing matchId");
-        currentMatchId = matchId;
-        wantReconnect = true;
-        reconnectAttempt = 0;
-        openWS(matchId, false);
-    }
-
-    // Try to restore connection when network/tab comes back.
-    window.addEventListener("online", () => {
-        if (wantReconnect && currentMatchId && (!ws || ws.readyState === WebSocket.CLOSED)) {
-            reconnectAttempt = 0;
-            openWS(currentMatchId, true);
-        }
-    });
-
-    document.addEventListener("visibilitychange", () => {
-        if (!document.hidden && wantReconnect && currentMatchId && (!ws || ws.readyState === WebSocket.CLOSED)) {
-            reconnectAttempt = 0;
-            openWS(currentMatchId, true);
-        }
-    });
-// ---------------- Clipboard
-    async function copyText(text) {
-        try {
-            await navigator.clipboard.writeText(text);
-            log("[ui] copied to clipboard");
-            return true;
-        } catch {
-            // fallback
-            const ta = document.createElement("textarea");
-            ta.value = text;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand("copy");
-            ta.remove();
-            log("[ui] copied (fallback)");
-            return true;
-        }
-    }
-
-    // ---------------- Auth actions
-    $("btnRegister").onclick = async () => {
-        try {
-            await api("/api/auth/register", {
-                method: "POST",
-                body: JSON.stringify({
-                    email: $("email").value,
-                    password: $("password").value,
-                    displayName: $("displayName").value
-                })
-            });
-            setAuthMsg("Registered. Now login.", false);
-        } catch (e) {
-            setAuthMsg("Register error: " + JSON.stringify(e), true);
-        }
-    };
-
-    $("btnLogin").onclick = async () => {
-        try {
-            const out = await api("/api/auth/login", {
-                method: "POST",
-                body: JSON.stringify({ email: $("email").value, password: $("password").value })
-            });
-
-            setToken(out?.accessToken || "");
-            await refreshMe();
-
-            setAuthedUI(true);
-            setAuthMsg("Logged in.", false);
-
-            // auto-join if match is present (URL > lastMatch)
-            const m = getQueryMatchId() || (localStorage.getItem("lastMatchId") || "");
-            if (m) {
-                setMatchId(m, {persist:true, updateUrl:true});
-                connectWS(m);
-            }
-        } catch (e) {
-            setAuthMsg("Login error: " + JSON.stringify(e), true);
-            setToken("");
-            setAuthedUI(false);
-        }
-    };
-
-    function doLogout() {
-        disconnectWS();
-        setToken("");
-        $("meOut").textContent = "";
-        setAuthMsg(t("authLoggedOut"), false);
-        setAuthedUI(false);
-    }
-
-    $("btnLogout").onclick = () => doLogout();
-    $("btnLogoutTop").onclick = () => doLogout();
-
-    $("btnMe").onclick = async () => {
-        try {
-            const me = await api("/api/me", { method: "GET" });
-            $("meOut").textContent = JSON.stringify(me, null, 2);
-            log("[http] /api/me loaded");
-        } catch (e) {
-            $("meOut").textContent = JSON.stringify(e, null, 2);
-            log("[http] /api/me error");
-        }
-    };
-
-    $("btnRefreshMe").onclick = async () => {
-        try { await refreshMe(); log("[http] refreshed /api/me"); }
-        catch (e) { log("[http] refresh /api/me error: " + JSON.stringify(e)); }
-    };
-
-    $("btnShowRating").onclick = () => openRating();
-    $("btnCloseRating").onclick = () => closeRating();
-    $("btnRefreshRating").onclick = () => loadRating();
-    $("ratingOverlay").addEventListener("click", (e) => {
-        if (e.target && e.target.id === "ratingOverlay") closeRating();
-    });
-
-    $("btnRules").onclick = () => openRules();
-    $("btnCloseRules").onclick = () => closeRules();
-    $("rulesOverlay").addEventListener("click", (e) => {
-        if (e.target && e.target.id === "rulesOverlay") closeRules();
-    });
-
-    $("btnLang").onclick = () => toggleLang();
-
-    // ---------------- Match actions
-    $("matchId").addEventListener("input", () => {
-        const m = $("matchId").value.trim();
-        setInviteLink(m);
-    });
-
-    $("btnCreateAndJoin").onclick = async () => {
-        try {
-            const out = await api("/api/match", { method: "POST" });
-            const m = out.matchId || out.matchID || out.match_id || "";
-            if (!m) throw new Error("no matchId in response");
-            setMatchId(m, {persist:true, updateUrl:true});
-            log("[http] created match: " + m);
-            connectWS(m);
-        } catch (e) {
-            log("[http] create match error: " + JSON.stringify(e));
-        }
-    };
-
-    $("btnJoin").onclick = async () => {
-        const m = $("matchId").value.trim();
-        if (!m) return log("[ui] enter matchId");
-        setMatchId(m, {persist:true, updateUrl:true});
-        connectWS(m);
-    };
-
-    $("btnReconnect").onclick = () => {
-        const m = localStorage.getItem("lastMatchId") || "";
-        if (!m) return log("[ui] no last match");
-        setMatchId(m, {persist:true, updateUrl:true});
-        connectWS(m);
-    };
-
-
-    $("btnReconnectNow").onclick = () => {
-        const m = $("matchId").value.trim() || currentMatchId || (localStorage.getItem("lastMatchId") || "");
-        if (!m) return log("[ui] no match to reconnect");
-        setMatchId(m, {persist:true, updateUrl:true});
-        currentMatchId = m;
-        wantReconnect = true;
-        reconnectAttempt = 0;
-        openWS(m, true);
-    };
-
-    $("btnOverlayReconnect").onclick = () => $("btnReconnectNow").click();
-
-    $("btnCopyLink").onclick = async () => {
-        const link = $("inviteLink").value.trim();
-        if (!link) return log("[ui] no invite link");
-        await copyText(link);
-    };
-
-    $("btnLeave").onclick = () => {
-        disconnectWS(true);
-        currentMatchId = "";
-        lastState = null;
-
-        setMatchId("", {persist:true, updateUrl:true});
-        $("youSlot").textContent = "-";
-        $("phase").textContent = "-";
-        $("round").textContent = "-";
-        $("deadline").textContent = "-";
-        $("series").textContent = "p1 0 : 0 p2 (draw 0)";
-        $("historyBody").innerHTML = `<tr><td colspan="8" class="muted" data-i18n="noData">No data yet</td></tr>`;
-
-        // UX reset
-        $("stageTitle").textContent = t("stageConnectTitle");
-        $("stageHint").textContent = t("stageConnectHint");
-        setNetBadge("muted", t("netOffline"));
-        setBadge("youRole", "muted", "-");
-        setBadge("oppRole", "muted", "-");
-        $("youName").textContent = "Вы";
-        $("oppName").textContent = "Соперник";
-        setBadge("youConn", "muted", "-");
-        setBadge("oppConn", "muted", "-");
-        setBadge("youSecret", "muted", "-");
-        setBadge("oppSecret", "muted", "-");
-        setBadge("youGuess", "muted", "-");
-        setBadge("oppGuess", "muted", "-");
-        $("revealBox").classList.add("hidden");
-        setWaitOverlay(false, "", "", false);
-        setNetBanner(false);
-
-        $("secret").disabled = true;
-        $("btnSetSecret").disabled = true;
-        $("guess").disabled = true;
-        $("btnGuess").disabled = true;
-        $("btnRematch").disabled = true;
-
-        log("[ui] left match");
-    };
-
-
-// ---------------- Input helpers
-    function digits4(v){
-        return String(v||"").replace(/\D+/g, "").slice(0, 4);
-    }
-    ["secret","guess"].forEach((id) => {
-        const el = $(id);
-        el.addEventListener("input", () => { el.value = digits4(el.value); });
-        el.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                if (id === "secret" && !$("btnSetSecret").disabled) $("btnSetSecret").click();
-                if (id === "guess" && !$("btnGuess").disabled) $("btnGuess").click();
-            }
-        });
-    });
-
-    // ---------------- Game actions
-    $("btnSetSecret").onclick = () => {
-        const v = digits4($("secret").value);
-        $("secret").value = v;
-        if (v.length !== 4) return log("[ui] secret must be 4 digits");
-        send("set_secret", { secret: v });
-    };
-    $("btnGuess").onclick = () => {
-        const v = digits4($("guess").value);
-        $("guess").value = v;
-        if (v.length !== 4) return log("[ui] guess must be 4 digits");
-        send("submit_guess", { guess: v });
-    };
-    $("btnRematch").onclick = () => send("rematch_request", {});
-
-    // ---------------- Boot
-    (async function boot() {
-        initTheme();
-        applyI18n();
-        setToken(getToken());
-
-        // Initial UX state
-        setNetBadge("muted", t("netOffline"));
-        $("secret").disabled = true;
-        $("btnSetSecret").disabled = true;
-        $("guess").disabled = true;
-        $("btnGuess").disabled = true;
-        $("btnRematch").disabled = true;
-
-        const tok = getToken();
-        if (!tok) {
-            setAuthedUI(false);
-            setAuthMsg(t("authPleaseLogin"), false);
-            // prefill matchId from URL for convenience
-            const m = getQueryMatchId();
-            if (m) setMatchId(m, {persist:false, updateUrl:false});
-            return;
-        }
-
-        try {
-            await refreshMe();
-            setAuthedUI(true);
-            setAuthMsg(t("authTokenRestored"), false);
-
-            // match auto join (URL > lastMatch)
-            const m = getQueryMatchId() || (localStorage.getItem("lastMatchId") || "");
-            if (m) {
-                setMatchId(m, {persist:true, updateUrl:true});
-                connectWS(m);
-            }
-        } catch (e) {
-            setToken("");
-            setAuthedUI(false);
-            setAuthMsg(t("authSessionExpired"), true);
-        }
-    })();
-</script>
+<script src="/app.js" defer></script>
 
 </body>
 </html>

@@ -12,6 +12,7 @@ func newTestConn() *ClientConn {
 	return &ClientConn{
 		ws:   nil,
 		send: make(chan []byte, 256),
+		done: make(chan struct{}),
 	}
 }
 
@@ -311,6 +312,14 @@ func TestMatch_Scenarios2(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, tc.run)
 	}
+}
+
+func TestMatch_SendLockedOnClosedConnDoesNotPanic(t *testing.T) {
+	m := NewMatch("m1", 0)
+	conn := newTestConn()
+	conn.Close()
+
+	m.sendLocked(conn, Envelope{Type: "state", Payload: mustJSON(map[string]any{"ok": true})})
 }
 
 func TestMatch_State_PlayerNames_And_RevealedSecrets(t *testing.T) {
