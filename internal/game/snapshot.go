@@ -93,6 +93,7 @@ func (m *Match) snapshotLocked() MatchSnapshot {
 }
 
 func (m *Match) restoreLocked(s MatchSnapshot) {
+	m.ranked = s.Ranked
 	m.phase = s.Phase
 	m.round = s.Round
 

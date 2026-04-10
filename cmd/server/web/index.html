@@ -5,664 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Bulls & Cows</title>
 
-    <style>
-        :root {
-            --bg: #efe6d9;
-            --bg-soft: rgba(255, 249, 241, 0.72);
-            --panel: rgba(255, 251, 245, 0.88);
-            --panel-strong: rgba(255, 252, 248, 0.96);
-            --text: #231b17;
-            --muted: #6e6055;
-            --border: rgba(92, 62, 41, 0.14);
-            --shadow: 0 22px 50px rgba(84, 53, 32, 0.12);
-            --shadow-soft: 0 10px 24px rgba(84, 53, 32, 0.08);
-
-            --btn-bg: linear-gradient(180deg, #a93936 0%, #822523 100%);
-            --btn-text: #fff8f2;
-            --btn-border: rgba(102, 29, 28, 0.45);
-
-            --btn2-bg: rgba(255, 251, 245, 0.82);
-            --btn2-text: #231b17;
-            --btn2-border: rgba(92, 62, 41, 0.16);
-
-            --chip-bg: rgba(255, 248, 239, 0.7);
-            --chip-border: rgba(92, 62, 41, 0.12);
-
-            --overlay: rgba(36, 24, 19, 0.44);
-            --ok: #1f7a61;
-            --err: #b34449;
-            --accent: #a93936;
-            --accent-soft: rgba(169, 57, 54, 0.12);
-        }
-
-        html[data-theme="dark"] {
-            --bg: #171513;
-            --bg-soft: rgba(30, 27, 24, 0.82);
-            --panel: rgba(32, 28, 25, 0.88);
-            --panel-strong: rgba(36, 31, 28, 0.96);
-            --text: #f7efe7;
-            --muted: #b8aa9e;
-            --border: rgba(255, 231, 212, 0.11);
-            --shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
-            --shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.2);
-
-            --btn-bg: linear-gradient(180deg, #f3c56f 0%, #c7903c 100%);
-            --btn-text: #211710;
-            --btn-border: rgba(255, 222, 170, 0.26);
-
-            --btn2-bg: rgba(31, 27, 24, 0.9);
-            --btn2-text: #f7efe7;
-            --btn2-border: rgba(255, 231, 212, 0.12);
-
-            --chip-bg: rgba(40, 35, 31, 0.8);
-            --chip-border: rgba(255, 231, 212, 0.09);
-
-            --overlay: rgba(6, 5, 5, 0.58);
-            --ok: #62c6a5;
-            --err: #ff8f8f;
-            --accent: #f3c56f;
-            --accent-soft: rgba(243, 197, 111, 0.12);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            html[data-theme="system"] {
-                --bg: #171513;
-                --bg-soft: rgba(30, 27, 24, 0.82);
-                --panel: rgba(32, 28, 25, 0.88);
-                --panel-strong: rgba(36, 31, 28, 0.96);
-                --text: #f7efe7;
-                --muted: #b8aa9e;
-                --border: rgba(255, 231, 212, 0.11);
-                --shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
-                --shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.2);
-
-                --btn-bg: linear-gradient(180deg, #f3c56f 0%, #c7903c 100%);
-                --btn-text: #211710;
-                --btn-border: rgba(255, 222, 170, 0.26);
-
-                --btn2-bg: rgba(31, 27, 24, 0.9);
-                --btn2-text: #f7efe7;
-                --btn2-border: rgba(255, 231, 212, 0.12);
-
-                --chip-bg: rgba(40, 35, 31, 0.8);
-                --chip-border: rgba(255, 231, 212, 0.09);
-
-                --overlay: rgba(6, 5, 5, 0.58);
-                --ok: #62c6a5;
-                --err: #ff8f8f;
-                --accent: #f3c56f;
-                --accent-soft: rgba(243, 197, 111, 0.12);
-            }
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            position: relative;
-            min-height: 100vh;
-            margin: 0;
-            padding: 24px;
-            color: var(--text);
-            background:
-                radial-gradient(circle at top left, rgba(255, 214, 170, 0.42), transparent 34%),
-                radial-gradient(circle at top right, rgba(171, 58, 55, 0.16), transparent 30%),
-                linear-gradient(180deg, #f7f1e8 0%, var(--bg) 100%);
-            font-family: "Avenir Next", "Segoe UI Variable", "Helvetica Neue", ui-sans-serif, sans-serif;
-        }
-
-        html[data-theme="dark"] body {
-            background:
-                radial-gradient(circle at top left, rgba(243, 197, 111, 0.14), transparent 30%),
-                radial-gradient(circle at top right, rgba(169, 57, 54, 0.14), transparent 26%),
-                linear-gradient(180deg, #1f1b18 0%, var(--bg) 100%);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            html[data-theme="system"] body {
-                background:
-                    radial-gradient(circle at top left, rgba(243, 197, 111, 0.14), transparent 30%),
-                    radial-gradient(circle at top right, rgba(169, 57, 54, 0.14), transparent 26%),
-                    linear-gradient(180deg, #1f1b18 0%, var(--bg) 100%);
-            }
-        }
-
-        body::before,
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        body::before {
-            background:
-                linear-gradient(90deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 100%),
-                linear-gradient(rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 100%);
-            background-size: 42px 42px;
-            opacity: 0.22;
-            mix-blend-mode: soft-light;
-        }
-
-        body::after {
-            background: radial-gradient(circle at center, transparent 0%, transparent 62%, rgba(24, 16, 12, 0.08) 100%);
-        }
-
-        body > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        #app {
-            max-width: 1240px;
-            margin: 0 auto;
-        }
-
-        h1, h2, .brand {
-            font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-            letter-spacing: 0.02em;
-        }
-
-        h1 { margin: 0 0 12px; font-size: 28px; }
-        h2 { margin: 0 0 14px; font-size: 20px; }
-
-        code {
-            color: inherit;
-            font-family: "SFMono-Regular", "Menlo", "Monaco", monospace;
-        }
-
-        .muted { color: var(--muted); font-size: 12px; }
-        .ok { color: var(--ok); font-weight: 800; }
-        .err { color: var(--err); font-weight: 800; }
-
-        .hidden { display: none !important; }
-
-        .card {
-            border: 1px solid var(--border);
-            border-radius: 28px;
-            padding: 22px;
-            background:
-                linear-gradient(180deg, rgba(255,255,255,0.28) 0%, transparent 100%),
-                var(--panel);
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(18px);
-            animation: riseIn 520ms ease both;
-        }
-
-        @keyframes riseIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .row {
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-            flex-wrap: wrap;
-        }
-
-        label {
-            display: block;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
-
-        input, select {
-            min-width: 220px;
-            padding: 12px 14px;
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            background: var(--panel-strong);
-            color: var(--text);
-            outline: none;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3);
-            transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
-        }
-
-        input:focus, select:focus {
-            border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
-            box-shadow:
-                0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent),
-                inset 0 1px 0 rgba(255,255,255,0.32);
-        }
-
-        input[readonly] { opacity: .94; }
-
-        button {
-            padding: 11px 14px;
-            border: 1px solid var(--btn-border);
-            background: var(--btn-bg);
-            color: var(--btn-text);
-            border-radius: 16px;
-            cursor: pointer;
-            font-weight: 800;
-            letter-spacing: .02em;
-            box-shadow: 0 12px 24px rgba(118, 36, 33, 0.18);
-            transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
-        }
-
-        button:hover:not(:disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 16px 30px rgba(118, 36, 33, 0.24);
-        }
-
-        button.secondary {
-            background: var(--btn2-bg);
-            color: var(--btn2-text);
-            border: 1px solid var(--btn2-border);
-            box-shadow: var(--shadow-soft);
-            font-weight: 700;
-        }
-
-        button:disabled {
-            opacity: .56;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .pills {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-        }
-
-        .pill, .badge {
-            border: 1px solid var(--chip-border);
-            background: var(--chip-bg);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.22);
-        }
-
-        .pill {
-            border-radius: 999px;
-            padding: 7px 11px;
-            font-size: 12px;
-            display: inline-flex;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .kv { font-weight: 900; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-
-        th, td {
-            border-bottom: 1px solid var(--border);
-            padding: 10px 12px;
-            text-align: left;
-        }
-
-        th {
-            font-size: 11px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-weight: 900;
-        }
-
-        tr.hlRow td {
-            font-weight: 900;
-            background: color-mix(in srgb, var(--accent-soft) 70%, transparent);
-        }
-
-        .gridTop {
-            display: grid;
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: 18px;
-            align-items: start;
-            margin-top: 18px;
-        }
-
-        .center {
-            display: grid;
-            justify-items: stretch;
-            margin-top: 18px;
-        }
-
-        .gameWrap {
-            width: min(1040px, 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .gameWrap::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at top right, var(--accent-soft), transparent 34%);
-            pointer-events: none;
-        }
-
-        .logsWrap {
-            margin-top: 18px;
-            max-width: 1040px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .topbar {
-            position: sticky;
-            top: 12px;
-            z-index: 5;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 14px 18px;
-            border: 1px solid var(--border);
-            border-radius: 28px;
-            background: var(--panel);
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(18px);
-        }
-
-        .brand {
-            font-size: 28px;
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        .topbarRight {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-
-        details.accountDetails {
-            min-width: 160px;
-        }
-
-        details.accountDetails > summary {
-            list-style: none;
-            cursor: pointer;
-            user-select: none;
-            padding: 8px 12px;
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            background: var(--panel-strong);
-            box-shadow: var(--shadow-soft);
-            font-weight: 900;
-            font-size: 12px;
-        }
-
-        details.accountDetails > summary::-webkit-details-marker { display:none; }
-
-        #headerAuthSlot { margin-top: 10px; }
-
-        .overlay {
-            position: fixed;
-            inset: 0;
-            display: grid;
-            place-items: center;
-            background: var(--overlay);
-            backdrop-filter: blur(18px);
-            padding: 18px;
-            z-index: 10;
-        }
-
-        .overlayInner { width: min(1040px, 100%); }
-
-        #authPanel {
-            background:
-                radial-gradient(circle at top right, var(--accent-soft), transparent 32%),
-                var(--panel);
-        }
-
-        #authPanel.compact {
-            padding: 16px;
-            border-radius: 22px;
-        }
-
-        #authPanel.compact h2 { margin-bottom: 10px; }
-        #authPanel.compact input { min-width: 180px; }
-
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--border), transparent);
-            margin: 14px 0;
-        }
-
-        .netBanner {
-            margin-top: 12px;
-            padding: 12px 14px;
-            border: 1px dashed var(--border);
-            border-radius: 18px;
-            background: var(--bg-soft);
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .netDot {
-            width: 10px;
-            height: 10px;
-            border-radius: 999px;
-            background: var(--muted);
-            box-shadow: 0 0 0 4px rgba(255,255,255,0.22);
-        }
-
-        .netDot.ok { background: var(--ok); }
-        .netDot.err { background: var(--err); }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-size: 12px;
-            line-height: 1;
-            white-space: nowrap;
-        }
-
-        .badge.ok { border-color: color-mix(in srgb, var(--ok) 50%, var(--chip-border)); }
-        .badge.err { border-color: color-mix(in srgb, var(--err) 50%, var(--chip-border)); }
-        .badge.muted { color: var(--muted); }
-
-        .coach {
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 18px;
-            background:
-                linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 42%, transparent), transparent 70%),
-                var(--chip-bg);
-            margin-top: 14px;
-        }
-
-        .coachTop {
-            display: flex;
-            gap: 10px;
-            align-items: flex-start;
-            justify-content: space-between;
-        }
-
-        .coachTitle {
-            font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-            font-weight: 700;
-            font-size: 22px;
-        }
-
-        .coachHint {
-            margin-top: 8px;
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.5;
-            max-width: 56ch;
-        }
-
-        .coachRight {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-
-        .statusBoard {
-            margin-top: 14px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        .statusCol {
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            background: var(--panel-strong);
-            padding: 16px;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .statusName {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            font-weight: 800;
-            margin-bottom: 6px;
-        }
-
-        .statusRows { margin-top: 8px; }
-
-        .statusRow {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 0;
-            border-top: 1px solid var(--border);
-            font-size: 13px;
-        }
-
-        .statusRow:first-child { border-top: 0; }
-        .statusKey { color: var(--muted); font-size: 12px; }
-
-        .revealBox {
-            margin-top: 12px;
-            padding: 12px 14px;
-            border-radius: 18px;
-            border: 1px solid var(--border);
-            background: var(--panel-strong);
-        }
-
-        .revealTitle {
-            font-weight: 800;
-            margin-bottom: 6px;
-        }
-
-        .revealRow {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            font-size: 13px;
-        }
-
-        .revealRow code { font-size: 13px; }
-
-        .waitOverlay {
-            position: fixed;
-            right: 18px;
-            bottom: 18px;
-            inset-inline-start: auto;
-            inset-block-start: auto;
-            background: transparent;
-            display: flex;
-            align-items: flex-end;
-            justify-content: flex-end;
-            padding: 0;
-            pointer-events: none;
-            z-index: 6;
-        }
-
-        .waitBox {
-            width: min(420px, calc(100vw - 36px));
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            background: var(--panel);
-            padding: 18px;
-            box-shadow: 0 22px 55px rgba(0,0,0,0.18);
-            pointer-events: auto;
-            backdrop-filter: blur(16px);
-        }
-
-        .waitTitle {
-            font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-            font-weight: 700;
-            font-size: 20px;
-            margin-bottom: 6px;
-        }
-
-        .waitHint {
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.45;
-        }
-
-        .spinner {
-            width: 18px;
-            height: 18px;
-            border-radius: 999px;
-            border: 2px solid var(--border);
-            border-top-color: var(--accent);
-            animation: spin 0.9s linear infinite;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        button.small {
-            padding: 8px 11px;
-            border-radius: 14px;
-            font-size: 12px;
-        }
-
-        pre {
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            background: var(--panel);
-            padding: 14px;
-            box-shadow: var(--shadow-soft);
-        }
-
-        details > summary {
-            cursor: pointer;
-            font-weight: 800;
-        }
-
-        @media (max-width: 980px) {
-            body { padding: 18px; }
-            .gridTop { grid-template-columns: 1fr; }
-            .topbar { top: 0; }
-        }
-
-        @media (max-width: 860px) {
-            input, select { min-width: 180px; }
-            .statusBoard { grid-template-columns: 1fr; }
-            .waitOverlay { right: 10px; bottom: 10px; }
-            .brand { font-size: 24px; }
-        }
-
-        @media (max-width: 640px) {
-            body { padding: 14px; }
-            .card { padding: 18px; border-radius: 22px; }
-            .topbar { padding: 12px 14px; border-radius: 22px; }
-            .row { gap: 10px; }
-        }
-    </style>
+    <link rel="stylesheet" href="/app.css" />
 </head>
 
 <body>
@@ -676,15 +19,15 @@
             <div id="authFormFields" class="row">
                 <div>
                     <label data-i18n="lblEmail">Email</label>
-                    <input id="email" placeholder="you@example.com" />
+                    <input id="email" type="email" autocomplete="email" spellcheck="false" placeholder="you@example.com" />
                 </div>
                 <div>
                     <label data-i18n="lblPassword">Password</label>
-                    <input id="password" type="password" placeholder="any" />
+                    <input id="password" type="password" autocomplete="current-password" placeholder="min 8 chars" />
                 </div>
                 <div>
                     <label data-i18n="lblDisplayName">Display name (for register)</label>
-                    <input id="displayName" placeholder="Player One" />
+                    <input id="displayName" autocomplete="nickname" placeholder="Player One" />
                 </div>
             </div>
 
@@ -699,7 +42,7 @@
 
             <div class="pills">
                 <div class="pill"><span data-i18n="lblSession">Session</span>: <span class="kv" id="sessionStatus"></span></div>
-                <div class="pill"><span data-i18n="lblAuth">Auth</span>: <span class="kv" id="authMsg"></span></div>
+                <div class="pill"><span data-i18n="lblAuth">Auth</span>: <span class="kv" id="authMsg" role="status" aria-live="polite"></span></div>
             </div>
 
             <div id="authSecureHint" class="muted hidden" style="margin-top:10px;" data-i18n="authSecureHint">
@@ -738,7 +81,9 @@
 <div id="app" class="hidden">
 
     <header class="topbar">
-        <div class="brand">Bulls & Cows</div>
+        <div class="brandBlock">
+            <div class="brand">Bulls & Cows</div>
+        </div>
 
         <div class="topbarRight">
             <div class="pill"><span data-i18n="lblUser">User</span>: <span class="kv" id="userBadge">-</span></div>
@@ -762,194 +107,273 @@
         </div>
     </header>
 
-    <!-- TOP -->
-    <div class="gridTop">
+    <div class="appGrid">
+        <aside class="appSidebar">
+            <div class="stack">
+                <section class="card sectionCard">
+                    <div class="sectionHeader">
+                        <div>
+                            <h2 id="hMatch" data-i18n="hMatch">Match</h2>
+                            <p class="sectionLead" data-i18n-html="inviteHintHtml">
+                                Поделись ссылкой — второй игрок просто откроет её и нажмёт <b>Join</b>.
+                            </p>
+                        </div>
+                        <div class="sectionMeta">
+                            <div class="miniStatus">
+                                <span>MM</span>
+                                <strong id="mmStatus">idle</strong>
+                            </div>
+                            <div class="miniStatus">
+                                <span>WS</span>
+                                <strong id="wsStatus">closed</strong>
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- MATCH -->
-        <div class="card">
-            <h2 id="hMatch" data-i18n="hMatch">Match</h2>
+                    <div class="row">
+                        <button id="btnCreateAndJoin" data-i18n="btnCreateJoin" data-i18n-title="tipCreateJoin" title="Create a match and immediately connect">Create & Join</button>
+                        <button id="btnFindMatch" data-i18n="btnFindMatch">Find match</button>
+                        <button class="secondary hidden" id="btnCancelFind" data-i18n="btnCancel">Cancel</button>
+                        <button class="secondary" id="btnReconnect" data-i18n="btnReconnect" data-i18n-title="tipReconnect" title="Reconnect to last match">Reconnect</button>
+                        <button class="secondary" id="btnLeave" data-i18n="btnLeave">Leave match</button>
+                    </div>
 
-            <div class="row">
-                <button id="btnCreateAndJoin" data-i18n="btnCreateJoin" data-i18n-title="tipCreateJoin" title="Create a match and immediately connect">Create & Join</button>
+                    <div class="divider"></div>
 
-                <button id="btnFindMatch" data-i18n="btnFindMatch">Find match</button>
-                <button class="secondary hidden" id="btnCancelFind" data-i18n="btnCancel">Cancel</button>
-                <div class="pill">MM: <span class="kv" id="mmStatus">idle</span></div>
+                    <div class="row">
+                        <div style="flex:1; min-width: 240px;">
+                            <label data-i18n="lblMatchId">Match ID</label>
+                            <input id="matchId" data-i18n-placeholder="phMatchId" placeholder="paste match id" />
+                        </div>
+                        <button class="secondary" id="btnJoin" data-i18n="btnJoin">Join</button>
+                    </div>
 
-                <button class="secondary" id="btnReconnect" data-i18n="btnReconnect" data-i18n-title="tipReconnect" title="Reconnect to last match">Reconnect</button>
+                    <div class="row" style="margin-top:10px;">
+                        <div style="flex:1; min-width: 240px;">
+                            <label data-i18n="lblInviteLink">Invite link</label>
+                            <input id="inviteLink" readonly data-i18n-placeholder="phInviteLink" placeholder="will appear after match id" />
+                        </div>
+                        <button class="secondary" id="btnCopyLink" data-i18n="btnCopyLink">Copy invite link</button>
+                    </div>
 
-                <div style="flex:1"></div>
+                    <div class="metricGrid">
+                        <div class="metricCard">
+                            <span class="metricLabel" data-i18n="lblYou">You</span>
+                            <strong class="metricValue" id="youSlot">-</strong>
+                        </div>
+                        <div class="metricCard">
+                            <span class="metricLabel" data-i18n="lblPhase">Phase</span>
+                            <strong class="metricValue" id="phase">-</strong>
+                        </div>
+                        <div class="metricCard">
+                            <span class="metricLabel" data-i18n="lblMode">Mode</span>
+                            <strong class="metricValue" id="matchMode">-</strong>
+                        </div>
+                        <div class="metricCard">
+                            <span class="metricLabel" data-i18n="lblRound">Round</span>
+                            <strong class="metricValue" id="round">-</strong>
+                        </div>
+                        <div class="metricCard">
+                            <span class="metricLabel" data-i18n="lblDeadline">Deadline</span>
+                            <strong class="metricValue" id="deadline">-</strong>
+                        </div>
+                        <div class="metricCard metricWide">
+                            <span class="metricLabel" data-i18n="lblSeries">Series</span>
+                            <strong class="metricValue" id="series">p1 0 : 0 p2 (draw 0)</strong>
+                        </div>
+                    </div>
 
-                <div class="pill">WS: <span class="kv" id="wsStatus">closed</span></div>
-                <button class="secondary" id="btnLeave" data-i18n="btnLeave">Leave match</button>
+                    <div id="modeNote" class="muted hidden" style="margin-top:12px;"></div>
+                </section>
+
+                <section class="card sectionCard">
+                    <div class="sectionHeader">
+                        <div>
+                            <h2 id="hProfile" data-i18n="hProfile">Profile</h2>
+                        </div>
+                    </div>
+
+                    <div class="profileHero">
+                        <div class="profileIdentity">
+                            <div class="profileName" id="profName">-</div>
+                            <div class="profileEmail" id="profEmail">-</div>
+                        </div>
+                        <div class="profileRank">
+                            <span data-i18n="lblRank">Rank</span>
+                            <strong id="profRank">-</strong>
+                        </div>
+                    </div>
+
+                    <div class="profileStats">
+                        <div class="statCard">
+                            <span data-i18n="lblWins">Wins</span>
+                            <strong id="profWins">0</strong>
+                        </div>
+                        <div class="statCard">
+                            <span data-i18n="lblLosses">Losses</span>
+                            <strong id="profLosses">0</strong>
+                        </div>
+                        <div class="statCard">
+                            <span data-i18n="lblDraws">Draws</span>
+                            <strong id="profDraws">0</strong>
+                        </div>
+                        <div class="statCard">
+                            <span data-i18n="lblGames">Games</span>
+                            <strong id="profGames">0</strong>
+                        </div>
+                        <div class="statCard">
+                            <span data-i18n="lblRating">Rating</span>
+                            <strong id="profRating">1000</strong>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:14px;">
+                        <button class="secondary" id="btnRefreshMe" data-i18n="btnRefresh">Refresh</button>
+                        <button class="secondary" id="btnLogoutTop" data-i18n="btnLogout">Logout</button>
+                    </div>
+                </section>
+
+                <details class="card logsPanel">
+                    <summary id="sumLogs" data-i18n="sumLogs">Logs</summary>
+                    <pre id="log" style="height: 260px; overflow:auto;"></pre>
+                </details>
             </div>
+        </aside>
 
-            <div class="divider"></div>
-
-            <div class="row">
-                <div>
-                    <label data-i18n="lblMatchId">Match ID</label>
-                    <input id="matchId" data-i18n-placeholder="phMatchId" placeholder="paste match id" />
-                </div>
-
-                <button class="secondary" id="btnJoin" data-i18n="btnJoin">Join</button>
-                <button class="secondary" id="btnCopyLink" data-i18n="btnCopyLink">Copy invite link</button>
-            </div>
-
-            <div class="row" style="margin-top:10px;">
-                <div style="flex:1; min-width: 260px;">
-                    <label data-i18n="lblInviteLink">Invite link</label>
-                    <input id="inviteLink" readonly data-i18n-placeholder="phInviteLink" placeholder="will appear after match id" />
-                </div>
-            </div>
-
-            <div class="pills">
-                <div class="pill"><span data-i18n="lblYou">You</span>: <span class="kv" id="youSlot">-</span></div>
-                <div class="pill"><span data-i18n="lblPhase">Phase</span>: <span class="kv" id="phase">-</span></div>
-                <div class="pill"><span data-i18n="lblMode">Mode</span>: <span class="kv" id="matchMode">-</span></div>
-                <div class="pill"><span data-i18n="lblRound">Round</span>: <span class="kv" id="round">-</span></div>
-                <div class="pill"><span data-i18n="lblDeadline">Deadline</span>: <span class="kv" id="deadline">-</span></div>
-                <div class="pill"><span data-i18n="lblSeries">Series</span>: <span class="kv" id="series">p1 0 : 0 p2 (draw 0)</span></div>
-            </div>
-
-            <div id="friendlyNote" class="muted hidden" data-i18n="friendlyNote">Friendly match: rating is not affected.</div>
-
-            <div class="muted" style="margin-top:10px;" data-i18n-html="inviteHintHtml">
-                Поделись ссылкой — второй игрок просто откроет её и нажмёт <b>Join</b>.
-            </div>
-        </div>
-
-        <!-- PROFILE -->
-        <div class="card">
-            <h2 id="hProfile" data-i18n="hProfile">Profile</h2>
-
-            <div class="pills">
-                <div class="pill"><span data-i18n="lblName">Name</span>: <span class="kv" id="profName">-</span></div>
-                <div class="pill"><span data-i18n="lblEmail">Email</span>: <span class="kv" id="profEmail">-</span></div>
-            </div>
-
-            <div class="pills">
-                <div class="pill"><span data-i18n="lblWins">Wins</span>: <span class="kv" id="profWins">0</span></div>
-                <div class="pill"><span data-i18n="lblLosses">Losses</span>: <span class="kv" id="profLosses">0</span></div>
-                <div class="pill"><span data-i18n="lblDraws">Draws</span>: <span class="kv" id="profDraws">0</span></div>
-            </div>
-
-            <div class="pills" style="margin-top:10px;">
-                <div class="pill"><span data-i18n="lblRating">Rating</span>: <span class="kv" id="profRating">1000</span></div>
-                <div class="pill"><span data-i18n="lblGames">Games</span>: <span class="kv" id="profGames">0</span></div>
-                <div class="pill"><span data-i18n="lblRank">Rank</span>: <span class="kv" id="profRank">-</span></div>
-            </div>
-
-            <div class="row" style="margin-top:10px;">
-                <button class="secondary" id="btnRefreshMe" data-i18n="btnRefresh">Refresh</button>
-                <button class="secondary" id="btnLogoutTop" data-i18n="btnLogout">Logout</button>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- GAME -->
-    <div class="center">
-        <div class="card gameWrap">
-            <h2 id="hGame" data-i18n="hGame">Game</h2>
-
-            <div id="coach" class="coach">
-                <div class="coachTop">
+        <main class="workspace">
+            <section class="card gameWrap">
+                <div class="sectionHeader">
                     <div>
-                        <div class="coachTitle" id="stageTitle">Подключитесь к матчу</div>
-                        <div class="coachHint" id="stageHint">Создайте матч или вставьте Match ID, затем нажмите Join.</div>
-                    </div>
-                    <div class="coachRight">
-                        <span class="badge muted" id="netBadge">offline</span>
-                    </div>
-                </div>
-
-                <div class="statusBoard">
-                    <div class="statusCol">
-                        <div class="statusName">
-                            <span id="youName" data-i18n="youName">You</span>
-                            <span class="badge muted" id="youRole">-</span>
-                        </div>
-                        <div class="statusRows">
-                            <div class="statusRow">
-                                <span class="statusKey" data-i18n="statusConn">Connection</span>
-                                <span class="badge muted" id="youConn">-</span>
-                            </div>
-                            <div class="statusRow">
-                                <span class="statusKey" data-i18n="statusSecret">Secret</span>
-                                <span class="badge muted" id="youSecret">-</span>
-                            </div>
-                            <div class="statusRow">
-                                <span class="statusKey" data-i18n="statusMove">Move</span>
-                                <span class="badge muted" id="youGuess">-</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="statusCol">
-                        <div class="statusName">
-                            <span id="oppName" data-i18n="oppName">Opponent</span>
-                            <span class="badge muted" id="oppRole">-</span>
-                        </div>
-                        <div class="statusRows">
-                            <div class="statusRow">
-                                <span class="statusKey" data-i18n="statusConn">Connection</span>
-                                <span class="badge muted" id="oppConn">-</span>
-                            </div>
-                            <div class="statusRow">
-                                <span class="statusKey" data-i18n="statusSecret">Secret</span>
-                                <span class="badge muted" id="oppSecret">-</span>
-                            </div>
-                            <div class="statusRow">
-                                <span class="statusKey" data-i18n="statusMove">Move</span>
-                                <span class="badge muted" id="oppGuess">-</span>
-                            </div>
-                        </div>
+                        <h2 id="hGame" data-i18n="hGame">Game</h2>
+                        <p class="sectionLead" id="stageLead" data-i18n="stageConnectHint">
+                            Создайте матч или вставьте Match ID, затем нажмите Join.
+                        </p>
                     </div>
                 </div>
 
-                <div id="revealBox" class="revealBox hidden">
-                    <div class="revealTitle" data-i18n="revealTitle">Secrets after game</div>
-                    <div class="revealRow"><span id="revealYouLabel">Вы</span><code id="revealYouSecret">----</code></div>
-                    <div class="revealRow" style="margin-top:6px;"><span id="revealOppLabel">Соперник</span><code id="revealOppSecret">----</code></div>
-                </div>
-            </div>
-
-            <div id="waitOverlay" class="waitOverlay hidden" aria-hidden="true">
-                <div class="waitBox">
-                    <div class="row" style="align-items:center;">
-                        <div class="spinner"></div>
-                        <div style="flex:1">
-                            <div class="waitTitle" id="waitTitle">Ожидание…</div>
-                            <div class="waitHint" id="waitHint">—</div>
+                <div id="coach" class="coach">
+                    <div class="coachTop">
+                        <div>
+                            <div class="coachTitle" id="stageTitle">Подключитесь к матчу</div>
+                            <div class="coachHint" id="stageHint">Создайте матч или вставьте Match ID, затем нажмите Join.</div>
                         </div>
-                        <button class="secondary small" id="btnOverlayReconnect" data-i18n="btnReconnect">Reconnect</button>
+                        <div class="coachRight">
+                            <span class="badge muted" id="netBadge">offline</span>
+                        </div>
+                    </div>
+
+                    <div class="statusBoard">
+                        <div class="statusCol">
+                            <div class="statusName">
+                                <span id="youName" data-i18n="youName">You</span>
+                                <span class="badge muted" id="youRole">-</span>
+                            </div>
+                            <div class="statusRows">
+                                <div class="statusRow">
+                                    <span class="statusKey" data-i18n="statusConn">Connection</span>
+                                    <span class="badge muted" id="youConn">-</span>
+                                </div>
+                                <div class="statusRow">
+                                    <span class="statusKey" data-i18n="statusSecret">Secret</span>
+                                    <span class="badge muted" id="youSecret">-</span>
+                                </div>
+                                <div class="statusRow">
+                                    <span class="statusKey" data-i18n="statusMove">Move</span>
+                                    <span class="badge muted" id="youGuess">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="statusCol">
+                            <div class="statusName">
+                                <span id="oppName" data-i18n="oppName">Opponent</span>
+                                <span class="badge muted" id="oppRole">-</span>
+                            </div>
+                            <div class="statusRows">
+                                <div class="statusRow">
+                                    <span class="statusKey" data-i18n="statusConn">Connection</span>
+                                    <span class="badge muted" id="oppConn">-</span>
+                                </div>
+                                <div class="statusRow">
+                                    <span class="statusKey" data-i18n="statusSecret">Secret</span>
+                                    <span class="badge muted" id="oppSecret">-</span>
+                                </div>
+                                <div class="statusRow">
+                                    <span class="statusKey" data-i18n="statusMove">Move</span>
+                                    <span class="badge muted" id="oppGuess">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="revealBox" class="revealBox hidden">
+                        <div class="revealTitle" data-i18n="revealTitle">Secrets after game</div>
+                        <div class="revealRow"><span id="revealYouLabel">Вы</span><code id="revealYouSecret">----</code></div>
+                        <div class="revealRow" style="margin-top:6px;"><span id="revealOppLabel">Соперник</span><code id="revealOppSecret">----</code></div>
                     </div>
                 </div>
-            </div>
 
+                <div class="actionsGrid">
+                    <section id="secretCard" class="actionCard" data-state="waiting">
+                        <div class="actionCardHead">
+                            <div>
+                                <div class="actionEyebrow" data-i18n="lblSetSecret">Set secret (4 digits)</div>
+                                <div class="actionState" id="secretState">—</div>
+                            </div>
+                        </div>
+                        <div class="actionHint" id="secretHint">—</div>
+                        <div class="actionField">
+                            <label data-i18n="lblSetSecret">Set secret (4 digits)</label>
+                            <div class="actionInputRow">
+                                <div>
+                                    <input id="secret" data-i18n-placeholder="phSecret" placeholder="e.g. 0011" maxlength="4" inputmode="numeric" />
+                                </div>
+                                <button id="btnSetSecret" data-i18n="btnSetSecret">Set secret</button>
+                            </div>
+                        </div>
+                    </section>
 
-            <div class="row">
-                <div>
-                    <label data-i18n="lblSetSecret">Set secret (4 digits)</label>
-                    <input id="secret" data-i18n-placeholder="phSecret" placeholder="e.g. 0011" maxlength="4" inputmode="numeric" />
+                    <section id="guessCard" class="actionCard" data-state="waiting">
+                        <div class="actionCardHead">
+                            <div>
+                                <div class="actionEyebrow" data-i18n="lblSubmitGuess">Submit guess (4 digits)</div>
+                                <div class="actionState" id="guessState">—</div>
+                            </div>
+                        </div>
+                        <div class="actionHint" id="guessHint">—</div>
+                        <div class="actionField">
+                            <label data-i18n="lblSubmitGuess">Submit guess (4 digits)</label>
+                            <div class="actionInputRow">
+                                <div>
+                                    <input id="guess" data-i18n-placeholder="phGuess" placeholder="e.g. 0101" maxlength="4" inputmode="numeric" />
+                                </div>
+                                <button id="btnGuess" data-i18n="btnSubmitGuess">Submit guess</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="rematchCard" class="actionCard rematchCard" data-state="waiting">
+                        <div class="actionCardHead">
+                            <div>
+                                <div class="actionEyebrow" data-i18n="btnRematch">Rematch</div>
+                                <div class="actionState" id="rematchState">—</div>
+                            </div>
+                        </div>
+                        <div class="actionFooter">
+                            <div class="actionHint" id="rematchHint">—</div>
+                            <button class="secondary" id="btnRematch" data-i18n="btnRematch" data-i18n-title="tipRematch" title="Request rematch (needs both players)">Rematch</button>
+                        </div>
+                    </section>
                 </div>
-                <button id="btnSetSecret" data-i18n="btnSetSecret">Set secret</button>
+            </section>
 
-                <div style="flex:1"></div>
-
-                <div>
-                    <label data-i18n="lblSubmitGuess">Submit guess (4 digits)</label>
-                    <input id="guess" data-i18n-placeholder="phGuess" placeholder="e.g. 0101" maxlength="4" inputmode="numeric" />
+            <section class="card historyCard">
+                <div class="sectionHeader">
+                    <div>
+                        <h2 data-i18n="lblHistory">History</h2>
+                    </div>
                 </div>
-                <button id="btnGuess" data-i18n="btnSubmitGuess">Submit guess</button>
-
-                <button class="secondary" id="btnRematch" data-i18n="btnRematch" data-i18n-title="tipRematch" title="Request rematch (needs both players)">Rematch</button>
-            </div>
-
-            <div style="margin-top:12px;">
-                <div class="muted" data-i18n="lblHistory">History</div>
-                <div style="margin-top:8px; overflow:auto;">
+                <div class="tableWrap">
                     <table>
                         <thead>
                         <tr>
@@ -968,16 +392,24 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
 
-    <!-- LOGS -->
-    <div class="logsWrap">
-        <details>
-            <summary id="sumLogs" data-i18n="sumLogs">Logs</summary>
-            <pre id="log" style="height: 260px; margin-top:10px; overflow:auto;"></pre>
-        </details>
+    <div id="waitOverlay" class="waitOverlay hidden" aria-hidden="true" role="status" aria-live="polite">
+        <div class="waitBox">
+            <div class="waitHead">
+                <div class="spinner"></div>
+                <div class="waitCopy">
+                    <div class="waitTitle" id="waitTitle">Ожидание…</div>
+                    <div class="waitHint" id="waitHint">—</div>
+                </div>
+            </div>
+            <div class="waitActions">
+                <button class="secondary small hidden" id="btnOverlayCopyLink" data-i18n="btnCopyLink">Copy invite link</button>
+                <button class="secondary small" id="btnOverlayReconnect" data-i18n="btnReconnect">Reconnect</button>
+            </div>
+        </div>
     </div>
 
 </div>

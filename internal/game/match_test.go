@@ -371,3 +371,15 @@ func TestMatch_State_PlayerNames_And_RevealedSecrets(t *testing.T) {
 		t.Run(tc.name, tc.run)
 	}
 }
+
+func TestMatch_RestoreLocked_PreservesRankedFlag(t *testing.T) {
+	m := NewMatch("ranked-match", 0)
+	m.ranked = true
+
+	snap := m.snapshotLocked()
+
+	restored := NewMatch("ranked-match", 0)
+	restored.restoreLocked(snap)
+
+	require.True(t, restored.ranked)
+}
